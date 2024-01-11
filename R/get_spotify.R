@@ -154,10 +154,13 @@ clean_artists <- function(artistsRaw) {
 
 get_artist_top_genre <- function(artists){
   genrelist <- artists$artist.s.genres
+  print(genrelist)
   genres <- c()
   for (i in seq(length(genrelist))){
     if(!(identical(genrelist[[i]],character(0)))){
       g <- c(genrelist[[i]][[1]])
+      print(genres)
+      print(g)
       genres <- rbind(genres,g)
     }
     else{
