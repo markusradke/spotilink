@@ -1,0 +1,28 @@
+Package: spotilink
+Title: Spotilink - An R Package to support Big Data Research on Spotify usage in Terms of simplified Data Linkage with other open Music Databases
+Version: 0.0.0.9000
+Authors@R: 
+    person("Markus", "Radke", , "mail@markus-radke.de", role = c("aut", "cre"),
+           comment = c(ORCID = "0009-0001-1719-7060"))
+Description: 
+ spotilink is an R software package that aims to simplify the integration of music API data by seamlessly linking the lists of tracks, albums or artists collected via the Spotify Web API with data from other open online music metadata repositories. spotilink merges existing API wrapper R packages such as spotifyr or musicbrainz while integrating custom wrapper functions for other databases into the package. In order to link individual data records correctly, spotilink primarily uses unique identifiers such as ISRC, UPC or cross-platform unique identifiers (if available). Alternatively, the data linkage is created using a fuzzy title or name comparison.To control the quality of the resulting links, a string similarity measure based on the Jaro-Winkler distance is used. In addition, spotilink provides users with a consistent variable nomenclature and transforms data from different sources into a standardized format. Currently, spotilink supports retrieving information from the Spotify Web API using Spotify track identifiers and linking to MusicBrainz, AcousticBrainz and Discogs. In the course of the future development of spotilink, integrations of other open music APIs (e.g. Genius for song lyrics) are planned.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.3
+Imports: 
+    dplyr,
+    magrittr,
+    spotifyr,
+    stringr,
+    tidyr,
+    stringdist,
+    musicbrainz (>= 0.0.0.9000),
+    purrr
+Depends: 
+    R (>= 2.10)
+Remotes: 
+    dmi3kno/musicbrainz
+Suggests: 
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
