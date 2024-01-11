@@ -4,7 +4,7 @@
 #'The result contains information on the tracks as well as corresponding albums and artists.
 #'The \pkg{spotilink} naming convention is used.
 #'
-#' @param charts
+#' @param input
 #'Data Frame containing a column \code{track.s.id} with \emph{Spotify} track ids.
 #' @param pass
 #'Character Vector containing two entries: \emph{Client ID} and \emph{Client secret}. See \url{https://developer.spotify.com/documentation/web-api/concepts/authorization} for details.
@@ -13,16 +13,18 @@
 #' @export
 #'
 #'@examples
-get_spotify <- function(charts, pass) {
+get_spotify <- function(input, pass) {
   connect_spotify(pass)
-  charts <- get_from_API(charts, 'track.s.id', spotifyr::get_tracks, clean_tracks, batchsize = 50)
-  charts <- get_from_API(charts, 'track.s.id', spotifyr::get_track_audio_features, clean_features, batchsize = 50)
-  charts <- get_from_API(charts, 'album.s.id', spotifyr::get_albums, clean_albums, batchsize = 20)
-  charts <- expand_artists(charts)
-  charts <- get_from_API(charts, 'artist.s.id', spotifyr::get_artists, clean_artists, batchsize = 50)
-  # charts <- get_from_API(charts, 'track.s.id', get_track_audio_analysis, clean_analysis, batchsize = 1) # TODO later
+
+  res <- rename_existing_variables(input, 'spotify')
+  res <- get_from_API(res, 'track.s.id', spotifyr::get_tracks, clean_tracks, batchsize = 50)
+  res <- get_from_API(res, 'track.s.id', spotifyr::get_track_audio_features, clean_features, batchsize = 50)
+  res <- get_from_API(res, 'album.s.id', spotifyr::get_albums, clean_albums, batchsize = 20)
+  res <- expand_artists(res)
+  res <- get_from_API(res, 'artist.s.id', spotifyr::get_artists, clean_artists, batchsize = 50)
+  # res <- get_from_API(res, 'track.s.id', get_track_audio_analysis, clean_analysis, batchsize = 1) # TODO later
   cat('Done.\n')
-  charts
+  res
 }
 
 connect_spotify<-function(pass){
@@ -32,14 +34,14 @@ connect_spotify<-function(pass){
   cat('Done.\n')
 }
 
-get_from_API <- function(charts, IDcol, pullFunction, cleanFunction, batchsize) {
+get_from_API <- function(input, IDcol, pullFunction, cleanFunction, batchsize) {
   cat('Retrieving data with', substitute(pullFunction) %>% as.character(), 'from identifier', IDcol, '... \n')
-  charts %>%
+  input %>%
     dplyr::distinct(.data[[IDcol]]) %>%
     dplyr::pull(IDcol) %>%
     get_from_IDs(pullFunction, batchsize) %>%
     cleanFunction() %>%
-    dplyr::left_join(charts, ., by = IDcol)
+    dplyr::left_join(input, ., by = IDcol)
 }
 
 get_from_IDs <- function(ids, pullFunction, batchsize) {

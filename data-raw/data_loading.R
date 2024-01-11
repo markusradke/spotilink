@@ -1,1 +1,1 @@
-use_data(musicbrainzWhitelist, internal = TRUE)
+use_data(musicbrainzWhitelist, spotifyVars, musicbrainzVars, internal = TRUE, overwrite = TRUE)

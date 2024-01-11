@@ -4,10 +4,10 @@
 \alias{get_musicbrainz}
 \title{Get \emph{MusicBrainz} Information}
 \usage{
-get_musicbrainz(charts)
+get_musicbrainz(input)
 }
 \arguments{
-\item{charts}{Data Frame containing the following columns:
+\item{input}{Data Frame containing the following columns:
 \itemize{
 \item\code{track.s.id} \cr
 with \emph{Spotify} track ids,

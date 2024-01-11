@@ -4,10 +4,10 @@
 \alias{get_spotify}
 \title{Get \emph{Spotify} API Information}
 \usage{
-get_spotify(charts, pass)
+get_spotify(input, pass)
 }
 \arguments{
-\item{charts}{Data Frame containing a column \code{track.s.id} with \emph{Spotify} track ids.}
+\item{input}{Data Frame containing a column \code{track.s.id} with \emph{Spotify} track ids.}
 
 \item{pass}{Character Vector containing two entries: \emph{Client ID} and \emph{Client secret}. See \url{https://developer.spotify.com/documentation/web-api/concepts/authorization} for details.}
 }

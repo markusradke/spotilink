@@ -4,7 +4,7 @@
 #'The result contains information on the tracks as well as corresponding albums and artists.
 #'The \pkg{spotilink} naming convention is used.
 #'
-#' @param charts
+#' @param input
 #'Data Frame containing the following columns:
 #'\itemize{
 #'  \item\code{track.s.id} \cr
@@ -31,42 +31,43 @@
 #' @export
 #'
 #'@examples
-get_musicbrainz <- function(charts) {
-  charts <- pull_tracks(charts)
-  charts <- pull_albums(charts)
-  charts <- pull_artists(charts)
-  charts <- charts %>%
+get_musicbrainz <- function(input) {
+  res <- rename_existing_variables(input, 'musicbrainz')
+  res <- pull_tracks(input)
+  res <- pull_albums(res)
+  res <- pull_artists(res)
+  res <- res %>%
     filter_low_quality() %>%
     combine_genres()
-  print_linking_success(charts, c('track.s.id', 'album.s.id', 'artist.s.id'))
-  charts
+  print_linking_success(res, c('track.s.id', 'album.s.id', 'artist.s.id'))
+  res
 }
 
-pull_tracks <- function(distinctCharts) {
-  distinctCharts %>%
+pull_tracks <- function(distinctinput) {
+  distinctinput %>%
     dplyr::distinct(.data[['track.s.id']], .keep_all = TRUE) %>%
     retrieve_tracks() %>%
     retrieve_track_genre() %>%
-    dplyr::left_join(distinctCharts, .data, by = c('track.s.id'))
+    dplyr::left_join(distinctinput, .data, by = c('track.s.id'))
 }
 
-retrieve_tracks <- function(distinctCharts){
+retrieve_tracks <- function(distinctinput){
   mbTracks <- c()
   isrcCounter <<- 0L
-  n <- nrow(distinctCharts)
+  n <- nrow(distinctinput)
   cat('---------------------------------------------------\n')
   cat('Looking for tracks in Musicbrainz...\n')
-  for (i in 1:nrow(distinctCharts)){
+  for (i in 1:nrow(distinctinput)){
     cat('---------------------------------------------------\n')
     cat('track', i, 'of', n, '\n')
-    result <- find_tracks_with_ISRC(distinctCharts[i,])
+    result <- find_tracks_with_ISRC(distinctinput[i,])
     if  (nrow(result) == 0) {
-      result <- find_tracks_without_ISRC(distinctCharts[i,])
+      result <- find_tracks_without_ISRC(distinctinput[i,])
     }
     mbTracks <- rbind(mbTracks, result)
   }
   cat('---------------------------------------------------\n')
-  cat(paste0(round(isrcCounter / nrow(distinctCharts),4) * 100, '% of tracks were found using the ISRC.\n'))
+  cat(paste0(round(isrcCounter / nrow(distinctinput),4) * 100, '% of tracks were found using the ISRC.\n'))
   rm(isrcCounter, pos = .GlobalEnv)
   mbTracks <- mbTracks %>%
     dplyr::select('track.mb.id' = 'mbid',
@@ -74,7 +75,7 @@ retrieve_tracks <- function(distinctCharts){
            'track.mb.quality',
            'track.mb.artistlist' = 'artists',
            'track.mb.releases' = 'releases')
-  cbind(track.s.id = distinctCharts$track.s.id, mbTracks)
+  cbind(track.s.id = distinctinput$track.s.id, mbTracks)
 }
 
 find_tracks_with_ISRC <- function(observation) {
@@ -91,7 +92,7 @@ find_tracks_with_ISRC <- function(observation) {
 find_tracks_without_ISRC <- function(observation) {
   cat('no ISRC, searching...\n')
   musicbrainz::search_recordings(paste0('artist:', observation$artist.s.name,' and recording:', observation$track.s.title)) %>%
-    .data[1,] %>%
+    .[1,] %>%
     dplyr::mutate(track.mb.quality = calculate_and_print_quality(search = observation$track.s.title,
                                                        found = .data[['title']]))
 }
@@ -128,37 +129,37 @@ lookup_musibrainz_track_tags_from_ID  <- function(mbID) {
     dplyr::mutate(length = .data[['length']] %>% as.integer())
 }
 
-pull_albums <- function(distinctCharts) {
-  distinctCharts %>%
+pull_albums <- function(distinctinput) {
+  distinctinput %>%
     dplyr::distinct(.data[['album.s.id']], .keep_all = TRUE) %>%
     retrieve_albums() %>%
     retrieve_album_genres() %>%
-    dplyr::left_join(distinctCharts, ., by = c('album.s.id'))
+    dplyr::left_join(distinctinput, ., by = c('album.s.id'))
 }
 
-retrieve_albums <- function(distinctCharts){
+retrieve_albums <- function(distinctinput){
   mbAlbums <- c()
   upcCounter <<- 0L
-  n <- nrow(distinctCharts)
+  n <- nrow(distinctinput)
   cat('---------------------------------------------------\n')
   cat('Looking for albums in Musicbrainz...\n')
-  for (i in 1:nrow(distinctCharts)){
+  for (i in 1:nrow(distinctinput)){
     cat('---------------------------------------------------\n')
     cat('album', i, 'of', n, '\n')
-    result <- find_album_with_UPC(distinctCharts[i,])
+    result <- find_album_with_UPC(distinctinput[i,])
     if  (nrow(result) == 0) {
-      result <- find_album_without_UPC(distinctCharts[i,])
+      result <- find_album_without_UPC(distinctinput[i,])
     }
     mbAlbums <- rbind(mbAlbums, result)
   }
   cat('---------------------------------------------------\n')
-  cat(paste0(round(upcCounter / nrow(distinctCharts),4) * 100, '% of albums were found using the UPC.\n'))
+  cat(paste0(round(upcCounter / nrow(distinctinput),4) * 100, '% of albums were found using the UPC.\n'))
   rm(upcCounter, pos = .GlobalEnv)
   mbAlbums <- mbAlbums %>%
     dplyr::select('album.mb.id' = 'mbid',
            'album.mb.title' = 'title',
            'album.mb.quality')
-  cbind(album.s.id = distinctCharts$album.s.id, mbAlbums)
+  cbind(album.s.id = distinctinput$album.s.id, mbAlbums)
 }
 
 find_album_with_UPC <- function(observation) {
@@ -175,7 +176,7 @@ find_album_with_UPC <- function(observation) {
 find_album_without_UPC <- function(observation) {
   cat('no UPC, searching...\n')
   musicbrainz::search_releases(paste0('artist:', observation$artist.s.name,' and release:', observation$album.s.title)) %>%
-    .data[1,] %>%
+    .[1,] %>%
     dplyr::mutate(album.mb.quality = calculate_and_print_quality(search = observation$album.s.title,
                                                        found = .data[['title']]))
 }
@@ -196,11 +197,11 @@ lookup_musicbrainz_album_tags_from_ID  <- function(mbID) {
 }
 
 
-pull_artists <- function(distinctCharts) {
+pull_artists <- function(distinctinput) {
   cat('---------------------------------------------------\n')
   cat('Looking for artists in Musicbrainz...\n')
   artistMBIDCounter <<- 0
-  artists <- distinctCharts %>%
+  artists <- distinctinput %>%
     dplyr::distinct(.data[['artist.s.id']], .keep_all = TRUE)
   noOfArtists <- nrow(artists)
   artists <- artists %>%
@@ -213,9 +214,9 @@ pull_artists <- function(distinctCharts) {
     retrieve_artist_genre() %>%
     dplyr::mutate(artist.mb.birth = as.Date(.data[['artist.mb.birth']]))  %>%
     dplyr::mutate(artist.mb.death = as.Date(.data[['artist.mb.death']])) %>%
-    dplyr::left_join(distinctCharts, ., by = c('artist.s.id'))
+    dplyr::left_join(distinctinput, ., by = c('artist.s.id'))
   cat('---------------------------------------------------\n')
-  cat(paste0(artistMBIDCounter / nrow(distinctCharts) * 100, '% were found using the MBID from the track information. \n'))
+  cat(paste0(round(artistMBIDCounter / nrow(distinctinput) * 100, 2), '% were found using the MBID from the track information. \n'))
   rm(artistMBIDCounter, pos = .GlobalEnv)
   artists
 }
@@ -320,8 +321,8 @@ unzip_tags <- function(tags) {
   }
 }
 
-combine_genres <- function(charts) {
-  charts %>%
+combine_genres <- function(input) {
+  input %>%
     dplyr::mutate(track.mb.combinedGenre = ifelse(!is.na(.data[['track.mb.topGenre']]), .data[['track.mb.topGenre']], .data[['album.mb.topGenre']])) %>%
     dplyr::mutate(track.mb.combinedGenre = ifelse(!is.na(.data[['track.mb.combinedGenre']]), .data[['track.mb.combinedGenre']], .data[['artist.mb.topGenre']])) %>%
     dplyr::mutate(album.mb.combinedGenre = ifelse(!is.na(.data[['album.mb.topGenre']]), .data[['album.mb.topGenre']], .data[['track.mb.topGenre']])) %>%
@@ -330,23 +331,23 @@ combine_genres <- function(charts) {
     dplyr::mutate(artist.mb.combinedGenre = ifelse(!is.na(.data[['artist.mb.combinedGenre']]), .data[['artist.mb.combinedGenre']], .data[['track.mb.topGenre']]))
 }
 
-filter_low_quality <- function(charts){
+filter_low_quality <- function(input){
   cat('---------------------------------------------------\n')
   cat('Filter Data with Quality < 0.8 ... \n')
 
-  charts %>%
+  input %>%
     dplyr::mutate(dplyr::across(dplyr::contains('track.mb'), ~ ifelse(.data[['track.mb.quality']] >= 0.8, .x, NA))) %>%
     dplyr::mutate(dplyr::across(dplyr::contains('album.mb'), ~ ifelse(.data[['album.mb.quality']] >= 0.8, .x, NA))) %>%
     dplyr::mutate(dplyr::across(dplyr::contains('artist.mb'), ~ ifelse(.data[['artist.mb.quality']] >= 0.8, .x, NA)))
 
 }
 
-print_linking_success <- function(charts, sIDcols) {
+print_linking_success <- function(input, sIDcols) {
   for (sIDcol in sIDcols) {
     mbidCol <- stringr::str_replace(sIDcol, '\\.s\\.', '\\.mb\\.')
-    distinctCharts <- charts %>%
+    distinctinput <- input %>%
       dplyr::distinct(.data[[sIDcol]], .keep_all = TRUE)
-    ratioFound <- nrow(distinctCharts %>% tidyr::drop_na(dplyr::all_of(mbidCol))) / nrow(distinctCharts)
+    ratioFound <- nrow(distinctinput %>% tidyr::drop_na(dplyr::all_of(mbidCol))) / nrow(distinctinput)
     cat(paste0('Found ', round(ratioFound,4) * 100, '% of distinct ', sIDcol, ' on Musicbrainz.'), '\n')
   }
 }
