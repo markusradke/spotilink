@@ -65,16 +65,18 @@ get_from_IDs <- function(ids, pullFunction, batchsize) {
 
 clean_tracks <- function(tracksRaw) {
   tracksRaw %>%
-    dplyr::mutate(track.s.artists = sapply(tracksRaw$artists,'[[','name')) %>%
+    # tidyr::hoist('artists', track.s.firstartist.id = list('id', 1L), .remove = FALSE) %>%
+    # dplyr::mutate(track.s.artists = sapply(tracksRaw$artists,'[[','name')) %>%
     dplyr::mutate(name = .data[['name']]) %>%
     dplyr::mutate(album.name = .data[['album.name']]) %>%
     dplyr::mutate(track.s.duration = .data[['duration_ms']] * 0.001) %>%
     tidyr::hoist('artists', track.s.firstartist.id = list('id', 1L), .remove = FALSE) %>%
     tidyr::hoist('artists', track.s.firstartist.name = list('name', 1L), .remove = FALSE) %>%
+    dplyr::rename('track.s.artists' = 'artists') %>%
     dplyr::select(
       'track.s.id' = 'id',
       'track.s.title' = 'name',
-      'track.s.artistlist' = 'artists',
+      'track.s.artistlist' = 'track.s.artists',
       'track.s.firstartist.id',
       'track.s.firstartist.name',
       'track.s.artists',
@@ -148,30 +150,8 @@ clean_artists <- function(artistsRaw) {
            'artist.s.genres' = 'genres',
            'artist.s.popularity' = 'popularity',
            'artist.s.followers' = 'followers.total') %>%
-    get_artist_top_genre()
+    tidyr::hoist('artist.s.genres', artist.s.topGenre = list('id', 1L), .remove = FALSE)
 }
-
-
-get_artist_top_genre <- function(artists){
-  genrelist <- artists$artist.s.genres
-  print(genrelist)
-  genres <- c()
-  for (i in seq(length(genrelist))){
-    if(!(identical(genrelist[[i]],character(0)))){
-      g <- c(genrelist[[i]][[1]])
-      print(genres)
-      print(g)
-      genres <- rbind(genres,g)
-    }
-    else{
-      genres <- rbind(genres,NA)
-    }
-  }
-  genres <- genres %>% as.character()
-  genres <- dplyr::tibble(artist.s.topGenre = genres)
-  cbind(artists,genres)
-}
-
 
 expand_artists <- function(trackframe){
   trackframe %>%
