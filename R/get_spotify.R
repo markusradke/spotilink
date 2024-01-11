@@ -21,7 +21,7 @@ get_spotify <- function(charts, pass) {
   charts <- expand_artists(charts)
   charts <- get_from_API(charts, 'artist.s.id', spotifyr::get_artists, clean_artists, batchsize = 50)
   # charts <- get_from_API(charts, 'track.s.id', get_track_audio_analysis, clean_analysis, batchsize = 1) # TODO later
-  cat('Done.')
+  cat('Done.\n')
   charts
 }
 
