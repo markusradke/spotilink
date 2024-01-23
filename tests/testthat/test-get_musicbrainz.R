@@ -4,7 +4,6 @@ test_that("Data retrieval works", {
 
   res <- get_spotify(data, pass)
   res <- get_musicbrainz(res)
-  dplyr::glimpse(res)
   expect_equal(
     !is.null(dim(res)),
     TRUE)

@@ -44,9 +44,10 @@ get_musicbrainz <- function(input) {
 }
 
 pull_tracks <- function(distinctinput) {
-  distinctinput %>%
+  res <- distinctinput %>%
     dplyr::distinct(.data[['track.s.id']], .keep_all = TRUE) %>%
-    retrieve_tracks() %>%
+    retrieve_tracks()
+  res %>%
     retrieve_track_genre() %>%
     dplyr::left_join(distinctinput, .data, by = c('track.s.id'))
 }
@@ -115,6 +116,7 @@ simplify_name <- function(trackname) {
 }
 
 retrieve_track_genre <- function(tracks){
+  cat('Looking up track genre...\n')
   trackGenres <- purrr::map_df(tracks$track.mb.id, lookup_musibrainz_track_tags_from_ID, .progress = TRUE) %>%
     get_highest_ranking_genre() %>%
     dplyr::rename('track.mb.genres' = 'genres',
@@ -130,9 +132,10 @@ lookup_musibrainz_track_tags_from_ID  <- function(mbID) {
 }
 
 pull_albums <- function(distinctinput) {
-  distinctinput %>%
+  res <- distinctinput %>%
     dplyr::distinct(.data[['album.s.id']], .keep_all = TRUE) %>%
-    retrieve_albums() %>%
+    retrieve_albums()
+  res %>%
     retrieve_album_genres() %>%
     dplyr::left_join(distinctinput, ., by = c('album.s.id'))
 }
@@ -182,6 +185,7 @@ find_album_without_UPC <- function(observation) {
 }
 
 retrieve_album_genres <- function(albums){
+  cat('Looking up album genre...\n')
   albumGenres <- purrr::map_df(albums$album.mb.id, lookup_musicbrainz_album_tags_from_ID, .progress = TRUE) %>%
     get_highest_ranking_genre() %>%
     dplyr::rename('album.mb.genres' = 'genres',

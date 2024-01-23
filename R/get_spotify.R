@@ -154,9 +154,16 @@ clean_artists <- function(artistsRaw) {
 }
 
 expand_artists <- function(trackframe){
-  trackframe %>%
+  idflag <- FALSE
+  if('id' %in% colnames(trackframe)) {
+    trackframe <- dplyr::rename(trackframe, 'id_temp' = 'id')
+    idflag <- TRUE
+  }
+  trackframe <- trackframe %>%
     tidyr::unnest(cols = 'track.s.artistlist') %>%
     dplyr::rename('artist.s.name' = 'name',
            'artist.s.id' = 'id',) %>%
     dplyr::select(-'href',-'type',-'uri',-'external_urls.spotify')
+  if(idflag) {trackframe <- dplyr::rename(trackframe, 'id' = 'id_temp')}
+  return(trackframe)
 }
