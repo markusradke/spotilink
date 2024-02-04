@@ -36,9 +36,8 @@ get_musicbrainz <- function(input) {
   res <- pull_tracks(input)
   res <- pull_albums(res)
   res <- pull_artists(res)
-  res <- res %>%
-    filter_low_quality() %>%
-    combine_genres()
+  res <- filter_low_quality_and_convert_dates(res)
+  res <- combine_genres(res)
   print_linking_success(res, c('track.s.id', 'album.s.id', 'artist.s.id'))
   res
 }
@@ -71,10 +70,14 @@ retrieve_tracks <- function(distinctinput){
   cat(paste0(round(isrcCounter / nrow(distinctinput),4) * 100, '% of tracks were found using the ISRC.\n'))
   rm(isrcCounter, pos = .GlobalEnv)
   mbTracks <- mbTracks %>%
+    tidyr::hoist('artists', track.mb.firstartist.id = list('artist_mbid', 1L), .remove = FALSE) %>%
+    tidyr::hoist('artists', track.mb.firstartist.name = list('name', 1L), .remove = FALSE) %>%
     dplyr::select('track.mb.id' = 'mbid',
            'track.mb.title' = 'title',
            'track.mb.quality',
            'track.mb.artistlist' = 'artists',
+           'track.mb.firstartist.id',
+           'track.mb.firstartist.name',
            'track.mb.releases' = 'releases')
   cbind(track.s.id = distinctinput$track.s.id, mbTracks)
 }
@@ -120,8 +123,8 @@ retrieve_track_genre <- function(tracks){
   trackGenres <- purrr::map_df(tracks$track.mb.id, lookup_musibrainz_track_tags_from_ID, .progress = TRUE) %>%
     get_highest_ranking_genre() %>%
     dplyr::rename('track.mb.genres' = 'genres',
-           'track.mb.topGenre' = 'topGenre') %>%
-    dplyr::mutate(track.mb.topGenre = .data[['track.mb.topGenre']] %>% as.character())
+           'track.mb.topgenre' = 'topgenre') %>%
+    dplyr::mutate(track.mb.topgenre = .data[['track.mb.topgenre']] %>% as.character())
   cbind(tracks, trackGenres)
 }
 
@@ -189,8 +192,8 @@ retrieve_album_genres <- function(albums){
   albumGenres <- purrr::map_df(albums$album.mb.id, lookup_musicbrainz_album_tags_from_ID, .progress = TRUE) %>%
     get_highest_ranking_genre() %>%
     dplyr::rename('album.mb.genres' = 'genres',
-           'album.mb.topGenre' = 'topGenre') %>%
-    dplyr::mutate(album.mb.topGenre = .data[['album.mb.topGenre']] %>% as.character())
+           'album.mb.topgenre' = 'topgenre') %>%
+    dplyr::mutate(album.mb.topgenre = .data[['album.mb.topgenre']] %>% as.character())
   cbind(albums, albumGenres)
 }
 
@@ -216,8 +219,6 @@ pull_artists <- function(distinctinput) {
     purrr::pmap_df(get_artist_MBIDs %>% count_artists(noOfArtists), .progress = TRUE) %>%
     purrr::pmap_df(lookup_artists %>% count_artists(noOfArtists), .progress = TRUE) %>%
     retrieve_artist_genre() %>%
-    dplyr::mutate(artist.mb.birth = as.Date(.data[['artist.mb.birth']]))  %>%
-    dplyr::mutate(artist.mb.death = as.Date(.data[['artist.mb.death']])) %>%
     dplyr::left_join(distinctinput, ., by = c('artist.s.id'))
   cat('---------------------------------------------------\n')
   cat(paste0(round(artistMBIDCounter / nrow(distinctinput) * 100, 2), '% were found using the MBID from the track information. \n'))
@@ -293,22 +294,22 @@ lookup_artists <- function(artist.s.id, artist.mb.id, artist.mb.quality) {
 }
 
 retrieve_artist_genre <- function(artists){
-  artistGenres <- artists %>%
+  artistgenres <- artists %>%
     get_highest_ranking_genre() %>%
     dplyr::rename('artist.mb.genres' = 'genres',
-           'artist.mb.topGenre' = 'topGenre')
-  cbind(artists, artistGenres) %>%
+           'artist.mb.topgenre' = 'topgenre')
+  cbind(artists, artistgenres) %>%
     dplyr::select(-'tags') %>%
-    dplyr::mutate(artist.mb.topGenre = .data[['artist.mb.topGenre']] %>% as.character())
+    dplyr::mutate(artist.mb.topgenre = .data[['artist.mb.topgenre']] %>% as.character())
 }
 
 get_highest_ranking_genre <- function(tagLookup) {
   highest_tag <- tagLookup$tags %>%
     purrr::lmap(unzip_tags) %>%
     unlist() %>%
-    dplyr::tibble(topGenre = .)
+    dplyr::tibble(topgenre = .)
   genresMB <- cbind(tagLookup, highest_tag) %>%
-    dplyr::select('genres' = 'tags', 'topGenre')
+    dplyr::select('genres' = 'tags', 'topgenre')
 }
 
 unzip_tags <- function(tags) {
@@ -327,23 +328,24 @@ unzip_tags <- function(tags) {
 
 combine_genres <- function(input) {
   input %>%
-    dplyr::mutate(track.mb.combinedGenre = ifelse(!is.na(.data[['track.mb.topGenre']]), .data[['track.mb.topGenre']], .data[['album.mb.topGenre']])) %>%
-    dplyr::mutate(track.mb.combinedGenre = ifelse(!is.na(.data[['track.mb.combinedGenre']]), .data[['track.mb.combinedGenre']], .data[['artist.mb.topGenre']])) %>%
-    dplyr::mutate(album.mb.combinedGenre = ifelse(!is.na(.data[['album.mb.topGenre']]), .data[['album.mb.topGenre']], .data[['track.mb.topGenre']])) %>%
-    dplyr::mutate(album.mb.combinedGenre = ifelse(!is.na(.data[['album.mb.combinedGenre']]), .data[['album.mb.combinedGenre']], .data[['artist.mb.topGenre']])) %>%
-    dplyr::mutate(artist.mb.combinedGenre = ifelse(!is.na(.data[['artist.mb.topGenre']]), .data[['artist.mb.topGenre']], .data[['album.mb.topGenre']])) %>%
-    dplyr::mutate(artist.mb.combinedGenre = ifelse(!is.na(.data[['artist.mb.combinedGenre']]), .data[['artist.mb.combinedGenre']], .data[['track.mb.topGenre']]))
+    dplyr::mutate(track.mb.combinedgenre = ifelse(!is.na(.data[['track.mb.topgenre']]), .data[['track.mb.topgenre']], .data[['album.mb.topgenre']])) %>%
+    dplyr::mutate(track.mb.combinedgenre = ifelse(!is.na(.data[['track.mb.combinedgenre']]), .data[['track.mb.combinedgenre']], .data[['artist.mb.topgenre']])) %>%
+    dplyr::mutate(album.mb.combinedgenre = ifelse(!is.na(.data[['album.mb.topgenre']]), .data[['album.mb.topgenre']], .data[['track.mb.topgenre']])) %>%
+    dplyr::mutate(album.mb.combinedgenre = ifelse(!is.na(.data[['album.mb.combinedgenre']]), .data[['album.mb.combinedgenre']], .data[['artist.mb.topgenre']])) %>%
+    dplyr::mutate(artist.mb.combinedgenre = ifelse(!is.na(.data[['artist.mb.topgenre']]), .data[['artist.mb.topgenre']], .data[['album.mb.topgenre']])) %>%
+    dplyr::mutate(artist.mb.combinedgenre = ifelse(!is.na(.data[['artist.mb.combinedgenre']]), .data[['artist.mb.combinedgenre']], .data[['track.mb.topgenre']]))
 }
 
-filter_low_quality <- function(input){
+filter_low_quality_and_convert_dates <- function(input){
   cat('---------------------------------------------------\n')
   cat('Filter Data with Quality < 0.8 ... \n')
 
   input %>%
     dplyr::mutate(dplyr::across(dplyr::contains('track.mb'), ~ ifelse(.data[['track.mb.quality']] >= 0.8, .x, NA))) %>%
     dplyr::mutate(dplyr::across(dplyr::contains('album.mb'), ~ ifelse(.data[['album.mb.quality']] >= 0.8, .x, NA))) %>%
-    dplyr::mutate(dplyr::across(dplyr::contains('artist.mb'), ~ ifelse(.data[['artist.mb.quality']] >= 0.8, .x, NA)))
-
+    dplyr::mutate(dplyr::across(dplyr::contains('artist.mb'), ~ ifelse(.data[['artist.mb.quality']] >= 0.8, .x, NA))) %>%
+    dplyr::mutate(artist.mb.birth = as.Date(.data[['artist.mb.birth']]))  %>% # Date conversion must be here; else only integers are returned
+    dplyr::mutate(artist.mb.death = as.Date(.data[['artist.mb.death']]))
 }
 
 print_linking_success <- function(input, sIDcols) {

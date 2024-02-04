@@ -73,20 +73,21 @@ clean_tracks <- function(tracksRaw) {
     tidyr::hoist('artists', track.s.firstartist.id = list('id', 1L), .remove = FALSE) %>%
     tidyr::hoist('artists', track.s.firstartist.name = list('name', 1L), .remove = FALSE) %>%
     dplyr::rename('track.s.artists' = 'artists') %>%
+    dplyr::mutate('track.s.artistlist' = .data[['track.s.artists']]) %>%
     dplyr::select(
       'track.s.id' = 'id',
       'track.s.title' = 'name',
-      'track.s.artistlist' = 'track.s.artists',
+      'track.s.artistlist',
       'track.s.firstartist.id',
       'track.s.firstartist.name',
       'track.s.artists',
       'track.s.explicit' = 'explicit',
       'track.s.popularity' = 'popularity',
       'track.s.isrc' = 'external_ids.isrc',
-      'track.s.duration_ms' = 'duration_ms',
+      'track.s.durationms' = 'duration_ms',
       'track.s.duration',
       'track.s.popularity' = 'popularity',
-      'track.s.albumPosition' = 'track_number',
+      'track.s.albumposition' = 'track_number',
       'album.s.id' = 'album.id',
       'album.s.title' = 'album.name'
     )
@@ -95,9 +96,10 @@ clean_tracks <- function(tracksRaw) {
 clean_features <- function(featuresRaw){
   keyLookup <- c('C', 'C#', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'G#', 'A', 'Bb', 'B', 'no')
   featuresRaw %>%
-    dplyr::mutate(time_signature = .data[['time_signature']] %>% as.character() %>% stringr::str_c('/4') %>% as.factor()) %>%
-    dplyr::mutate(key = keyLookup[.data[['key']] + 1] %>% as.factor()) %>% # +1 due to 1-indexing in R vs. 0-indexing of keys in API
-    dplyr::mutate(mode = ifelse(.data[['mode']] == 1, 'major', 'minor') %>% as.factor()) %>%
+    dplyr::mutate(time_signature = .data[['time_signature']] %>% as.character() %>% stringr::str_c('/4')) %>%
+    dplyr::mutate(key = keyLookup[.data[['key']] + 1]) %>% # +1 due to 1-indexing in R vs. 0-indexing of keys in API
+    dplyr::mutate(mode = ifelse(.data[['mode']] == 1, 'major', 'minor')) %>%
+    dplyr::mutate(instrumentalness = .data[['instrumentalness']] %>% as.double()) %>%
     dplyr::select('track.s.id' = 'id',
            'track.s.danceability' = 'danceability',
            'track.s.energy' = 'energy',
@@ -110,21 +112,21 @@ clean_features <- function(featuresRaw){
            'track.s.liveness' = 'liveness',
            'track.s.valence' = 'valence',
            'track.s.tempo' = 'tempo',
-           'track.s.time_signature' = 'time_signature')
+           'track.s.timesignature' = 'time_signature')
 }
 
 clean_albums <- function(albumsRaw){
   albumsRaw %>%
     dplyr::as_tibble() %>%
-    dplyr::mutate(album.s.release_year = stringr::str_sub(.data[['release_date']], end = 4) %>% as.integer()) %>%
-    dplyr::mutate(album.s.release_date = ifelse(stringr::str_length(.data[['release_date']]) == 4, paste0(.data[['release_date']], '-01-01'),.data[['release_date']])) %>%
-    dplyr::mutate(album.s.release_date = .data[['album.s.release_date']] %>% as.Date()) %>%
+    dplyr::mutate(album.s.releaseyear = stringr::str_sub(.data[['release_date']], end = 4) %>% as.integer()) %>%
+    dplyr::mutate(album.s.releasedate = ifelse(stringr::str_length(.data[['release_date']]) == 4, paste0(.data[['release_date']], '-01-01'),.data[['release_date']])) %>%
+    dplyr::mutate(album.s.releasedate = .data[['album.s.releasedate']] %>% as.Date()) %>%
     dplyr::select('album.s.id' = 'id',
            'album.s.type' = 'type',
            'album.s.upc' = 'external_ids.upc',
-           'album.s.total_tracks' = 'total_tracks',
-           'album.s.release_date',
-           'album.s.release_year',
+           'album.s.totaltracks' = 'total_tracks',
+           'album.s.releasedate',
+           'album.s.releaseyear',
            'album.s.label' = 'label',
            'album.s.popularity' = 'popularity')
 }
@@ -150,7 +152,7 @@ clean_artists <- function(artistsRaw) {
            'artist.s.genres' = 'genres',
            'artist.s.popularity' = 'popularity',
            'artist.s.followers' = 'followers.total') %>%
-    tidyr::hoist('artist.s.genres', artist.s.topGenre = list('id', 1L), .remove = FALSE)
+    tidyr::hoist('artist.s.genres', artist.s.topgenre = list('genre', 1L), .remove = FALSE)
 }
 
 expand_artists <- function(trackframe){
