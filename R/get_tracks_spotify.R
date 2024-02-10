@@ -1,0 +1,57 @@
+get_tracks_spotify <- function(input, pass) {
+  connect_spotify(pass)
+  # res <- rename_existing_variables(input, 'spotify_tracks') # TDOO implement single renaming requests
+  res <- input
+  res <- get_from_API(res, 'track.s.id', spotifyr::get_tracks, clean_tracks, batchsize = 50)
+  res <- get_from_API(res, 'track.s.id', spotifyr::get_track_audio_features, clean_features, batchsize = 50)
+}
+
+clean_tracks <- function(tracksRaw) {
+  tracksRaw %>%
+    dplyr::mutate(name = .data[['name']]) %>%
+    dplyr::mutate(album.name = .data[['album.name']]) %>%
+    dplyr::mutate(track.s.duration = .data[['duration_ms']] * 0.001) %>%
+    tidyr::hoist('artists', track.s.firstartist.id = list('id', 1L), .remove = FALSE) %>%
+    tidyr::hoist('artists', track.s.firstartist.name = list('name', 1L), .remove = FALSE) %>%
+    dplyr::rename('track.s.artists' = 'artists') %>%
+    dplyr::mutate('track.s.artistlist' = .data[['track.s.artists']]) %>%
+    dplyr::select(
+      'track.s.id' = 'id',
+      'track.s.title' = 'name',
+      'track.s.artistlist',
+      'track.s.firstartist.id',
+      'track.s.firstartist.name',
+      'track.s.artists',
+      'track.s.explicit' = 'explicit',
+      'track.s.popularity' = 'popularity',
+      'track.s.isrc' = 'external_ids.isrc',
+      'track.s.durationms' = 'duration_ms',
+      'track.s.duration',
+      'track.s.popularity' = 'popularity',
+      'track.s.albumposition' = 'track_number',
+      'album.s.id' = 'album.id',
+      'album.s.title' = 'album.name'
+    )
+}
+
+clean_features <- function(featuresRaw){
+  keyLookup <- c('C', 'C#', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'G#', 'A', 'Bb', 'B', 'no')
+  featuresRaw %>%
+    dplyr::mutate(time_signature = .data[['time_signature']] %>% as.character() %>% stringr::str_c('/4')) %>%
+    dplyr::mutate(key = keyLookup[.data[['key']] + 1]) %>% # +1 due to 1-indexing in R vs. 0-indexing of keys in API
+    dplyr::mutate(mode = ifelse(.data[['mode']] == 1, 'major', 'minor')) %>%
+    dplyr::mutate(instrumentalness = .data[['instrumentalness']] %>% as.double()) %>%
+    dplyr::select('track.s.id' = 'id',
+                  'track.s.danceability' = 'danceability',
+                  'track.s.energy' = 'energy',
+                  'track.s.key' = 'key',
+                  'track.s.loudness' = 'loudness',
+                  'track.s.mode' = 'mode',
+                  'track.s.speechiness' = 'speechiness',
+                  'track.s.acousticness' = 'acousticness',
+                  'track.s.instrumentalness' = 'instrumentalness',
+                  'track.s.liveness' = 'liveness',
+                  'track.s.valence' = 'valence',
+                  'track.s.tempo' = 'tempo',
+                  'track.s.timesignature' = 'time_signature')
+}

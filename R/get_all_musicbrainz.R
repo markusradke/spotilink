@@ -31,7 +31,7 @@
 #' @export
 #'
 #'@examples
-get_musicbrainz <- function(input) {
+get_all_musicbrainz <- function(input) {
   res <- rename_existing_variables(input, 'musicbrainz')
   res <- pull_tracks(input)
   res <- pull_albums(res)

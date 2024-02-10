@@ -8,3 +8,4 @@ rename_existing_variables <- function(input, database) {
   }
   input %>% dplyr::rename_at(dplyr::vars(dplyr::all_of(alreadyExistingCols)), ~new_names)
 }
+

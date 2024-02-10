@@ -1,9 +1,8 @@
 get_single_example_song <- function(){
   data <-  data.frame(track.s.id = '7iN1s7xHE4ifF5povM6A48')
   pass <- c("bf4b7a7cffc547d49199cab4ae0b347f","5fe2a814df864abda82b740ecc307661")
-  invisible(capture.output(res <- get_spotify(data, pass)))
-  res <- get_musicbrainz(res)
-  # invisible(capture.output(res <- get_musicbrainz(res)))
+  invisible(capture.output(res <- get_all_spotify(data, pass)))
+  invisible(capture.output(res <- get_all_musicbrainz(res)))
   res
 }
 
