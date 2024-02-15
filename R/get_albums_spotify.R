@@ -1,3 +1,17 @@
+#'Get \emph{Spotify} API Information on Albums
+#'
+#'Retrieve a data frame containing information from the \emph{Spotify} API.
+#'The result contains information on the albums using the  \pkg{spotilink} naming convention.
+#'
+#' @param input
+#'Data Frame containing a column \code{album.s.id} with \emph{Spotify} album ids.
+#' @param pass
+#'Character Vector containing two entries: \emph{Client ID} and \emph{Client secret}. See \url{https://developer.spotify.com/documentation/web-api/concepts/authorization} for details.
+#'
+#' @return Data Frame with added information from the \emph{Spotify} Web API using the \pkg{spotilink} naming convention.
+#' @export
+#'
+#'@examples
 get_albums_spotify <- function(input, pass) {
   connect_spotify(pass)
   # res <- rename_existing_variables(input, 'spotify_albums') #TODO implement single renaming requests

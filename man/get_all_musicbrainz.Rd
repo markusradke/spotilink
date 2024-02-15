@@ -26,7 +26,7 @@ with \emph{Spotify} artist id,
 \item \code{artist.s.name} \cr
 with \emph{Spotify} artist name.
 }
-It is advisable to first run \code{\link{get_spotify}} before running this command,
+It is advisable to first run \code{\link{get_all_spotify}} before running this command,
 in order to have all the necessary information.}
 }
 \value{

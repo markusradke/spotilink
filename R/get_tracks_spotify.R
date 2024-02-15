@@ -1,3 +1,17 @@
+#'Get \emph{Spotify} API Information on Tracks
+#'
+#'Retrieve a data frame containing information from the \emph{Spotify} API.
+#'The result contains information on the tracks using the  \pkg{spotilink} naming convention.
+#'
+#' @param input
+#'Data Frame containing a column \code{track.s.id} with \emph{Spotify} track ids.
+#' @param pass
+#'Character Vector containing two entries: \emph{Client ID} and \emph{Client secret}. See \url{https://developer.spotify.com/documentation/web-api/concepts/authorization} for details.
+#'
+#' @return Data Frame with added information from the \emph{Spotify} Web API using the \pkg{spotilink} naming convention. Tracks' audio analysis is not returned. Please use the \link{get_audioanalysis_spotify} function to achieve that.
+#' @export
+#'
+#'@examples
 get_tracks_spotify <- function(input, pass) {
   connect_spotify(pass)
   # res <- rename_existing_variables(input, 'spotify_tracks') # TDOO implement single renaming requests
