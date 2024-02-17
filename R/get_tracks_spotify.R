@@ -28,11 +28,9 @@ clean_tracks <- function(tracksRaw) {
     tidyr::hoist('artists', track.s.firstartist.id = list('id', 1L), .remove = FALSE) %>%
     tidyr::hoist('artists', track.s.firstartist.name = list('name', 1L), .remove = FALSE) %>%
     dplyr::rename('track.s.artists' = 'artists') %>%
-    dplyr::mutate('track.s.artistlist' = .data[['track.s.artists']]) %>%
     dplyr::select(
       'track.s.id' = 'id',
       'track.s.title' = 'name',
-      'track.s.artistlist',
       'track.s.firstartist.id',
       'track.s.firstartist.name',
       'track.s.artists',

@@ -18,7 +18,9 @@ get_all_spotify <- function(input, pass) {
   res <- rename_existing_variables(input, 'spotify')
 
   res <- get_tracks_spotify(input, pass)
+  res <- dplyr::select(res, -album.s.title)
   res <- get_albums_spotify(res, pass)
+  res <- dplyr::mutate(res, 'track.s.artistlist' = .data[['track.s.artists']])
   res <- expand_artists(res)
   res <- get_artists_spotify(res, pass)
   res

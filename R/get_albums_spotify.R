@@ -26,6 +26,7 @@ clean_albums <- function(albumsRaw){
     dplyr::mutate(album.s.releasedate = ifelse(stringr::str_length(.data[['release_date']]) == 4, paste0(.data[['release_date']], '-01-01'),.data[['release_date']])) %>%
     dplyr::mutate(album.s.releasedate = .data[['album.s.releasedate']] %>% as.Date()) %>%
     dplyr::select('album.s.id' = 'id',
+                  'album.s.title' = 'name',
                   'album.s.type' = 'type',
                   'album.s.upc' = 'external_ids.upc',
                   'album.s.totaltracks' = 'total_tracks',
