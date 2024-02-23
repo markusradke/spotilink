@@ -13,10 +13,15 @@
 #'
 #'@examples
 get_albums_spotify <- function(input, pass) {
+  renameVars <- spotifyAlbumVars[! spotifyAlbumVars %in% c('album.s.id')]
+  res <- rename_existing_variables(input, renameVars)
+
   connect_spotify(pass)
-  # res <- rename_existing_variables(input, 'spotify_albums') #TODO implement single renaming requests
-  res <- input
-  get_from_API(res, 'album.s.id', spotifyr::get_albums, clean_albums, batchsize = 20)
+  pull_albums_spotify(res)
+}
+
+pull_albums_spotify <- function(input, pass){
+  get_from_API(input, 'album.s.id', spotifyr::get_albums, clean_albums, batchsize = 20)
 }
 
 clean_albums <- function(albumsRaw){

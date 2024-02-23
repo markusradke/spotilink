@@ -13,10 +13,15 @@
 #'
 #'@examples
 get_tracks_spotify <- function(input, pass) {
+  renameVars <- spotifyTrackVars[! spotifyTrackVars %in% c('track.s.id')]
+  res <- rename_existing_variables(input, renameVars)
+
   connect_spotify(pass)
-  # res <- rename_existing_variables(input, 'spotify_tracks') # TDOO implement single renaming requests
-  res <- input
-  res <- get_from_API(res, 'track.s.id', spotifyr::get_tracks, clean_tracks, batchsize = 50)
+  pull_tracks_spotify(res)
+}
+
+pull_tracks_spotify <- function(input) {
+  res <- get_from_API(input, 'track.s.id', spotifyr::get_tracks, clean_tracks, batchsize = 50)
   res <- get_from_API(res, 'track.s.id', spotifyr::get_track_audio_features, clean_features, batchsize = 50)
 }
 

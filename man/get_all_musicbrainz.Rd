@@ -4,7 +4,12 @@
 \alias{get_all_musicbrainz}
 \title{Get \emph{MusicBrainz} Information}
 \usage{
-get_all_musicbrainz(input)
+get_all_musicbrainz(
+  input,
+  track_threshold = 0.8,
+  album_threshold = 0.8,
+  artist.threshold = 0.8
+)
 }
 \arguments{
 \item{input}{Data Frame containing the following columns:
@@ -28,6 +33,14 @@ with \emph{Spotify} artist name.
 }
 It is advisable to first run \code{\link{get_all_spotify}} before running this command,
 in order to have all the necessary information.}
+
+\item{track_threshold, album_treshold, artist_threshold}{Floating point numbers between 0 and 1 indicating which elements to keep that were found using a fuzzy search.
+The values correspond to the string similarity (1 - Jaro-Winkler distance) between
+\enumerate{
+\item the track title on \emph{Spotify} and the found track title on \emph{Musicbrainz}.
+\item the album title on \emph{Spotify} and the found album title on \emph{Musicbrainz}.
+\item the artist name on \emph{Spotify} and the found artist name on \emph{Musicbrainz}.
+}}
 }
 \value{
 Data Frame with added information from the \emph{MusicBrainz} API using the  \pkg{spotilink} naming convention.

@@ -13,8 +13,14 @@
 #'
 #'@examples
 get_artists_spotify <- function(input, pass) {
+  renameVars <- spotifyArtistVars[! spotifyArtistVars %in% c('artist.s.id')]
+  res <- rename_existing_variables(input, renameVars)
+
   connect_spotify(pass)
-  # res <- rename_existing_variables(input, 'spotify_albums') #TODO implement single renaming requests
+  pull_artists_spotify(res)
+}
+
+pull_artists_spotify <- function(input) {
   res <- input
   if ('artist.s.name' %in% colnames(res)) { # remove redundant artist name from get tracks if necessary
     res <- dplyr::select(res, -'artist.s.name')

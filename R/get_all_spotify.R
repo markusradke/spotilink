@@ -14,19 +14,20 @@
 #'
 #'@examples
 get_all_spotify <- function(input, pass) {
-  connect_spotify(pass)
-  res <- rename_existing_variables(input, 'spotify')
+  renameVars <- spotifyAllVars[! spotifyAllVars %in% c('track.s.id')]
+  res <- rename_existing_variables(input, renameVars)
 
-  res <- get_tracks_spotify(input, pass)
+  connect_spotify(pass)
+  res <- pull_tracks_spotify(res)
   res <- dplyr::select(res, -album.s.title)
-  res <- get_albums_spotify(res, pass)
-  res <- dplyr::mutate(res, 'track.s.artistlist' = .data[['track.s.artists']])
+  res <- pull_albums_spotify(res)
   res <- expand_artists(res)
-  res <- get_artists_spotify(res, pass)
+  res <- pull_artists_spotify(res)
   res
 }
 
 expand_artists <- function(trackframe){
+  trackframe <- dplyr::mutate(trackframe, 'track.s.artistlist' = .data[['track.s.artists']])
   idflag <- FALSE
   if('id' %in% colnames(trackframe)) {
     trackframe <- dplyr::rename(trackframe, 'id_temp' = 'id')
