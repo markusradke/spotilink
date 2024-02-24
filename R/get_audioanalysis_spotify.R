@@ -13,20 +13,35 @@
 #'
 #'@examples
 get_audioanalysis_spotify <- function(input, pass) {
+  renameVars <- spotifyAudioanalysisVars[! spotifyAudioanalysisVars %in% c('track.s.id')]
+  res <- rename_existing_variables(input, renameVars)
+
   connect_spotify(pass)
-  # res <- rename_existing_variables(input, 'spotify_audioanalysis') #TODO implement single renaming requests
-  # get_from_API(res, 'track.s.id', get_track_audio_analysis, clean_analysis, batchsize = 1) # TODO later
+  res <- retrieve_audioanalysis_spotify(res)
 }
 
+retrieve_audioanalysis_spotify <- function(input) {
+  cat('Retrieving data with get_track_audio_analysis from identifier track.s.id ... \n')
+  input %>%
+    dplyr::distinct(.data[['track.s.id']]) %>%
+    dplyr::pull('track.s.id') %>%
+    purrr::map_df(retrieve_single_audioanalysis)
+}
+
+retrieve_single_audioanalysis <- function(track.s.id) {
+  spotifyr::get_track_audio_analysis(track.s.id) %>%
+  clean_analysis() %>%
+  cbind(track.s.id, .)
+}
 
 clean_analysis <- function(analysisRaw) {
-  dplyr::tibble(meta = list(analysisRaw$meta),
-                track = list(analysisRaw$track),
-                bars = list(analysisRaw$bars),
-                beats = list(analysisRaw$beats),
-                sections = list(analysisRaw$sections),
-                segments = list(analysisRaw$segments),
-                tatums = list(analysisRaw$tatums)) %>%
-    dplyr::mutate(track.s.id = 'x') %>% # todo incorporate id and make data frame
-    dplyr::select('track.s.id', dplyr::everything())
+  dplyr::tibble(track.s.tempoconfidence = analysisRaw$track$tempo_confidence,
+                track.s.timesignatureconfidence = analysisRaw$track$time_signature_confidence,
+                track.s.keyconfidence = analysisRaw$track$key_confidence,
+                track.s.modeconfidence = analysisRaw$track$mode_confidence,
+                track.s.bars = list(analysisRaw$bars),
+                track.s.beats = list(analysisRaw$beats),
+                track.s.sections = list(analysisRaw$sections),
+                track.s.segments = list(analysisRaw$segments),
+                track.s.tatums = list(analysisRaw$tatums))
 }
