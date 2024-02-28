@@ -16,5 +16,5 @@ simplify_name <- function(name) {
 
 are_needed_columns_present <- function(input, neededCols)
 if(! all(neededCols %in% colnames(input))) {
-  stop('Please provide a data frame containing the following columns:\n', neededCols,'\nSee the function reference for further information.')
+  stop('Please provide a data frame containing the following columns:\n', paste(toString(neededCols), collapse = ", "),'\nSee the function reference for further information.')
 }

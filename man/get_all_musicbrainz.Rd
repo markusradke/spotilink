@@ -8,7 +8,7 @@ get_all_musicbrainz(
   input,
   track_threshold = 0.8,
   album_threshold = 0.8,
-  artist.threshold = 0.8
+  artist_threshold = 0.8
 )
 }
 \arguments{

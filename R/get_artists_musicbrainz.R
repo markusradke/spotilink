@@ -24,6 +24,7 @@
 #'
 #'@examples
 get_artists_musicbrainz <- function(input, threshold = 0.8) {
+  are_needed_columns_present(input, c('artist.s.id', 'artist.s.name'))
   renameVars <- musicbrainzArtistVars[! musicbrainzArtistVars %in% c('artist.s.id', 'artist.s.name')]
   res <- rename_existing_variables(input, renameVars)
 

@@ -13,6 +13,7 @@
 #'
 #'@examples
 get_artists_spotify <- function(input, pass) {
+  are_needed_columns_present(input, c('artist.s.id'))
   renameVars <- spotifyArtistVars[! spotifyArtistVars %in% c('artist.s.id')]
   res <- rename_existing_variables(input, renameVars)
 

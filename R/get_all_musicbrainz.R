@@ -41,6 +41,14 @@
 #'
 #'@examples
 get_all_musicbrainz <- function(input, track_threshold = 0.8, album_threshold = 0.8, artist_threshold = 0.8) {
+  are_needed_columns_present(input, c('track.s.id',
+                                      'track.s.title',
+                                      'track.s.isrc',
+                                      'album.s.id',
+                                      'album.s.title',
+                                      'album.s.upc',
+                                      'artist.s.id',
+                                      'artist.s.name'))
   res <- rename_existing_variables(input, 'musicbrainz_all')
   res <- pull_tracks_musicbrainz(res, track_threshold)
   res <- pull_albums_musicbrainz(res, album_threshold)

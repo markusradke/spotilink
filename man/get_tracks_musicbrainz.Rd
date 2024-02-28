@@ -4,7 +4,7 @@
 \alias{get_tracks_musicbrainz}
 \title{Get \emph{MusicBrainz} Track Information}
 \usage{
-get_tracks_musicbrainz(input, threshold)
+get_tracks_musicbrainz(input, threshold = 0.8)
 }
 \arguments{
 \item{input}{Data Frame containing the following columns:

@@ -13,9 +13,7 @@
 #'
 #'@examples
 get_audioanalysis_spotify <- function(input, pass) {
-  if(! all(c('track.s.id') %in% colnames(input))) {
-    stop('Please provide a data frame containing the following column: track.s.id. See the function reference for further information.')
-  }
+  are_needed_columns_present(input, c('track.s.id'))
   renameVars <- spotifyAudioanalysisVars[! spotifyAudioanalysisVars %in% c('track.s.id')]
   res <- rename_existing_variables(input, renameVars)
 
