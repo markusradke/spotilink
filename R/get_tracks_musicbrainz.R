@@ -26,9 +26,7 @@
 #'
 #'@examples
 get_tracks_musicbrainz <- function(input, threshold = 0.8) {
-  if(! all(c('track.s.id', 'track.s.title', 'track.s.isrc') %in% colnames(input))) {
-    stop('Please provide a data frame containing the following columns: track.s.id, track.s.title, track.s.irsc. See the function reference for further information.')
-  }
+  are_needed_columns_present(input, c('track.s.id', 'track.s.title', 'track.s.isrc'))
 
   renameVars <- musicbrainzTrackVars[! musicbrainzTrackVars %in% c('track.s.id', 'track.s.title', 'track.s.isrc')]
   res <- rename_existing_variables(input, renameVars)

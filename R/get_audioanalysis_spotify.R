@@ -16,7 +16,6 @@ get_audioanalysis_spotify <- function(input, pass) {
   if(! all(c('track.s.id') %in% colnames(input))) {
     stop('Please provide a data frame containing the following column: track.s.id. See the function reference for further information.')
   }
-
   renameVars <- spotifyAudioanalysisVars[! spotifyAudioanalysisVars %in% c('track.s.id')]
   res <- rename_existing_variables(input, renameVars)
 
@@ -29,7 +28,8 @@ retrieve_audioanalysis_spotify <- function(input) {
   input %>%
     dplyr::distinct(.data[['track.s.id']]) %>%
     dplyr::pull('track.s.id') %>%
-    purrr::map_df(retrieve_single_audioanalysis)
+    purrr::map_df(retrieve_single_audioanalysis, .progress = TRUE) %>%
+    dplyr::right_join(input)
 }
 
 retrieve_single_audioanalysis <- function(track.s.id) {
