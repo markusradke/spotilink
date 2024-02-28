@@ -8,5 +8,5 @@
 #'@examples
 #'get_naming_convention()
 get_naming_convention <- function() {
-  c(spotifyAllVars, musicbrainzAllVars)
+  c(spotifyAllVars, musicbrainzAllVars, spotifyAudioanalysisVars) %>% unique()
 }

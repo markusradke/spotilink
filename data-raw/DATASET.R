@@ -9,6 +9,7 @@ use_data(musicbrainzWhitelist,
          spotifyAllVars,
          musicbrainzAllVars,
          correctTypesAll,
+         spotifyAudioanalysisVars,
          internal = TRUE,
          overwrite = TRUE)
 {
