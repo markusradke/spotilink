@@ -23,9 +23,8 @@
 #' @export
 #'
 #'@examples
-#'pass <- c('YOUR CLIENT ID', 'YOUR CLIENT SECRET')
-#'data <- data.frame(artist.s.id = c('5aIqB5nVVvmFsvSdExz408'))
-#'data <- get_artists_spotify(data, pass)
+#'data <- data.frame(artist.s.id = c('5aIqB5nVVvmFsvSdExz408'),
+#'                   artist.s.name = c('Johann Sebastian Bach'))
 #'
 #'get_artists_musicbrainz(data)
 get_artists_musicbrainz <- function(input, threshold = 0.8) {

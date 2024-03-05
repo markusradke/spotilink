@@ -19,8 +19,3 @@ Retrieve a data frame containing information from the \emph{Spotify} API.
 The result contains information on the tracks as well as corresponding albums and artists.
 The \pkg{spotilink} naming convention is used.
 }
-\examples{
-pass <- c('YOUR CLIENT ID', 'YOUR CLIENT SECRET')
-data <- data.frame(track.s.id = c('4ZXLWTmQFzM02hZwMiZfgS'))
-get_all_spotify(data, pass)
-}

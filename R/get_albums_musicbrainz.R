@@ -25,9 +25,9 @@
 #' @export
 #'
 #'@examples
-#'pass <- c('YOUR CLIENT ID', 'YOUR CLIENT SECRET')
-#'data <- data.frame(album.s.id = c('2rlWvQ1GuTOSkyNpmcoaMC'))
-#'data <- get_albums_spotify(data, pass)
+#'data <- data.frame(album.s.id = c('2rlWvQ1GuTOSkyNpmcoaMC'),
+#'                   album.s.title = c('Bach: Motets'),
+#'                   album.s.upc = c('843183071623'))
 #'
 #'get_albums_musicbrainz(data)
 get_albums_musicbrainz <- function(input, threshold = 0.8) {

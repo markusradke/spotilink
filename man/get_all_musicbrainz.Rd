@@ -34,7 +34,7 @@ with \emph{Spotify} artist name.
 It is advisable to first run \code{\link{get_all_spotify}} before running this command,
 in order to have all the necessary information.}
 
-\item{track_threshold, album_treshold, artist_threshold}{Floating point numbers between 0 and 1 indicating which elements to keep that were found using a fuzzy search.
+\item{track_threshold, album_threshold, artist_threshold}{Floating point numbers between 0 and 1 indicating which elements to keep that were found using a fuzzy search.
 The values correspond to the string similarity (1 - Jaro-Winkler distance) between
 \enumerate{
 \item the track title on \emph{Spotify} and the found track title on \emph{Musicbrainz}.
@@ -51,9 +51,14 @@ The result contains information on the tracks as well as corresponding albums an
 The \pkg{spotilink} naming convention is used.
 }
 \examples{
-pass <- c('YOUR CLIENT ID', 'YOUR CLIENT SECRET')
-data <- data.frame(track.s.id = c('4ZXLWTmQFzM02hZwMiZfgS'))
-data <- get_all_spotify(data, pass)
+data <- data.frame(track.s.id = c('4ZXLWTmQFzM02hZwMiZfgS'),
+                  track.s.title = c('Der Geist hilft unser Schwachheit auf, BWV 226'),
+                  track.s.isrc = c('GBHNG1200003'),
+                  album.s.id = c('2rlWvQ1GuTOSkyNpmcoaMC'),
+                  album.s.title = c('Bach: Motets'),
+                  album.s.upc = c('843183071623'),
+                  artist.s.id = c('5aIqB5nVVvmFsvSdExz408'),
+                  artist.s.name = c('Johann Sebastian Bach'))
 
 get_all_musicbrainz(data)
 }

@@ -12,9 +12,6 @@
 #' @export
 #'
 #'@examples
-#'pass <- c('YOUR CLIENT ID', 'YOUR CLIENT SECRET')
-#'data <- data.frame(track.s.id = c('4ZXLWTmQFzM02hZwMiZfgS'))
-#'get_tracks_spotify(data, pass)
 get_tracks_spotify <- function(input, pass) {
   are_needed_columns_present(input, c('track.s.id'))
 

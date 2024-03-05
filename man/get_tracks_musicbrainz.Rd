@@ -31,9 +31,9 @@ The result contains information on tracks.
 The \pkg{spotilink} naming convention is used.
 }
 \examples{
-pass <- c('YOUR CLIENT ID', 'YOUR CLIENT SECRET')
-data <- data.frame(track.s.id = c('4ZXLWTmQFzM02hZwMiZfgS'))
-data <- get_tracks_spotify(data, pass)
+data <- data.frame(track.s.id = c('4ZXLWTmQFzM02hZwMiZfgS'),
+                  track.s.title = c('Der Geist hilft unser Schwachheit auf, BWV 226'),
+                  track.s.isrc = c('GBHNG1200003'))
 
 get_tracks_musicbrainz(data)
 }
