@@ -4,7 +4,7 @@ source('./data-raw/define_test_data.R')
 source('./data-raw/define_variables.R')
 
 use_data(musicbrainzWhitelist,
-         testTracksArtists,
+         testTracksArtistsAlbums,
          spotifyTrackVars,
          musicbrainzTrackVars,
          spotifyAlbumVars,
