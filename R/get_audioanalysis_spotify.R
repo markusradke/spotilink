@@ -45,5 +45,9 @@ clean_analysis <- function(analysisRaw) {
                 track.s.beats = list(analysisRaw$beats),
                 track.s.sections = list(analysisRaw$sections),
                 track.s.segments = list(analysisRaw$segments),
-                track.s.tatums = list(analysisRaw$tatums))
+                track.s.tatums = list(analysisRaw$tatums),
+                track.s.synchstring = analysisRaw$track$synchstring,
+                track.s.rhythmstring = analysisRaw$track$rhythmstring,
+                track.s.echoprintstring = analysisRaw$track$echoprintstring,
+                track.s.codestring = analysisRaw$track$codestring)
 }

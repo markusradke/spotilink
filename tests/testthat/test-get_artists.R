@@ -1,14 +1,16 @@
-get_single_example_artist <- function(){
-  data <-  data.frame(artist.s.id = '1QL7yTHrdahRMpvNtn6rI2')
+get_example <- function(){
+  data <- dplyr::select(testTracksArtistsAlbums, artist.s.id, artist.s.name, track.s.title)
   pass <- c("bf4b7a7cffc547d49199cab4ae0b347f","5fe2a814df864abda82b740ecc307661")
   invisible(capture.output(res <- get_artists_spotify(data, pass)))
   invisible(capture.output(res <- get_artists_musicbrainz(res)))
+  res <- dplyr::select(res, -track.s.title, - artist.s.name_old)
   res
 }
 
-test_that("Artist variables complete?", {
-  data <-  get_single_example_artist()
+cat('\nRetrieving test example...\n')
+data <-  get_example()
 
+test_that("Artist variables complete?", {
   allVariablesLookup <- c(spotifyArtistVars, musicbrainzArtistVars)
 
   columns <- names(data)
