@@ -15,10 +15,9 @@ with \emph{Spotify} artist id,
 with \emph{Spotify} artist name.
 }
 It is advisable to first run \code{\link{get_artists_spotify}} before running this command,
-in order to have all the necessary information.
+in order to have all the necessary information.}
 
-#'@param threshold
-Floating point number between 0 and 1 indicating which elements to keep that were found using a fuzzy search.
+\item{threshold}{Floating point number between 0 and 1 indicating which elements to keep that were found using a fuzzy search.
 The values correspond to the string similarity (1 - Jaro-Winkler distance) between the artist name on \emph{Spotify} and the found artist name on \emph{Musicbrainz}.}
 }
 \value{
@@ -28,4 +27,11 @@ Data Frame with added information from the \emph{MusicBrainz} API using the  \pk
 Retrieve a data frame containing information from the \emph{MusicBrainz} API.
 The result contains information on artists.
 The \pkg{spotilink} naming convention is used.
+}
+\examples{
+pass <- c('YOUR CLIENT ID', 'YOUR CLIENT SECRET')
+data <- data.frame(artist.s.id = c('5aIqB5nVVvmFsvSdExz408'))
+data <- get_artists_spotify(data, pass)
+
+get_artists_musicbrainz(data)
 }

@@ -30,3 +30,10 @@ Retrieve a data frame containing information from the \emph{MusicBrainz} API.
 The result contains information on albums.
 The \pkg{spotilink} naming convention is used.
 }
+\examples{
+pass <- c('YOUR CLIENT ID', 'YOUR CLIENT SECRET')
+data <- data.frame(album.s.id = c('2rlWvQ1GuTOSkyNpmcoaMC'))
+data <- get_albums_spotify(data, pass)
+
+get_albums_musicbrainz(data)
+}

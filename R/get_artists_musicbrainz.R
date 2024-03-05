@@ -15,7 +15,7 @@
 #'It is advisable to first run \code{\link{get_artists_spotify}} before running this command,
 #'in order to have all the necessary information.
 #'
-#'#'@param threshold
+#'@param threshold
 #'Floating point number between 0 and 1 indicating which elements to keep that were found using a fuzzy search.
 #'The values correspond to the string similarity (1 - Jaro-Winkler distance) between the artist name on \emph{Spotify} and the found artist name on \emph{Musicbrainz}.
 #'
@@ -23,6 +23,11 @@
 #' @export
 #'
 #'@examples
+#'pass <- c('YOUR CLIENT ID', 'YOUR CLIENT SECRET')
+#'data <- data.frame(artist.s.id = c('5aIqB5nVVvmFsvSdExz408'))
+#'data <- get_artists_spotify(data, pass)
+#'
+#'get_artists_musicbrainz(data)
 get_artists_musicbrainz <- function(input, threshold = 0.8) {
   are_needed_columns_present(input, c('artist.s.id', 'artist.s.name'))
   renameVars <- musicbrainzArtistVars[! musicbrainzArtistVars %in% c('artist.s.id', 'artist.s.name')]

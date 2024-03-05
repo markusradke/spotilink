@@ -18,3 +18,8 @@ Data Frame with added information from the \emph{Spotify} Web API using the \pkg
 Retrieve a data frame containing information from the \emph{Spotify} API.
 The result contains information on the tracks using the  \pkg{spotilink} naming convention.
 }
+\examples{
+pass <- c('YOUR CLIENT ID', 'YOUR CLIENT SECRET')
+data <- data.frame(track.s.id = c('4ZXLWTmQFzM02hZwMiZfgS'))
+get_tracks_spotify(data, pass)
+}

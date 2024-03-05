@@ -25,6 +25,11 @@
 #' @export
 #'
 #'@examples
+#'pass <- c('YOUR CLIENT ID', 'YOUR CLIENT SECRET')
+#'data <- data.frame(track.s.id = c('4ZXLWTmQFzM02hZwMiZfgS'))
+#'data <- get_tracks_spotify(data, pass)
+#'
+#'get_tracks_musicbrainz(data)
 get_tracks_musicbrainz <- function(input, threshold = 0.8) {
   are_needed_columns_present(input, c('track.s.id', 'track.s.title', 'track.s.isrc'))
 

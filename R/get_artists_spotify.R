@@ -12,6 +12,9 @@
 #' @export
 #'
 #'@examples
+#'pass <- c('YOUR CLIENT ID', 'YOUR CLIENT SECRET')
+#'data <- data.frame(artist.s.id = c('5aIqB5nVVvmFsvSdExz408'))
+#'get_artists_spotify(data, pass)
 get_artists_spotify <- function(input, pass) {
   are_needed_columns_present(input, c('artist.s.id'))
   renameVars <- spotifyArtistVars[! spotifyArtistVars %in% c('artist.s.id')]

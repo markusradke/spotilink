@@ -25,6 +25,11 @@
 #' @export
 #'
 #'@examples
+#'pass <- c('YOUR CLIENT ID', 'YOUR CLIENT SECRET')
+#'data <- data.frame(album.s.id = c('2rlWvQ1GuTOSkyNpmcoaMC'))
+#'data <- get_albums_spotify(data, pass)
+#'
+#'get_albums_musicbrainz(data)
 get_albums_musicbrainz <- function(input, threshold = 0.8) {
   are_needed_columns_present(input, c('album.s.id', 'album.s.title', 'album.s.upc'))
   renameVars <- musicbrainzAlbumVars[! musicbrainzAlbumVars %in% c('album.s.id', 'album.s.title', 'album.s.upc')]
