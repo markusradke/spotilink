@@ -37,13 +37,19 @@ retrieve_single_audioanalysis <- function(track.s.id) {
 }
 
 clean_analysis <- function(analysisRaw) {
+  keyLookup <- c('C', 'C#', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'G#', 'A', 'Bb', 'B', 'no')
+  sections <- analysisRaw$sections %>%
+    dplyr::mutate(time_signature = .data[['time_signature']] %>% as.character() %>% stringr::str_c('/4')) %>%
+    dplyr::mutate(key = keyLookup[.data[['key']] + 1]) %>%
+    dplyr::mutate(mode = ifelse(.data[['mode']] == 1, 'major', 'minor'))
+
   dplyr::tibble(track.s.tempoconfidence = analysisRaw$track$tempo_confidence,
                 track.s.timesignatureconfidence = analysisRaw$track$time_signature_confidence,
                 track.s.keyconfidence = analysisRaw$track$key_confidence,
                 track.s.modeconfidence = analysisRaw$track$mode_confidence,
                 track.s.bars = list(analysisRaw$bars),
                 track.s.beats = list(analysisRaw$beats),
-                track.s.sections = list(analysisRaw$sections),
+                track.s.sections = list(sections),
                 track.s.segments = list(analysisRaw$segments),
                 track.s.tatums = list(analysisRaw$tatums),
                 track.s.synchstring = analysisRaw$track$synchstring,
