@@ -31,9 +31,8 @@ pull_artists_spotify <- function(input) {
 
 clean_artists <- function(artistsRaw) {
   artistsRaw %>%
-    dplyr::mutate(artist.s.name = .data[['name']]) %>%
     dplyr::select('artist.s.id' = 'id',
-                  'artist.s.name',
+                  'artist.s.name' = 'name',
                   'artist.s.genres' = 'genres',
                   'artist.s.popularity' = 'popularity',
                   'artist.s.followers' = 'followers.total') %>%

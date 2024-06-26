@@ -31,4 +31,12 @@ test_that("Artist variables complete?", {
 })
 
 
+test_that('Retrieve Number of Artists > 50 from Spotify (70)',{
+  data <- largeArtistTest
+  pass <- c("bf4b7a7cffc547d49199cab4ae0b347f","5fe2a814df864abda82b740ecc307661")
+  invisible(capture.output(res <- get_artists_spotify(data, pass)))
+  expect_equal(
+    nrow(res), 70
+  )
+})
 

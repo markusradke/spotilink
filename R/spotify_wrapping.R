@@ -7,12 +7,12 @@ connect_spotify <- function(pass){
 
 get_from_API <- function(input, IDcol, pullFunction, cleanFunction, batchsize) {
   cat('Retrieving data with', substitute(pullFunction) %>% as.character(), 'from identifier', IDcol, '... \n')
-  input %>%
+  res <- input %>%
     dplyr::distinct(.data[[IDcol]]) %>%
     dplyr::pull(IDcol) %>%
     get_from_IDs(pullFunction, batchsize) %>%
-    cleanFunction() %>%
-    dplyr::left_join(input, ., by = IDcol)
+    cleanFunction()
+  dplyr::left_join(res, input, ., by = IDcol)
 }
 
 get_from_IDs <- function(ids, pullFunction, batchsize) {

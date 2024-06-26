@@ -16,5 +16,6 @@ use_data(musicbrainzWhitelist,
          correctTypesAll,
          spotifyAudioanalysisVars,
          correctTypesAudioanalysis,
+         largeArtistTest,
          internal = TRUE,
          overwrite = TRUE)
