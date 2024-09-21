@@ -11,6 +11,8 @@
 #'  with \emph{Spotify} track ids,
 #'  \item \code{track.s.title} \cr
 #'  with \emph{Spotify} track name,
+#'  \item \code{track.s.firstartist.name} \cr
+#'  with \code{Spotify} name of first artist,
 #'  \item \code{track.s.isrc} \cr
 #'  with track ISRCs from \emph{Spotify}
 #'}
@@ -93,7 +95,7 @@ find_tracks_with_ISRC <- function(observation) {
 
 find_tracks_without_ISRC <- function(observation) {
   cat('no ISRC, searching...\n')
-  musicbrainz::search_recordings(paste0('artist:', observation$track.firstartist.name,' and recording:', observation$track.s.title)) %>%
+  musicbrainz::search_recordings(paste0('artist:', observation$track.s.firstartist.name,' and recording:', observation$track.s.title)) %>%
     .[1,] %>%
     dplyr::mutate(track.mb.quality = calculate_and_print_quality(search = observation$track.s.title,
                                                                  found = .data[['title']]))

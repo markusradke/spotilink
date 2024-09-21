@@ -13,6 +13,8 @@ get_tracks_musicbrainz(input, threshold = 0.8)
 with \emph{Spotify} track ids,
 \item \code{track.s.title} \cr
 with \emph{Spotify} track name,
+\item \code{track.s.firstartist.name} \cr
+with \code{Spotify} name of first artist,
 \item \code{track.s.isrc} \cr
 with track ISRCs from \emph{Spotify}
 }
