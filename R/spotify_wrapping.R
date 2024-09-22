@@ -1,8 +1,8 @@
 connect_spotify <- function(pass){
-  cat('Connecting with Spotify-API...', '\n')
+  message('Connecting with Spotify-API...', '\n')
   Sys.setenv(SPOTIFY_CLIENT_ID = pass[1])
   Sys.setenv(SPOTIFY_CLIENT_SECRET = pass[2])
-  cat('Done.\n')
+  message('Done.\n')
 }
 
 get_from_API <- function(input, IDcol, pullFunction, cleanFunction, batchsize) {

@@ -1,10 +1,17 @@
 test_that('Assertion artist und track vector are charcters and threhshold is a number between 0 and 1', {
   expect_error(get_spotify_ids('Olivia Rodrigo', s_pass, tracks = 1),
-               'Please make sure the artists vector and the optional track vector are character vectors of the same length.')
+               'Please make sure the artists vector and the optional track / album vector are character vectors of the same length.')
   expect_error(get_spotify_ids(1, s_pass),
-               'Please make sure the artists vector and the optional track vector are character vectors of the same length.')
-  expect_error(get_spotify_ids('Olivia Rodrigo', s_pass, c('vampire', 'drivers license')),
-               'Please make sure the artists vector and the optional track vector are character vectors of the same length.')
+               'Please make sure the artists vector and the optional track / album vector are character vectors of the same length.')
+  expect_error(get_spotify_ids('Olivia Rodrigo', s_pass, albums = 1),
+               'Please make sure the artists vector and the optional track / album vector are character vectors of the same length.')
+  expect_error(get_spotify_ids('Olivia Rodrigo', s_pass, tracks = c('vampire', 'drivers license')),
+               'Please make sure the artists vector and the optional track / album vector are character vectors of the same length.')
+  expect_error(get_spotify_ids('Olivia Rodrigo', s_pass, albums = c('GUTS', 'SOUR')),
+               'Please make sure the artists vector and the optional track / album vector are character vectors of the same length.')
+
+  expect_error(get_spotify_ids('Olivia Rodrigo', s_pass, albums = c('GUTS'), tracks = 'vampire'),
+               'Please provide either track or album together with the artist to search for the corresponding type.')
 
   expect_error(get_spotify_ids('Olivia Rodrigo', s_pass, threshold = -1),
                'Please make sure the threshold is a single number between 0 and 1.')
@@ -15,20 +22,21 @@ test_that('Assertion artist und track vector are charcters and threhshold is a n
 })
 
 test_that('Returned content is correct', {
-  res_artist_only <- get_spotify_ids(c('Olivia Rodrigo', 'Johann Sebastian Bach'), s_pass)
-  expect_setequal(colnames(res_artist_only), c('artist.search', 'artist.s.id', 'artists.s.name', 'artist.s.quality'))
-  expect_true(all(res_artist_only$artist.s.quality <= 1 & res_artist_only$artist.dc.quality >= 0))
+  res_artist_only <- suppressMessages(get_spotify_ids(c('Olivia Rodrigo', 'Johann Sebastian Bach'), s_pass))
+  expect_setequal(colnames(res_artist_only), c('artist.search', 'artist.s.id', 'artist.s.name', 'artist.s.quality'))
+  expect_true(all((res_artist_only$artist.s.quality <= 1 & res_artist_only$artist.s.quality >= 0)| is.na(res_artist_only$artist.s.quality)))
   expect_true(class(res_artist_only$artist.search) == 'character')
   expect_true(class(res_artist_only$artist.s.id) == 'character')
   expect_true(class(res_artist_only$artist.s.name) == 'character')
   expect_true(class(res_artist_only$artist.s.quality) == 'numeric')
 
-  res_track_artist <- get_spotify_ids(c('Olivia Rodrigo', 'Johann Sebastian Bach'),
+  res_track_artist <- suppressMessages(get_spotify_ids(c('Olivia Rodrigo', 'Johann Sebastian Bach'),
                                       s_pass,
-                                      c('vampire', 'Der Geist hilft unserer Schwachheit auf'))
-  expect_setequal(colnames(res_track_artist), c('artist.search', 'artist.s.id', 'artists.s.name', 'artist.s.quality',
+                                      tracks = c('vampire', 'Der Geist hilft unserer Schwachheit auf')))
+  expect_setequal(colnames(res_track_artist), c('artist.search', 'artist.s.id', 'artist.s.name', 'artist.s.quality',
                                                'track.search', 'track.s.id', 'track.s.title', 'track.s.quality'))
-  expect_true(all(res_track_artist$artist.s.quality <= 1 & res_track_artist$artist.dc.quality >= 0))
+  expect_true(all((res_track_artist$artist.s.quality <= 1 & res_track_artist$artist.s.quality >= 0) | is.na(res_track_artist$artist.s.quality)))
+  expect_true(all((res_track_artist$track.s.quality <= 1 & res_track_artist$track.s.quality >= 0)| is.na(res_track_artist$artist.s.quality)))
   expect_true(class(res_track_artist$artist.search) == 'character')
   expect_true(class(res_track_artist$artist.s.id) == 'character')
   expect_true(class(res_track_artist$artist.s.name) == 'character')
@@ -38,5 +46,28 @@ test_that('Returned content is correct', {
   expect_true(class(res_track_artist$track.s.title) == 'character')
   expect_true(class(res_track_artist$track.s.quality) == 'numeric')
 
-  # expect_equal(res_track_artist$track.s.title[2] == 'MAXPOPSOLUTION')
+  res_album_artist <- suppressMessages(get_spotify_ids(c('Olivia Rodrigo', 'Johann Sebastian Bach'),
+                                      s_pass,
+                                      albums = c('GUTS', 'Bach: Motets')))
+  expect_setequal(colnames(res_album_artist), c('artist.search', 'artist.s.id', 'artist.s.name', 'artist.s.quality',
+                                               'album.search', 'album.s.id', 'album.s.title', 'album.s.quality'))
+  expect_true(all((res_album_artist$artist.s.quality <= 1 & res_album_artist$artist.s.quality >= 0) | is.na(res_album_artist$artist.s.quality)))
+  expect_true(all((res_album_artist$album.s.quality <= 1 & res_album_artist$album.s.quality >= 0) | is.na(res_album_artist$artist.s.quality)))
+  expect_true(class(res_album_artist$artist.search) == 'character')
+  expect_true(class(res_album_artist$artist.s.id) == 'character')
+  expect_true(class(res_album_artist$artist.s.name) == 'character')
+  expect_true(class(res_album_artist$artist.s.quality) == 'numeric')
+  expect_true(class(res_album_artist$album.search) == 'character')
+  expect_true(class(res_album_artist$album.s.id) == 'character')
+  expect_true(class(res_album_artist$album.s.title) == 'character')
+  expect_true(class(res_album_artist$album.s.quality) == 'numeric')
 })
+
+
+# takes longer to perform
+# test_that('function also works for larger amounts of data',{
+# (test <- get_spotify_ids(testTracksArtistsAlbums_larger$artist.s.name,
+#                  tracks = testTracksArtistsAlbums_larger$track.s.title,
+#                  pass = s_pass))
+#   expect_true(T)
+# })

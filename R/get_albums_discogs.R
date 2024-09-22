@@ -1,17 +1,30 @@
-#' Get Discogs Album Genres and Style
+#' Get \emph{Discogs} Album Genres and Style
 #'
 #'
 #'
 #' @param input
-#' @param dc_pass
-#' @param threshold both artist and title quality must be above threshold
+#' Data Frame containing the following columns:
+#'\itemize{
+#'  \item \code{album.s.id} \cr
+#'  with \emph{Spotify} album id,
+#'  \item \code{album.s.title} \cr
+#'  with \emph{Spotify} album title,
+#'  \item \code{artist.s.name} \cr
+#'  with \emph{Spotify} artist name.
+#'}
+#'It is advisable to first run \code{\link{get_all_spotify}} before running this command,
+#'in order to have all the necessary information.
+#'
+#' @param dc_pass Discogs Authentification. Please refer to \url{https://www.discogs.com/developers/#page:authentication,header:authentication-discogs-auth-flow} for details.
+#' @param threshold Floating point number between 0 and 1 indicating which elements to keep that were found using a fuzzy search.
+#'The values correspond to the string similarity (1 - Jaro-Winkler distance) between the searched artist / album and the found name / title on \emph{Spotify}. \emph{spotilink} will only keep results where the artist name as well as the album title surpass the threshold.
 #'
 #' @return
 #' @export
 #'
 #' @examples
 get_albums_discogs <- function(input, dc_pass, threshold = 0.8){
-  check_assertions(input, threshold)
+  are_needed_columns_present(input, c('album.s.id', 'album.s.title', 'artist.s.name'))
   dc_vars <- c('album.dc.id', 'album.dc.name', 'album.dc.genres', 'album.dc.styles',
                'album.dc.firstgenre', 'album.dc.style',
                 'album.dc.quality', 'artist.dc.id', 'artist.dc.name', 'artist.dc.quality')
@@ -25,10 +38,6 @@ get_albums_discogs <- function(input, dc_pass, threshold = 0.8){
   print_discogs_linkage(res)
   res <- suppressMessages(dplyr::left_join(input, res))
   res
-}
-
-check_assertions <- function(input, threshold){
-  are_needed_columns_present(input, c('album.s.id', 'album.s.title', 'artist.s.name'))
 }
 
 get_discogs_for_single_track <- function(album.s.id, album.s.title,artist.s.name, dc_pass, threshold){
@@ -111,7 +120,7 @@ get_discogs_api <- function(url){
   repeat {
     response <- httr::GET(url)
     if (httr::status_code(response) == 200) {
-      res <- jsonlite::fromJSON(httr::content(response, 'text', encoding = 'UTF-8'))
+      res <- jsonlite::fromJSON(httr::content(response, 'text', encoding = ' UTF-8'))
       return(res)
     } else if (httr::status_code(response) == 429) {
       message('Rate limit exceeded. Waiting for 45 seconds, then trying again...')
