@@ -1,7 +1,6 @@
 get_example <- function(){
   data <-  dplyr::select(testTracksArtistsAlbums, track.s.id, track.s.title, track.s.keyconfidence)
-  pass <- c("bf4b7a7cffc547d49199cab4ae0b347f","5fe2a814df864abda82b740ecc307661")
-  invisible(capture.output(res <- get_audioanalysis_spotify(data, pass)))
+  invisible(capture.output(res <- get_audioanalysis_spotify(data, s_pass)))
   res <- dplyr::select(res, -track.s.title, -track.s.keyconfidence_old)
   res
 }

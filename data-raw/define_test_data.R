@@ -19,6 +19,5 @@ testTracksArtistsAlbums <- data.frame(
                   'GUTS'),
  track.s.keyconfidence = c(0., 0., 0.))
 
-pass <- c("bf4b7a7cffc547d49199cab4ae0b347f","5fe2a814df864abda82b740ecc307661")
 
 largeArtistTest <- readRDS('./data-raw/largeArtistTest.rds')

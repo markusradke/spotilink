@@ -1,7 +1,6 @@
 get_example <- function(){
   data <- dplyr::select(testTracksArtistsAlbums, album.s.id, album.s.title, artist.s.name, track.s.title)
-  pass <- c("bf4b7a7cffc547d49199cab4ae0b347f","5fe2a814df864abda82b740ecc307661")
-  invisible(capture.output(res <- get_albums_spotify(data, pass)))
+  invisible(capture.output(res <- get_albums_spotify(data, s_pass)))
   invisible(capture.output(res <- get_albums_musicbrainz(res)))
   res <- dplyr::select(res, -album.s.title_old, -artist.s.name, -track.s.title)
   res
