@@ -18,7 +18,8 @@ Imports:
     tidyr,
     stringdist,
     musicbrainz (>= 0.0.0.9000),
-    purrr
+    purrr,
+    httr
 Depends: 
     R (>= 2.10)
 Remotes: 

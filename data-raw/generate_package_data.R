@@ -8,6 +8,7 @@ dc_pass <- c('bSyzKCYCBBwMYsMfxUhj', 'lZvwpvEOdZnrJsWewPxjvYUgdeWDCENu')
 
 use_data(musicbrainzWhitelist,
          testTracksArtistsAlbums,
+         testTracksArtistsAlbums_larger,
          spotifyTrackVars,
          musicbrainzTrackVars,
          spotifyAlbumVars,

@@ -1,8 +1,10 @@
 #' Get Discogs Album Genres and Style
 #'
+#'
+#'
 #' @param input
 #' @param dc_pass
-#' @param threshold
+#' @param threshold both artist and title quality must be above threshold
 #'
 #' @return
 #' @export
@@ -15,18 +17,21 @@ get_albums_discogs <- function(input, dc_pass, threshold = 0.8){
                 'album.dc.quality', 'artist.dc.id', 'artist.dc.name', 'artist.dc.quality')
   input <- rename_existing_variables(input, dc_vars)
 
-  res <- purrr::pmap_df(list(input$album.s.id, input$album.s.title,
-                        input$artist.s.name),
-                        get_discogs_for_single_track, dc_pass,
+  distinct_input <- dplyr::distinct(input, album.s.id, .keep_all = TRUE)
+  res <- purrr::pmap_df(list(distinct_input$album.s.id, distinct_input$album.s.title,
+                             distinct_input$artist.s.name),
+                        get_discogs_for_single_track, dc_pass, threshold,
                         .progress = 'Linking DC album genres...')
-  dplyr::left_join(input, res)
+  print_discogs_linkage(res)
+  res <- suppressMessages(dplyr::left_join(input, res))
+  res
 }
 
 check_assertions <- function(input, threshold){
   are_needed_columns_present(input, c('album.s.id', 'album.s.title', 'artist.s.name'))
 }
 
-get_discogs_for_single_track <- function(album.s.id, album.s.title,artist.s.name, dc_pass){
+get_discogs_for_single_track <- function(album.s.id, album.s.title,artist.s.name, dc_pass, threshold){
   .build_search_url <- function(){
     title <- simplify_name(album.s.title)
     artist <- simplify_name(artist.s.name)
@@ -94,9 +99,32 @@ get_discogs_for_single_track <- function(album.s.id, album.s.title,artist.s.name
   }
 
   url <- .build_search_url()
-  res <- jsonlite::fromJSON(url)
+  res <- get_discogs_api(url)
   if(length(res$results) == 0) {return(.make_empty_frame())}
   res <- .parse_results(res)
+  if(res$album.dc.quality < threshold | res$artist.dc.quality < threshold) {return(.make_empty_frame())}
   res$album.s.id <- album.s.id
   res
+}
+
+get_discogs_api <- function(url){
+  repeat {
+    response <- httr::GET(url)
+    if (httr::status_code(response) == 200) {
+      res <- jsonlite::fromJSON(httr::content(response, 'text', encoding = 'UTF-8'))
+      return(res)
+    } else if (httr::status_code(response) == 429) {
+      message('Rate limit exceeded. Waiting for 45 seconds, then trying again...')
+      Sys.sleep(45)
+    } else {
+      message('An error occurred: ', httr::status_code(response), ' - ', httr::content(response, 'text', encoding = 'UTF-8'))
+      return(NULL)
+    }
+  }
+}
+
+print_discogs_linkage <- function(res){
+  relfreq_na <- nrow(dplyr::filter(res, ! is.na(album.dc.id))) / nrow(res)
+  relfreq_na_percent <- 100 * round(relfreq_na, 4)
+  message(paste0('Done. Found ', relfreq_na_percent, '% of distinct albums in the input data.'))
 }

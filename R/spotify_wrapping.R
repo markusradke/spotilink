@@ -6,13 +6,18 @@ connect_spotify <- function(pass){
 }
 
 get_from_API <- function(input, IDcol, pullFunction, cleanFunction, batchsize) {
-  cat('Retrieving data with', substitute(pullFunction) %>% as.character(), 'from identifier', IDcol, '... \n')
+  fctn_name <- paste0(as.character(substitute(pullFunction))[2],
+                                   '::',
+                                   as.character((substitute(pullFunction))[3]))
+  message(paste0('Retrieving data with ', fctn_name, ' from identifier ', IDcol, '... \n'))
   res <- input %>%
     dplyr::distinct(.data[[IDcol]]) %>%
     dplyr::pull(IDcol) %>%
     get_from_IDs(pullFunction, batchsize) %>%
     cleanFunction()
-  dplyr::left_join(res, input, ., by = IDcol)
+  res <- dplyr::left_join(res, input, ., by = IDcol)
+  message('Done.')
+  res
 }
 
 get_from_IDs <- function(ids, pullFunction, batchsize) {
@@ -23,7 +28,7 @@ get_from_IDs <- function(ids, pullFunction, batchsize) {
 
   repeat{
     stop <- min(c(start + stepsize - 1, total))
-    cat("Getting infos for ", start ,"-", stop, " of ", total, "...\n")
+    message(paste0("Getting infos for ", start ,"-", stop, " of ", total, "...\n"))
     pulled <- pullFunction(ids[start:stop]) %>%
       rbind(pulled, .)
     start <- start + stepsize
