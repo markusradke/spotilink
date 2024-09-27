@@ -13,9 +13,7 @@ test_that('Returns a frame with correct additional colnames and content', {
   res <- suppressMessages(get_albums_discogs(input, dc_pass))
   res_names <- colnames(res)
   expected_names <- c(colnames(testTracksArtistsAlbums),
-                      'album.dc.id', 'album.dc.title', 'album.dc.genres', 'album.dc.styles',
-                      'album.dc.firstgenre', 'album.dc.firststyle',
-                      'album.dc.quality', 'artist.dc.name', 'artist.dc.quality')
+                     discogsAlbumVars)
   expect_setequal(res_names, expected_names)
 
   expect_true(all((res$album.dc.quality <= 1 & res$album.dc.quality >= 0) | is.na(res$album.dc.quality)))
@@ -54,9 +52,7 @@ test_that('Renames already existing columns', {
   res <- suppressMessages(get_albums_discogs(input, dc_pass))
   res_names <- colnames(res)
   expected_names <- c(colnames(testTracksArtistsAlbums),
-                      'album.dc.id', 'album.dc.title', 'album.dc.genres', 'album.dc.styles',
-                      'album.dc.firstgenre', 'album.dc.firststyle',
-                      'album.dc.quality', 'artist.dc.name', 'artist.dc.quality',
+                      discogsAlbumVars,
                       'album.dc.genres_old')
   expect_setequal(res_names, expected_names)
 })

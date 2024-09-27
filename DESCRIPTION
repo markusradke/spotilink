@@ -19,7 +19,10 @@ Imports:
     stringdist,
     musicbrainz (>= 0.0.0.9000),
     purrr,
-    httr
+    httr,
+    xml2,
+    rvest,
+    sjmisc
 Depends: 
     R (>= 2.10)
 Remotes: 

@@ -25,10 +25,7 @@
 #' @examples
 get_albums_discogs <- function(input, dc_pass, threshold = 0.8){
   are_needed_columns_present(input, c('album.s.id', 'album.s.title', 'artist.s.name'))
-  dc_vars <- c('album.dc.id', 'album.dc.name', 'album.dc.genres', 'album.dc.styles',
-               'album.dc.firstgenre', 'album.dc.style',
-                'album.dc.quality', 'artist.dc.id', 'artist.dc.name', 'artist.dc.quality')
-  input <- rename_existing_variables(input, dc_vars)
+  input <- rename_existing_variables(input, discogsAlbumVars)
 
   distinct_input <- dplyr::distinct(input, album.s.id, .keep_all = TRUE)
   res <- purrr::pmap_df(list(distinct_input$album.s.id, distinct_input$album.s.title,
@@ -108,28 +105,12 @@ get_discogs_for_single_track <- function(album.s.id, album.s.title,artist.s.name
   }
 
   url <- .build_search_url()
-  res <- get_discogs_api(url)
+  res <- get_api_with_connection_management(url)
   if(length(res$results) == 0) {return(.make_empty_frame())}
   res <- .parse_results(res)
   if(res$album.dc.quality < threshold | res$artist.dc.quality < threshold) {return(.make_empty_frame())}
   res$album.s.id <- album.s.id
   res
-}
-
-get_discogs_api <- function(url){
-  repeat {
-    response <- httr::GET(url)
-    if (httr::status_code(response) == 200) {
-      res <- jsonlite::fromJSON(httr::content(response, 'text', encoding = ' UTF-8'))
-      return(res)
-    } else if (httr::status_code(response) == 429) {
-      message('Rate limit exceeded. Waiting for 45 seconds, then trying again...')
-      Sys.sleep(45)
-    } else {
-      message('An error occurred: ', httr::status_code(response), ' - ', httr::content(response, 'text', encoding = 'UTF-8'))
-      return(NULL)
-    }
-  }
 }
 
 print_discogs_linkage <- function(res){

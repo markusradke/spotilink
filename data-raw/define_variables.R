@@ -247,3 +247,11 @@ correctTypesAudioanalysis <- c(
   track.s.echoprintstring = 'character',
   track.s.codestring = 'character'
 )
+
+discogsAlbumVars <- c('album.dc.id', 'album.dc.title', 'album.dc.genres', 'album.dc.styles',
+                      'album.dc.firstgenre', 'album.dc.firststyle',
+                      'album.dc.quality', 'artist.dc.name', 'artist.dc.quality')
+
+geniusLyricsVars <- c('track.g.id', 'track.g.title', 'track.g.quality',
+                      'artist.g.id', 'artist.g.name', 'artist.g.quality',
+                      'track.g.lyrics')

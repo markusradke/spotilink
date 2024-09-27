@@ -21,3 +21,21 @@ are_needed_columns_present <- function(input, neededCols)
 if(! all(neededCols %in% colnames(input))) {
   stop('Please provide a data frame containing the following columns:\n', paste(toString(neededCols), collapse = ", "),'\nSee the function reference for further information.')
 }
+
+
+get_api_with_connection_management <- function(url){
+  repeat {
+    response <- httr::GET(url)
+    if (httr::status_code(response) == 200) {
+      res <- jsonlite::fromJSON(httr::content(response, 'text', encoding = ' UTF-8'))
+      return(res)
+    } else if (httr::status_code(response) == 429) {
+      message('Rate limit exceeded. Waiting for 45 seconds, then trying again...')
+      Sys.sleep(45)
+    } else {
+      message('An error occurred: ', httr::status_code(response), ' - ', httr::content(response, 'text', encoding = 'UTF-8'))
+      return(NULL)
+    }
+  }
+}
+
