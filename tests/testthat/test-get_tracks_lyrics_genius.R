@@ -1,10 +1,10 @@
 test_that('Assertion all variables in input data frame', {
   expect_error(get_tracks_lyrics_genius(data.frame(track.s.id = c('a', 'b'), track.s.title = c('a', 'b')), g_token),
-               'Please provide a data frame containing the following columns:\ntrack.s.id, track.s.title, artist.s.name\nSee the function reference for further information.')
-  expect_error(get_tracks_lyrics_genius(data.frame(track.s.id = c('a', 'b'), artist.s.name = c('a', 'b')), g_token),
-               'Please provide a data frame containing the following columns:\ntrack.s.id, track.s.title, artist.s.name\nSee the function reference for further information.')
-  expect_error(get_tracks_lyrics_genius(data.frame(track.s.title = c('a', 'b'), artist.s.name = c('a', 'b')), g_token),
-               'Please provide a data frame containing the following columns:\ntrack.s.id, track.s.title, artist.s.name\nSee the function reference for further information.')
+               'Please provide a data frame containing the following columns:\ntrack.s.id, track.s.title, track.s.firstartist.name\nSee the function reference for further information.')
+  expect_error(get_tracks_lyrics_genius(data.frame(track.s.id = c('a', 'b'), track.s.firstartist.name = c('a', 'b')), g_token),
+               'Please provide a data frame containing the following columns:\ntrack.s.id, track.s.title, track.s.firstartist.name\nSee the function reference for further information.')
+  expect_error(get_tracks_lyrics_genius(data.frame(track.s.title = c('a', 'b'), track.s.firstartist.name = c('a', 'b')), g_token),
+               'Please provide a data frame containing the following columns:\ntrack.s.id, track.s.title, track.s.firstartist.name\nSee the function reference for further information.')
 })
 
 test_that('Returns a frame with correct additional colnames and content', {
@@ -23,6 +23,7 @@ test_that('Returns a frame with correct additional colnames and content', {
   expect_true(class(res$artist.g.id) == 'character')
   expect_true(class(res$artist.g.name) == 'character')
   expect_true(class(res$artist.g.quality) == 'numeric')
+  expect_true(class(res$track.g.lyricsstate) == 'character')
 
   expect_setequal(res$track.g.lyrics[3][[1]] %>% colnames(), c('line', 'section'))
 })

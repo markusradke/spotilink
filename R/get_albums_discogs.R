@@ -32,8 +32,9 @@ get_albums_discogs <- function(input, dc_pass, threshold = 0.8){
                              distinct_input$artist.s.name),
                         get_discogs_for_single_track, dc_pass, threshold,
                         .progress = 'Linking DC album genres...')
-  print_discogs_linkage(res)
+  message('Done.')
   res <- suppressMessages(dplyr::left_join(input, res))
+  print_linkage_for_id(res, 'album.dc.id')
   res
 }
 
@@ -111,10 +112,4 @@ get_discogs_for_single_track <- function(album.s.id, album.s.title,artist.s.name
   if(res$album.dc.quality < threshold | res$artist.dc.quality < threshold) {return(.make_empty_frame())}
   res$album.s.id <- album.s.id
   res
-}
-
-print_discogs_linkage <- function(res){
-  relfreq_na <- nrow(dplyr::filter(res, ! is.na(album.dc.id))) / nrow(res)
-  relfreq_na_percent <- 100 * round(relfreq_na, 4)
-  message(paste0('Done. Found ', relfreq_na_percent, '% of distinct albums in the input data.'))
 }

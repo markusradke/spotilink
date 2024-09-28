@@ -21,12 +21,18 @@
 #'
 #' @examples
 get_tracks_lyrics_genius <- function(input, g_token, threshold = 0.8){
-  are_needed_columns_present(input, c('track.s.id', 'track.s.title', 'artist.s.name'))
+  are_needed_columns_present(input, c('track.s.id', 'track.s.title', 'track.s.firstartist.name'))
   input <- rename_existing_variables(input, geniusLyricsVars)
-  genius <- purrr::pmap_df(list(input$track.s.title, input$artist.s.name, input$track.s.id),
+
+  input_distinct <- dplyr::distinct(input, track.s.id, track.s.firstartist.name, .keep_all = T)
+  genius <- purrr::pmap_df(list(input_distinct$track.s.title,
+                                input_distinct$artist.s.name,
+                                input_distinct$track.s.id),
                            get_lyrics_for_single_track, threshold, .progress = 'Retrieving lyrics from Genius...')
   message('Done.')
-  suppressMessages(dplyr::left_join(input, genius))
+  result <- suppressMessages(dplyr::left_join(input, genius))
+  print_linkage_for_id(result, 'track.g.id')
+  result
 }
 
 get_lyrics_for_single_track <- function(track.s.title, artist.s.name, track.s.id, threshold){
@@ -36,9 +42,27 @@ get_lyrics_for_single_track <- function(track.s.title, artist.s.name, track.s.id
                track.g.title = NA,
                track.g.quality = NA,
                track.g.lyrics = NA,
+               track.g.lyricsstate = NA,
                artist.g.id = NA,
                artist.g.name = NA,
                artist.g.quality = NA)
+  }
+
+  .connection_management <- function(search_term){
+    repeat {
+      response <- httr::GET(url = 'https://api.genius.com/search', query = list(q = search_term,
+                                                                              page = 1, access_token = g_token))
+      if (httr::status_code(response) == 200) {
+        res <- httr::content(response)
+        return(res)
+      } else if (httr::status_code(response) == 429) {
+        message('Rate limit exceeded. Waiting for 45 seconds, then trying again...')
+        Sys.sleep(45)
+      } else {
+        message('An error occurred: ', httr::status_code(response), ' - ', httr::content(response, 'text', encoding = 'UTF-8'))
+        return(NULL)
+      }
+    }
   }
 
   .get_parsed_topresult <- function(result){
@@ -46,6 +70,7 @@ get_lyrics_for_single_track <- function(track.s.title, artist.s.name, track.s.id
                              track.g.title = sapply(result$response$hits, function(hit) hit$result$title),
                              artist.g.id = sapply(result$response$hits, function(hit) hit$result$primary_artist$id %>% as.character()),
                              artist.g.name = sapply(result$response$hits, function(hit) hit$result$primary_artist$name),
+                             track.g.lyricsstate = sapply(result$response$hits, function(hit) hit$result$lyrics_state),
                              track.g.url = sapply(result$response$hits, function(hit) hit$result$url))
     if(nrow(topresults) == 0){return(NULL)}
     topresults %>%
@@ -58,9 +83,9 @@ get_lyrics_for_single_track <- function(track.s.title, artist.s.name, track.s.id
   .get_lyrics_for_topresult <- function(topresult){
     lyrics_html <- rvest::read_html(topresult$track.g.url)
     lyrics <- lyrics_html %>% rvest::html_nodes(xpath = "//div[contains(@class, \"Lyrics__Container\")]")
-    xml_find_all(lyrics, ".//br") %>% xml_add_sibling("p", "\n")
-    xml_find_all(lyrics, ".//br") %>% xml_remove()
-    lyrics <- html_text(lyrics, trim = TRUE)
+    xml2::xml_find_all(lyrics, ".//br") %>% xml2::xml_add_sibling("p", "\n")
+    xml2::xml_find_all(lyrics, ".//br") %>% xml2::xml_remove()
+    lyrics <- rvest::html_text(lyrics, trim = TRUE)
     lyrics <- unlist(strsplit(lyrics, split = "\n"))
     lyrics <- grep(pattern = "[[:alnum:]]", lyrics, value = TRUE)
     if (sjmisc::is_empty(lyrics)) {
@@ -84,9 +109,7 @@ get_lyrics_for_single_track <- function(track.s.title, artist.s.name, track.s.id
 
   search_term <- paste(track.s.title %>% simplify_name(),
                        artist.s.name %>% simplify_name())
-  response <- httr::GET(url = 'https://api.genius.com/search', query = list(q = search_term,
-                                                                            page = 1, access_token = g_token))
-  result <- content(response)
+  result <- .connection_management(search_term)
   topresult <- .get_parsed_topresult(result)
   if(is.null(topresult)){return(.make_empty_frame())}
   if(topresult$track.g.quality < threshold | topresult$artist.g.quality < threshold) {return(.make_empty_frame())}
@@ -96,3 +119,4 @@ get_lyrics_for_single_track <- function(track.s.title, artist.s.name, track.s.id
                   track.s.id = track.s.id) %>%
     dplyr::select(-track.g.url)
 }
+
