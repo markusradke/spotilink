@@ -1,17 +1,17 @@
 test_that('Assertion all variables in input data frame', {
-  expect_error(get_tracks_lyrics_genius(data.frame(track.s.id = c('a', 'b'), track.s.title = c('a', 'b')), g_token),
+  expect_error(get_tracks_genius(data.frame(track.s.id = c('a', 'b'), track.s.title = c('a', 'b')), g_token),
                'Please provide a data frame containing the following columns:\ntrack.s.id, track.s.title, track.s.firstartist.name\nSee the function reference for further information.')
-  expect_error(get_tracks_lyrics_genius(data.frame(track.s.id = c('a', 'b'), track.s.firstartist.name = c('a', 'b')), g_token),
+  expect_error(get_tracks_genius(data.frame(track.s.id = c('a', 'b'), track.s.firstartist.name = c('a', 'b')), g_token),
                'Please provide a data frame containing the following columns:\ntrack.s.id, track.s.title, track.s.firstartist.name\nSee the function reference for further information.')
-  expect_error(get_tracks_lyrics_genius(data.frame(track.s.title = c('a', 'b'), track.s.firstartist.name = c('a', 'b')), g_token),
+  expect_error(get_tracks_genius(data.frame(track.s.title = c('a', 'b'), track.s.firstartist.name = c('a', 'b')), g_token),
                'Please provide a data frame containing the following columns:\ntrack.s.id, track.s.title, track.s.firstartist.name\nSee the function reference for further information.')
 })
 
 test_that('Returns a frame with correct additional colnames and content', {
-  input <- testTracksArtistsAlbums
-  res <- suppressMessages(get_tracks_lyrics_genius(input, g_token))
+  input <- testTracksArtistsAlbums %>% dplyr::rename('track.s.firstartist.name' = 'artist.s.name')
+  res <- suppressMessages(get_tracks_genius(input, g_token))
   res_names <- colnames(res)
-  expected_names <- c(colnames(testTracksArtistsAlbums),
+  expected_names <- c(colnames(input),
                       geniusLyricsVars)
   expect_setequal(res_names, expected_names)
 

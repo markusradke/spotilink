@@ -20,22 +20,22 @@
 #' @export
 #'
 #' @examples
-get_tracks_lyrics_genius <- function(input, g_token, threshold = 0.8){
+get_tracks_genius <- function(input, g_token, threshold = 0.8){
   are_needed_columns_present(input, c('track.s.id', 'track.s.title', 'track.s.firstartist.name'))
   input <- rename_existing_variables(input, geniusLyricsVars)
 
   input_distinct <- dplyr::distinct(input, track.s.id, track.s.firstartist.name, .keep_all = T)
   genius <- purrr::pmap_df(list(input_distinct$track.s.title,
-                                input_distinct$artist.s.name,
+                                input_distinct$track.s.firstartist.name,
                                 input_distinct$track.s.id),
-                           get_lyrics_for_single_track, threshold, .progress = 'Retrieving lyrics from Genius...')
+                           get_lyrics_for_single_track, g_token, threshold, .progress = 'Retrieving lyrics from Genius...')
   message('Done.')
   result <- suppressMessages(dplyr::left_join(input, genius))
   print_linkage_for_id(result, 'track.g.id')
   result
 }
 
-get_lyrics_for_single_track <- function(track.s.title, artist.s.name, track.s.id, threshold){
+get_lyrics_for_single_track <- function(track.s.title, artist.s.name, track.s.id, g_token, threshold){
   .make_empty_frame <- function(){
     data.frame(track.s.id = track.s.id,
                track.g.id = NA,
@@ -48,10 +48,9 @@ get_lyrics_for_single_track <- function(track.s.title, artist.s.name, track.s.id
                artist.g.quality = NA)
   }
 
-  .connection_management <- function(search_term){
+  .connection_management <- function(url){
     repeat {
-      response <- httr::GET(url = 'https://api.genius.com/search', query = list(q = search_term,
-                                                                              page = 1, access_token = g_token))
+      response <- httr::GET(url)
       if (httr::status_code(response) == 200) {
         res <- httr::content(response)
         return(res)
@@ -109,7 +108,8 @@ get_lyrics_for_single_track <- function(track.s.title, artist.s.name, track.s.id
 
   search_term <- paste(track.s.title %>% simplify_name(),
                        artist.s.name %>% simplify_name())
-  result <- .connection_management(search_term)
+  url <- paste0('https://api.genius.com/search/?q="', search_term, '"&page=1&access_token=',g_token, '#') %>% utils::URLencode()
+  result <- .connection_management(url)
   topresult <- .get_parsed_topresult(result)
   if(is.null(topresult)){return(.make_empty_frame())}
   if(topresult$track.g.quality < threshold | topresult$artist.g.quality < threshold) {return(.make_empty_frame())}
