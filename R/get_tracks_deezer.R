@@ -48,22 +48,6 @@ get_single_track_deezer <- function(track.s.title, artist.s.name, track.s.id, al
     paste0('https://api.deezer.com/track/', track.dz.id)
   }
 
-  .connection_management <- function(url){
-    repeat {
-      response <- httr::GET(url)
-      if (httr::status_code(response) == 200) {
-        res <- httr::content(response)
-        return(res)
-      } else if (httr::status_code(response) == 429) {
-        message('Rate limit exceeded. Waiting for 45 seconds, then trying again...')
-        Sys.sleep(45)
-      } else {
-        message('An error occurred: ', httr::status_code(response), ' - ', httr::content(response, 'text', encoding = 'UTF-8'))
-        return(NULL)
-      }
-    }
-  }
-
   .get_parsed_topresult <- function(result){
     topresults <- data.frame(track.dz.id = sapply(result$data, function(hit) hit$id),
                              track.dz.title = sapply(result$data, function(hit) hit$title),
@@ -95,11 +79,11 @@ get_single_track_deezer <- function(track.s.title, artist.s.name, track.s.id, al
   }
 
   url <- .create_search_url(track.s.title, artist.s.name, album.s.title)
-  result <- .connection_management(url)
+  result <- get_api_with_connection_management(url)
   topresult <- .get_parsed_topresult(result)
   if(is.null(topresult)){return(.make_empty_frame())}
   url <- .create_lookup_url(topresult$track.dz.id)
-  track_lookup <- .connection_management(url)
+  track_lookup <- get_api_with_connection_management(url)
   res <- .get_parsed_track_lookup(track_lookup)
   suppressMessages(dplyr::inner_join(res, topresult) %>% dplyr::mutate(track.s.id = track.s.id))
 }

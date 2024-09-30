@@ -53,7 +53,12 @@ get_discogs_for_single_track <- function(album.s.id, album.s.title,artist.s.name
 
   .parse_results <- function(res){
     res <- res$results
-    data.frame(res) %>%
+    topresults <- data.frame(id = sapply(res, function(hit) hit$id),
+                             title = sapply(res, function(hit) hit$title))
+    topresults$genre = lapply(res, function(hit) hit$genre)
+    topresults$style = lapply(res, function(hit) hit$style)
+
+    topresults %>%
       .extract_albumtitle_and_artistname_from_dctitle() %>%
       .get_quality_and_best_result() %>%
       dplyr::mutate(album.dc.id = as.character(id)) %>%

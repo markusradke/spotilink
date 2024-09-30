@@ -27,7 +27,7 @@ get_api_with_connection_management <- function(url){
   repeat {
     response <- httr::GET(url)
     if (httr::status_code(response) == 200) {
-      res <- suppressMessages(jsonlite::fromJSON(httr::content(response, 'text')))
+      res <- httr::content(response)
       return(res)
     } else if (httr::status_code(response) == 429) {
       message('Rate limit exceeded. Waiting for 45 seconds, then trying again...')
@@ -38,6 +38,7 @@ get_api_with_connection_management <- function(url){
     }
   }
 }
+
 
 print_linkage_for_id <- function(frame, idcol){
   entity <- stringr::str_extract(idcol, '(album|track|artist)')

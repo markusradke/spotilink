@@ -48,22 +48,6 @@ get_lyrics_for_single_track <- function(track.s.title, artist.s.name, track.s.id
                artist.g.quality = NA)
   }
 
-  .connection_management <- function(url){
-    repeat {
-      response <- httr::GET(url)
-      if (httr::status_code(response) == 200) {
-        res <- httr::content(response)
-        return(res)
-      } else if (httr::status_code(response) == 429) {
-        message('Rate limit exceeded. Waiting for 45 seconds, then trying again...')
-        Sys.sleep(45)
-      } else {
-        message('An error occurred: ', httr::status_code(response), ' - ', httr::content(response, 'text', encoding = 'UTF-8'))
-        return(NULL)
-      }
-    }
-  }
-
   .get_parsed_topresult <- function(result){
     topresults <- data.frame(track.g.id = sapply(result$response$hits, function(hit) hit$result$id %>% as.character()),
                              track.g.title = sapply(result$response$hits, function(hit) hit$result$title),
@@ -109,7 +93,7 @@ get_lyrics_for_single_track <- function(track.s.title, artist.s.name, track.s.id
   search_term <- paste(track.s.title %>% simplify_name(),
                        artist.s.name %>% simplify_name())
   url <- paste0('https://api.genius.com/search/?q="', search_term, '"&page=1&access_token=',g_token, '#') %>% utils::URLencode()
-  result <- .connection_management(url)
+  result <- get_api_with_connection_management(url)
   topresult <- .get_parsed_topresult(result)
   if(is.null(topresult)){return(.make_empty_frame())}
   if(topresult$track.g.quality < threshold | topresult$artist.g.quality < threshold) {return(.make_empty_frame())}
