@@ -255,3 +255,7 @@ discogsAlbumVars <- c('album.dc.id', 'album.dc.title', 'album.dc.genres', 'album
 geniusLyricsVars <- c('track.g.id', 'track.g.title', 'track.g.quality',
                       'artist.g.id', 'artist.g.name', 'artist.g.quality',
                       'track.g.lyrics', 'track.g.lyricsstate')
+
+deezerTrackVars <- c('track.dz.id', 'track.dz.title', 'track.dz.isrc', 'track.dz.durationms', 'track.dz.rank',
+                     'track.dz.explicit', 'track.dz.explicitinfo', 'track.dz.tempo', 'track.dz.loudness', 'track.dz.quality')
+

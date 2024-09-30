@@ -1,29 +1,34 @@
 test_that('Assertion all variables in input data frame', {
   expect_error(get_tracks_deezer(data.frame(track.s.id = c('a', 'b'), track.s.title = c('a', 'b'))),
-               'Please provide a data frame containing the following columns:\ntrack.s.id, track.s.title, track.s.firstartist.name\nSee the function reference for further information.')
+               'Please provide a data frame containing the following columns:\ntrack.s.id, track.s.title, track.s.firstartist.name, album.s.title\nSee the function reference for further information.')
   expect_error(get_tracks_deezer(data.frame(track.s.id = c('a', 'b'), track.s.firstartist.name = c('a', 'b'))),
-               'Please provide a data frame containing the following columns:\ntrack.s.id, track.s.title, track.s.firstartist.name\nSee the function reference for further information.')
+               'Please provide a data frame containing the following columns:\ntrack.s.id, track.s.title, track.s.firstartist.name, album.s.title\nSee the function reference for further information.')
   expect_error(get_tracks_deezer(data.frame(track.s.title = c('a', 'b'), track.s.firstartist.name = c('a', 'b'))),
-               'Please provide a data frame containing the following columns:\ntrack.s.id, track.s.title, track.s.firstartist.name\nSee the function reference for further information.')
+               'Please provide a data frame containing the following columns:\ntrack.s.id, track.s.title, track.s.firstartist.name, album.s.title\nSee the function reference for further information.')
 })
 
-# test_that('Returns a frame with correct additional colnames and content', {
-#   input <- testTracksArtistsAlbums
-#   res <- suppressMessages(get_tracks_lyrics_genius(input, g_token))
-#   res_names <- colnames(res)
-#   expected_names <- c(colnames(testTracksArtistsAlbums),
-#                       geniusLyricsVars)
-#   expect_setequal(res_names, expected_names)
-#
-#   expect_true(all((res$track.g.quality <= 1 & res$track.g.quality >= 0) | is.na(res$track.g.quality)))
-#   expect_true(all((res$artist.g.quality <= 1 & res$artist.g.quality >= 0) | is.na(res$artist.g.quality)))
-#   expect_true(class(res$track.g.id) == 'character')
-#   expect_true(class(res$track.g.title) == 'character')
-#   expect_true(class(res$track.g.lyrics) == 'list')
-#   expect_true(class(res$artist.g.id) == 'character')
-#   expect_true(class(res$artist.g.name) == 'character')
-#   expect_true(class(res$artist.g.quality) == 'numeric')
-#   expect_true(class(res$track.g.lyricsstate) == 'character')
-#
-#   expect_setequal(res$track.g.lyrics[3][[1]] %>% colnames(), c('line', 'section'))
-# })
+test_that('Returns a frame with correct additional colnames and content', {
+  input <- testTracksArtistsAlbums %>% dplyr::rename(track.s.firstartist.name = artist.s.name)
+  res <- suppressMessages(get_tracks_deezer(input, g_token))
+  res_names <- colnames(res)
+  expected_names <- c(colnames(input),
+                      deezerTrackVars, c('artist.dz.id', 'artist.dz.name', 'album.dz.id', 'album.dz.title',
+                                         'artist.dz.quality', 'album.dz.quality'))
+  expect_setequal(res_names, expected_names)
+
+  expect_true(all((res$track.dz.quality <= 1 & res$track.dz.quality >= 0) | is.na(res$track.dz.quality)))
+  expect_true(all((res$artist.dz.quality <= 1 & res$artist.dz.quality >= 0) | is.na(res$artist.dz.quality)))
+  expect_true(all((res$album.dz.quality <= 1 & res$album.dz.quality >= 0) | is.na(res$album.dz.quality)))
+  expect_true(class(res$track.dz.id) == 'character')
+  expect_true(class(res$track.dz.title) == 'character')
+  expect_true(class(res$track.dz.isrc) == 'character')
+  expect_true(class(res$track.dz.durationms) == 'numeric')
+  expect_true(class(res$track.dz.rank) == 'integer')
+  expect_true(class(res$track.dz.explicit) == 'logical')
+  expect_true(class(res$track.dz.explicitinfo) == 'character')
+  expect_true(class(res$track.dz.tempo) == 'integer')
+  expect_true(class(res$track.dz.loudness) == 'numeric')
+  expect_true(class(res$artist.dz.id) == 'character')
+  expect_true(class(res$artist.dz.name) == 'character')
+  expect_true(class(res$artist.dz.quality) == 'numeric')
+})
