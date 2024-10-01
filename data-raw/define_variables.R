@@ -256,6 +256,15 @@ geniusLyricsVars <- c('track.g.id', 'track.g.title', 'track.g.quality',
                       'artist.g.id', 'artist.g.name', 'artist.g.quality',
                       'track.g.lyrics', 'track.g.lyricsstate')
 
-deezerTrackVars <- c('track.dz.id', 'track.dz.title', 'track.dz.isrc', 'track.dz.durationms', 'track.dz.rank',
-                     'track.dz.explicit', 'track.dz.explicitinfo', 'track.dz.tempo', 'track.dz.loudness', 'track.dz.quality')
+deezerTrackVars <- c('track.dz.id', 'track.dz.title', 'track.dz.isrc', 'track.dz.duration', 'track.dz.rank',
+                     'track.dz.explicit', 'track.dz.explicitinfo', 'track.dz.tempo', 'track.dz.loudness', 'track.dz.quality',
+                     'artist.dz.id', 'artist.dz.name', 'album.dz.id', 'album.dz.title',
+                     'artist.dz.quality', 'album.dz.quality')
 
+deezerAlbumVars <- c('album.dz.id', 'album.dz.title', 'album.dz.upc', 'album.dz.totaltracks', 'album.dz.duration',
+                     'album.dz.follower', 'album.dz.releasedate', 'album.dz.type', 'album.dz.explicitlyrics',
+                     'album.dz.explicitlyricsinfo', 'album.dz.explicitcoverinfo', 'album.dz.label',
+                     'album.dz.firstgenre.id', 'album.dz.firstgenre.name', 'album.dz.genres', 'album.dz.quality',
+                     'artist.dz.id', 'artist.dz.name','artist.dz.quality')
+
+deezerAllVars <- union(deezerTrackVars, deezerAlbumVars)

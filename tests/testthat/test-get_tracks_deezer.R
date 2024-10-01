@@ -9,11 +9,10 @@ test_that('Assertion all variables in input data frame', {
 
 test_that('Returns a frame with correct additional colnames and content', {
   input <- testTracksArtistsAlbums %>% dplyr::rename(track.s.firstartist.name = artist.s.name)
-  res <- suppressMessages(get_tracks_deezer(input, g_token))
+  res <- suppressMessages(get_tracks_deezer(input))
   res_names <- colnames(res)
   expected_names <- c(colnames(input),
-                      deezerTrackVars, c('artist.dz.id', 'artist.dz.name', 'album.dz.id', 'album.dz.title',
-                                         'artist.dz.quality', 'album.dz.quality'))
+                      deezerTrackVars)
   expect_setequal(res_names, expected_names)
 
   expect_true(all((res$track.dz.quality <= 1 & res$track.dz.quality >= 0) | is.na(res$track.dz.quality)))
@@ -22,7 +21,7 @@ test_that('Returns a frame with correct additional colnames and content', {
   expect_true(class(res$track.dz.id) == 'character')
   expect_true(class(res$track.dz.title) == 'character')
   expect_true(class(res$track.dz.isrc) == 'character')
-  expect_true(class(res$track.dz.durationms) == 'numeric')
+  expect_true(class(res$track.dz.duration) == 'integer')
   expect_true(class(res$track.dz.rank) == 'integer')
   expect_true(class(res$track.dz.explicit) == 'logical')
   expect_true(class(res$track.dz.explicitinfo) == 'character')

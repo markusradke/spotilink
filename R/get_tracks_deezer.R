@@ -1,15 +1,42 @@
+#'Get \emph{Deezer} Track Information
+#'
+#'Retrieve a data frame containing information from the \emph{Deezer} API.
+#'The result contains information on tracks.
+#'The \pkg{spotilink} naming convention is used.
+#'
+#' @param input
+#'Data Frame containing the following columns:
+#'\itemize{
+#'  \item\code{track.s.id} \cr
+#'  with \emph{Spotify} track ids,
+#'  \item \code{track.s.title} \cr
+#'  with \emph{Spotify} track name,
+#'  \item \code{track.s.firstartist.name} \cr
+#'  with \code{Spotify} name of first artist,
+#'  \item \code{album.s.title} \cr
+#'  with album title from \emph{Spotify}
+#'}
+#'It is advisable to first run \code{\link{get_tracks_spotify}} before running this command,
+#'in order to have all the necessary information.
+#'
+#'@param threshold
+#'Floating point number between 0 and 1 indicating which elements to keep that were found using a fuzzy search.
+#'The values correspond to the string similarity (1 - Jaro-Winkler distance) between the track title on \emph{Spotify} and the found track title on \emph{Deezer}.
+#'
+#' @return Data Frame with added information from the \emph{Deezer} API using the  \pkg{spotilink} naming convention.
+#' @export
+#'
+#'@examples
 get_tracks_deezer <- function(input, threshold = 0.8){
   are_needed_columns_present(input, c('track.s.id', 'track.s.title', 'track.s.firstartist.name', 'album.s.title'))
-  input <- rename_existing_variables(input, geniusLyricsVars)
+  input <- rename_existing_variables(input, c(deezerTrackVars))
 
   input_distinct <- dplyr::distinct(input, track.s.id, track.s.firstartist.name, album.s.title, .keep_all = T)
-  if('album.s.title' %in% colnames(input)){
-    deezer_tracks <- purrr::pmap_df(list(input_distinct$track.s.title,
-                                  input_distinct$track.s.firstartist.name,
-                                  input_distinct$track.s.id,
-                                  input_distinct$album.s.title),
-                                  get_single_track_deezer, .progress = 'Retrieving tracks from Deezer...')
-  }
+  deezer_tracks <- purrr::pmap_df(list(input_distinct$track.s.title,
+                                input_distinct$track.s.firstartist.name,
+                                input_distinct$track.s.id,
+                                input_distinct$album.s.title),
+                                get_single_track_deezer, .progress = 'Retrieving tracks from Deezer...')
 
   message('Done.')
   result <- suppressMessages(dplyr::left_join(input, deezer_tracks))
@@ -24,7 +51,7 @@ get_single_track_deezer <- function(track.s.title, artist.s.name, track.s.id, al
                track.dz.title = NA,
                track.dz.quality = NA,
                track.dz.isrc = NA,
-               track.dz.durationms = NA,
+               track.dz.duration = NA,
                track.dz.rank = NA,
                track.dz.explicit = NA,
                track.dz.explicitinfo = NA,
@@ -69,7 +96,7 @@ get_single_track_deezer <- function(track.s.title, artist.s.name, track.s.id, al
     data.frame(track.dz.id = lookup$id %>% as.character(),
                track.dz.title = lookup$title,
                track.dz.isrc = lookup$isrc,
-               track.dz.durationms = lookup$duration * 1000,
+               track.dz.duration = lookup$duration,
                track.dz.rank = lookup$rank,
                track.dz.explicit = lookup$explicit_lyrics,
                track.dz.explicitinfo = lookup$explicit_content_lyrics,
