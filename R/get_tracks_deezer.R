@@ -44,7 +44,7 @@ get_tracks_deezer <- function(input, threshold = 0.8){
   result
 }
 
-get_single_track_deezer <- function(track.s.title, artist.s.name, track.s.id, album.s.title){
+get_single_track_deezer <- function(track.s.title, track.s.firstartist.name, track.s.id, album.s.title){
   .make_empty_frame <- function(){
     data.frame(track.s.id = track.s.id,
                track.dz.id = NA,
@@ -57,60 +57,56 @@ get_single_track_deezer <- function(track.s.title, artist.s.name, track.s.id, al
                track.dz.explicitinfo = NA,
                track.dz.tempo = NA,
                track.dz.loudness = NA,
-               artist.dz.id = NA,
-               artist.dz.name = NA,
-               artist.dz.quality = NA,
-               album.dz.id = NA,
-               album.dz.title = NA,
-               album.dz.quality = NA)
+               track.dz.firstartist.id = NA,
+               track.dz.firstartist.name = NA)
   }
 
-  .create_search_url <- function(track.s.title, artist.s.name, album.s.title = NA){
-    paste0('https://api.deezer.com/search?q=artist:"', artist.s.name %>% simplify_name(),
+  .create_search_url <- function(track.s.title, track.s.firstartist.name, album.s.title = NA){
+    paste0('https://api.deezer.com/search?q=artist:"', track.s.firstartist.name %>% simplify_name(),
           '" track:"',track.s.title %>% simplify_name(),
           '" album:"', album.s.title %>% simplify_name(), '"') %>% utils::URLencode()
-  }
-
-  .create_lookup_url <- function(track.dz.id){
-    paste0('https://api.deezer.com/track/', track.dz.id)
   }
 
   .get_parsed_topresult <- function(result){
     topresults <- data.frame(track.dz.id = sapply(result$data, function(hit) hit$id),
                              track.dz.title = sapply(result$data, function(hit) hit$title),
-                             artist.dz.id = sapply(result$data, function(hit) hit$artist$id %>% as.character()),
-                             artist.dz.name = sapply(result$data, function(hit) hit$artist$name),
-                             album.dz.id = sapply(result$data, function(hit) hit$album$id %>% as.character()),
-                             album.dz.title = sapply(result$data, function(hit) hit$album$title))
+                             track.dz.firstartist.id = sapply(result$data, function(hit) hit$artist$id %>% as.character()),
+                             track.dz.firstartist.name = sapply(result$data, function(hit) hit$artist$name),
+                             track.dz.album.id = sapply(result$data, function(hit) hit$album$id %>% as.character()),
+                             track.dz.album.title = sapply(result$data, function(hit) hit$album$title))
     if(nrow(topresults) == 0){return(NULL)}
     topresults %>%
       dplyr::mutate(track.dz.quality = stringdist::stringsim(track.s.title %>% simplify_name(), track.dz.title %>% simplify_name()),
-                    artist.dz.quality = stringdist::stringsim(artist.s.name %>% simplify_name(), artist.dz.name %>% simplify_name()),
-                    album.dz.quality = stringdist::stringsim(album.s.title %>% simplify_name(), album.dz.title %>% simplify_name())) %>%
-      dplyr::arrange(-artist.dz.quality, -track.dz.quality, -album.dz.quality, track.dz.id) %>%
+                    track.dz.firstartist.quality = stringdist::stringsim(track.s.firstartist.name %>% simplify_name(), track.dz.firstartist.name %>% simplify_name()),
+                    track.dz.album.quality = stringdist::stringsim(album.s.title %>% simplify_name(), track.dz.album.title %>% simplify_name())) %>%
+      dplyr::arrange(-track.dz.firstartist.quality, -track.dz.quality, -track.dz.album.quality, track.dz.id) %>%
       dplyr::mutate(track.dz.id = track.dz.id %>% as.character()) %>%
       dplyr::first()
   }
 
-  .get_parsed_track_lookup <- function(lookup){
-    data.frame(track.dz.id = lookup$id %>% as.character(),
-               track.dz.title = lookup$title,
-               track.dz.isrc = lookup$isrc,
-               track.dz.duration = lookup$duration,
-               track.dz.rank = lookup$rank,
-               track.dz.explicit = lookup$explicit_lyrics,
-               track.dz.explicitinfo = lookup$explicit_content_lyrics,
-               track.dz.tempo = lookup$bpm,
-               track.dz.loudness = lookup$gain) %>%
-      dplyr::mutate(track.dz.explicitinfo = purrr::map_chr(.data$track.dz.explicitinfo, decode_explicit_info))
-  }
-
-  url <- .create_search_url(track.s.title, artist.s.name, album.s.title)
+  url <- .create_search_url(track.s.title, track.s.firstartist.name, album.s.title)
   result <- get_api_with_connection_management(url)
   topresult <- .get_parsed_topresult(result)
   if(is.null(topresult)){return(.make_empty_frame())}
-  url <- .create_lookup_url(topresult$track.dz.id)
+  url <- create_dz_track_lookup_url(topresult$track.dz.id)
   track_lookup <- get_api_with_connection_management(url)
-  res <- .get_parsed_track_lookup(track_lookup)
+  res <- parse_dz_track_lookup(track_lookup)
   suppressMessages(dplyr::inner_join(res, topresult) %>% dplyr::mutate(track.s.id = track.s.id))
+}
+
+create_dz_track_lookup_url <- function(track.dz.id){
+  paste0('https://api.deezer.com/track/', track.dz.id)
+}
+
+parse_dz_track_lookup <- function(lookup){
+  data.frame(track.dz.id = lookup$id %>% as.character(),
+             track.dz.title = lookup$title,
+             track.dz.isrc = lookup$isrc,
+             track.dz.duration = lookup$duration,
+             track.dz.rank = lookup$rank,
+             track.dz.explicit = lookup$explicit_lyrics,
+             track.dz.explicitinfo = lookup$explicit_content_lyrics,
+             track.dz.tempo = lookup$bpm,
+             track.dz.loudness = lookup$gain) %>%
+    dplyr::mutate(track.dz.explicitinfo = purrr::map_chr(.data$track.dz.explicitinfo, decode_explicit_info))
 }

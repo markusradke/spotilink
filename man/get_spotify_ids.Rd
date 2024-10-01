@@ -33,9 +33,9 @@ If additional track titles are supplied, track.s.ids will be returned. If additi
 }
 \examples{
 # get artist ids
-get_spotify_id(c('Nina Hagen', 'Olivia Rodrigo'), pass = s_pass)
+get_spotify_ids(c('Nina Hagen', 'Olivia Rodrigo'), pass = s_pass)
 # get track ids
-get_spotify_id(c('Nina Hagen', 'Olivia Rodrigo'), tracks = c('TV GLOTZER', 'drivers license'), pass = s_pass)
+get_spotify_ids(c('Nina Hagen', 'Olivia Rodrigo'), tracks = c('TV GLOTZER', 'drivers license'), pass = s_pass)
 # get album ids
-get_spotify_id(c('Nina Hagen', 'Olivia Rodrigo'), albums = c('Nunsexmonkrock', 'SOUR'), pass = s_pass)
+get_spotify_ids(c('Nina Hagen', 'Olivia Rodrigo'), albums = c('Nunsexmonkrock', 'SOUR'), pass = s_pass)
 }

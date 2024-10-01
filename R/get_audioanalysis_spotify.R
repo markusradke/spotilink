@@ -23,17 +23,20 @@ get_audioanalysis_spotify <- function(input, pass) {
 
 retrieve_audioanalysis_spotify <- function(input) {
   cat('Retrieving data with get_track_audio_analysis from identifier track.s.id ... \n')
-  input %>%
+  res <- input %>%
     dplyr::distinct(.data[['track.s.id']]) %>%
     dplyr::pull('track.s.id') %>%
-    purrr::map_df(retrieve_single_audioanalysis, .progress = TRUE) %>%
-    dplyr::right_join(input)
+    purrr::map_df(retrieve_single_audioanalysis, .progress = TRUE)
+  suppressMessages(dplyr::right_join(res, input))
 }
 
 retrieve_single_audioanalysis <- function(track.s.id) {
-  spotifyr::get_track_audio_analysis(track.s.id) %>%
-  clean_analysis() %>%
-  cbind(track.s.id, .)
+  res <- spotify_api_connection_management(id = track.s.id, spotify_function = spotifyr::get_track_audio_analysis)
+  # res <- spotifyr::get_track_audio_analysis(track.s.id)
+  Sys.sleep(2)
+  res %>%
+    clean_analysis() %>%
+    cbind(track.s.id, .)
 }
 
 clean_analysis <- function(analysisRaw) {
@@ -56,4 +59,14 @@ clean_analysis <- function(analysisRaw) {
                 track.s.rhythmstring = analysisRaw$track$rhythmstring,
                 track.s.echoprintstring = analysisRaw$track$echoprintstring,
                 track.s.codestring = analysisRaw$track$codestring)
+}
+
+
+spotify_api_connection_management <- function(id, spotify_function){
+  repeat{
+    tryCatch(res <- spotify_function(id),
+                    error = function(e) Sys.sleep(45),
+                    finally = break)
+  }
+  return(res)
 }

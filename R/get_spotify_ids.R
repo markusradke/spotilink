@@ -15,11 +15,11 @@
 #'
 #' @examples
 #' # get artist ids
-#' get_spotify_id(c('Nina Hagen', 'Olivia Rodrigo'), pass = s_pass)
+#' get_spotify_ids(c('Nina Hagen', 'Olivia Rodrigo'), pass = s_pass)
 #' # get track ids
-#' get_spotify_id(c('Nina Hagen', 'Olivia Rodrigo'), tracks = c('TV GLOTZER', 'drivers license'), pass = s_pass)
+#' get_spotify_ids(c('Nina Hagen', 'Olivia Rodrigo'), tracks = c('TV GLOTZER', 'drivers license'), pass = s_pass)
 #' # get album ids
-#' get_spotify_id(c('Nina Hagen', 'Olivia Rodrigo'), albums = c('Nunsexmonkrock', 'SOUR'), pass = s_pass)
+#' get_spotify_ids(c('Nina Hagen', 'Olivia Rodrigo'), albums = c('Nunsexmonkrock', 'SOUR'), pass = s_pass)
 get_spotify_ids <- function(artists, pass, tracks = character(), albums = character(), threshold = 0.8){
   check_assertions_get_spotify_ids(artists, tracks, albums, threshold)
   connect_spotify(pass)
