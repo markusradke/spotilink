@@ -4,7 +4,7 @@
 \alias{get_tracks_deezer}
 \title{Get \emph{Deezer} Track Information}
 \usage{
-get_tracks_deezer(input, threshold = 0.8)
+get_tracks_deezer(input, track_threshold = 0.8, artist_threshold = 0.8)
 }
 \arguments{
 \item{input}{Data Frame containing the following columns:

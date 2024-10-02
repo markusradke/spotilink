@@ -39,7 +39,7 @@ get_tracks_deezer <- function(input, track_threshold = 0.8, artist_threshold = 0
                                 get_single_track_deezer, .progress = 'Retrieving tracks from Deezer...')
 
   message('Done.')
-  result <- filter_quality_deezer_tracks(result, track_threshold, artist_threshold)
+  deezer_tracks <- filter_quality_deezer_tracks(deezer_tracks, track_threshold, artist_threshold)
   result <- suppressMessages(dplyr::left_join(input, deezer_tracks))
   print_linkage_for_id(result, 'track.dz.id')
   result

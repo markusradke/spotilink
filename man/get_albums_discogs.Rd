@@ -4,7 +4,12 @@
 \alias{get_albums_discogs}
 \title{Get \emph{Discogs} Album Genres and Style}
 \usage{
-get_albums_discogs(input, dc_pass, threshold = 0.8)
+get_albums_discogs(
+  input,
+  dc_pass,
+  album_threshold = 0.8,
+  artist_threshold = 0.8
+)
 }
 \arguments{
 \item{input}{Data Frame containing the following columns:
@@ -13,7 +18,7 @@ get_albums_discogs(input, dc_pass, threshold = 0.8)
 with \emph{Spotify} album id,
 \item \code{album.s.title} \cr
 with \emph{Spotify} album title,
-\item \code{artist.s.name} \cr
+\item \code{track.s.firstartist.name} \cr
 with \emph{Spotify} artist name.
 }
 It is advisable to first run \code{\link{get_all_spotify}} before running this command,

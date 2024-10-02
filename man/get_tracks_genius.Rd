@@ -4,7 +4,12 @@
 \alias{get_tracks_genius}
 \title{Get \emph{Genius} song lyrics}
 \usage{
-get_tracks_genius(input, g_token, threshold = 0.8)
+get_tracks_genius(
+  input,
+  g_token,
+  track_threshold = 0.8,
+  artist_threshold = 0.8
+)
 }
 \arguments{
 \item{input}{Data Frame containing the following columns:
