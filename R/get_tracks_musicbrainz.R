@@ -19,7 +19,7 @@
 #'It is advisable to first run \code{\link{get_tracks_spotify}} before running this command,
 #'in order to have all the necessary information.
 #'
-#'@param threshold
+#'@param track_threshold
 #'Floating point number between 0 and 1 indicating which elements to keep that were found using a fuzzy search.
 #'The values correspond to the string similarity (1 - Jaro-Winkler distance) between the track title on \emph{Spotify} and the found track title on \emph{Musicbrainz}.
 #'
@@ -32,23 +32,23 @@
 #'                   track.s.isrc = c('GBHNG1200003'))
 #'
 #'get_tracks_musicbrainz(data)
-get_tracks_musicbrainz <- function(input, threshold = 0.8) {
+get_tracks_musicbrainz <- function(input, track_threshold = 0.8) {
   are_needed_columns_present(input, c('track.s.id', 'track.s.title', 'track.s.isrc'))
 
   renameVars <- musicbrainzTrackVars[! musicbrainzTrackVars %in% c('track.s.id', 'track.s.title', 'track.s.isrc')]
   res <- rename_existing_variables(input, renameVars)
 
-  pull_tracks_musicbrainz(res, threshold)
+  pull_tracks_musicbrainz(res, track_threshold)
 }
 
-pull_tracks_musicbrainz <- function(input, threshold) {
+pull_tracks_musicbrainz <- function(input, track_threshold) {
   res <- input %>%
     dplyr::distinct(.data[['track.s.id']], .keep_all = TRUE) %>%
     retrieve_tracks()
   res %>%
     retrieve_track_genre() %>%
     dplyr::left_join(input, .data, by = c('track.s.id')) %>%
-    filter_low_quality('track', threshold)
+    filter_lowquality_content('track.mb.quality', track_threshold, musicbrainzTrackVars)
 }
 
 retrieve_tracks <- function(distinctinput){

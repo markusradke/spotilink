@@ -52,12 +52,3 @@ print_linkage_for_id <- function(frame, idcol){
   message(paste0('Found ', relfreq_na_percent, '% of distinct ', entity, 's in the data set.\n',
                  'This equals to ', relfreq_na_percent_distinct, '% of all ', entity, 's in the data set.'))
 }
-
-
-filter_low_quality<- function(input, type, threshold = 0.8){
-  cat('---------------------------------------------------\n')
-  cat(paste0('Filter Data with Quality < ', threshold, ' ... \n'))
-
-  input %>%
-    dplyr::mutate(dplyr::across(dplyr::contains(paste0(type, '.mb')), ~ ifelse(.data[[paste0(type, '.mb.quality')]] >= threshold, .x, NA)))
-}

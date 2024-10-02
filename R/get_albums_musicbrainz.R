@@ -17,7 +17,7 @@
 #'It is advisable to first run \code{\link{get_albums_spotify}} before running this command,
 #'in order to have all the necessary information.
 #'
-#'@param threshold
+#'@param album_threshold
 #'Floating point number between 0 and 1 indicating which elements to keep that were found using a fuzzy search.
 #'The values correspond to the string similarity (1 - Jaro-Winkler distance) between the album title on \emph{Spotify} and the found album title on \emph{Musicbrainz}.
 #'
@@ -30,22 +30,22 @@
 #'                   album.s.upc = c('843183071623'))
 #'
 #'get_albums_musicbrainz(data)
-get_albums_musicbrainz <- function(input, threshold = 0.8) {
+get_albums_musicbrainz <- function(input, album_threshold = 0.8) {
   are_needed_columns_present(input, c('album.s.id', 'album.s.title', 'album.s.upc'))
   renameVars <- musicbrainzAlbumVars[! musicbrainzAlbumVars %in% c('album.s.id', 'album.s.title', 'album.s.upc')]
   res <- rename_existing_variables(input, renameVars)
 
-  pull_albums_musicbrainz(res, threshold)
+  pull_albums_musicbrainz(res, album_threshold)
 }
 
-pull_albums_musicbrainz <- function(input, threshold) {
+pull_albums_musicbrainz <- function(input, album_threshold) {
   res <- input %>%
     dplyr::distinct(.data[['album.s.id']], .keep_all = TRUE) %>%
     retrieve_albums()
   res %>%
     retrieve_album_genres() %>%
     dplyr::left_join(input, ., by = c('album.s.id')) %>%
-    filter_low_quality('album', threshold)
+    filter_lowquality_content('album.mb.quality', album_threshold, musicbrainzAlbumVars)
 }
 
 retrieve_albums <- function(distinctinput){

@@ -15,7 +15,7 @@
 #'It is advisable to first run \code{\link{get_artists_spotify}} before running this command,
 #'in order to have all the necessary information.
 #'
-#'@param threshold
+#'@param artist_threshold
 #'Floating point number between 0 and 1 indicating which elements to keep that were found using a fuzzy search.
 #'The values correspond to the string similarity (1 - Jaro-Winkler distance) between the artist name on \emph{Spotify} and the found artist name on \emph{Musicbrainz}.
 #'
@@ -27,15 +27,15 @@
 #'                   artist.s.name = c('Johann Sebastian Bach'))
 #'
 #'get_artists_musicbrainz(data)
-get_artists_musicbrainz <- function(input, threshold = 0.8) {
+get_artists_musicbrainz <- function(input, artist_threshold = 0.8) {
   are_needed_columns_present(input, c('artist.s.id', 'artist.s.name'))
   renameVars <- musicbrainzArtistVars[! musicbrainzArtistVars %in% c('artist.s.id', 'artist.s.name')]
   res <- rename_existing_variables(input, renameVars)
 
-  pull_artists_musicbrainz(res, threshold)
+  pull_artists_musicbrainz(res, artist_threshold)
 }
 
-pull_artists_musicbrainz <- function(input, threshold) {
+pull_artists_musicbrainz <- function(input, artist_threshold) {
   cat('---------------------------------------------------\n')
   cat('Looking for artists in Musicbrainz...\n')
   artistMBIDCounter <<- 0
@@ -62,7 +62,7 @@ pull_artists_musicbrainz <- function(input, threshold) {
   cat(paste0(round(artistMBIDCounter / nrow(input) * 100, 2), '% were found using the MBID from the track information. \n'))
   rm(artistMBIDCounter, pos = .GlobalEnv)
   artists %>%
-    filter_low_quality('artist', threshold) %>%
+    filter_lowquality_content('artist.mb.quality', artist_threshold, musicbrainzArtistVars) %>%
     dplyr::mutate(artist.mb.birth = as.Date(.data[['artist.mb.birth']]))  %>% # Date conversion must be here; else only integers are returned
     dplyr::mutate(artist.mb.death = as.Date(.data[['artist.mb.death']]))
 }
