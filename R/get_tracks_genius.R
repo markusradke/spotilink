@@ -20,7 +20,7 @@
 #' @export
 #'
 #' @examples
-get_tracks_genius <- function(input, g_token, threshold = 0.8){
+get_tracks_genius <- function(input, g_token, track_threshold = 0.8, artist_threshold = 0.8){
   are_needed_columns_present(input, c('track.s.id', 'track.s.title', 'track.s.firstartist.name'))
   input <- rename_existing_variables(input, geniusLyricsVars)
 
@@ -28,14 +28,15 @@ get_tracks_genius <- function(input, g_token, threshold = 0.8){
   genius <- purrr::pmap_df(list(input_distinct$track.s.title,
                                 input_distinct$track.s.firstartist.name,
                                 input_distinct$track.s.id),
-                           get_lyrics_for_single_track, g_token, threshold, .progress = 'Retrieving lyrics from Genius...')
+                           get_lyrics_for_single_track, g_token, .progress = 'Retrieving lyrics from Genius...')
   message('Done.')
+  genius <- filter_quality_genius_tracks(genius, track_threshold, artist_threshold)
   result <- suppressMessages(dplyr::left_join(input, genius))
   print_linkage_for_id(result, 'track.g.id')
   result
 }
 
-get_lyrics_for_single_track <- function(track.s.title, artist.s.name, track.s.id, g_token, threshold){
+get_lyrics_for_single_track <- function(track.s.title, artist.s.name, track.s.id, g_token){
   .make_empty_frame <- function(){
     data.frame(track.s.id = track.s.id,
                track.g.id = NA,
@@ -96,7 +97,6 @@ get_lyrics_for_single_track <- function(track.s.title, artist.s.name, track.s.id
   result <- get_api_with_connection_management(url)
   topresult <- .get_parsed_topresult(result)
   if(is.null(topresult)){return(.make_empty_frame())}
-  if(topresult$track.g.quality < threshold | topresult$artist.g.quality < threshold) {return(.make_empty_frame())}
   lyrics <- .get_lyrics_for_topresult(topresult)
   topresult %>%
     dplyr::mutate(track.g.lyrics = list(lyrics),

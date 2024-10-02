@@ -9,7 +9,7 @@
 #'  with \emph{Spotify} album id,
 #'  \item \code{album.s.title} \cr
 #'  with \emph{Spotify} album title,
-#'  \item \code{artist.s.name} \cr
+#'  \item \code{track.s.firstartist.name} \cr
 #'  with \emph{Spotify} artist name.
 #'}
 #'It is advisable to first run \code{\link{get_all_spotify}} before running this command,
@@ -23,25 +23,26 @@
 #' @export
 #'
 #' @examples
-get_albums_discogs <- function(input, dc_pass, threshold = 0.8){
-  are_needed_columns_present(input, c('album.s.id', 'album.s.title', 'artist.s.name'))
+get_albums_discogs <- function(input, dc_pass, album_threshold = 0.8, artist_threshold = 0.8){
+  are_needed_columns_present(input, c('album.s.id', 'album.s.title', 'track.s.firstartist.name'))
   input <- rename_existing_variables(input, discogsAlbumVars)
 
   distinct_input <- dplyr::distinct(input, album.s.id, .keep_all = TRUE)
   res <- purrr::pmap_df(list(distinct_input$album.s.id, distinct_input$album.s.title,
-                             distinct_input$artist.s.name),
-                        get_discogs_for_single_track, dc_pass, threshold,
+                             distinct_input$track.s.firstartist.name),
+                        get_discogs_for_single_track, dc_pass,
                         .progress = 'Linking DC album genres...')
   message('Done.')
+  res <- filter_quality_discogs_albums(res, album_threshold, artist_threshold)
   res <- suppressMessages(dplyr::left_join(input, res))
   print_linkage_for_id(res, 'album.dc.id')
   res
 }
 
-get_discogs_for_single_track <- function(album.s.id, album.s.title,artist.s.name, dc_pass, threshold){
+get_discogs_for_single_track <- function(album.s.id, album.s.title,track.s.firstartist.name, dc_pass){
   .build_search_url <- function(){
     title <- simplify_name(album.s.title)
-    artist <- simplify_name(artist.s.name)
+    artist <- simplify_name(track.s.firstartist.name)
     url <- paste0('https://api.discogs.com/database/search?q=',
                   URLencode(title,reserved=T),
                   '&type=track&artist=',
@@ -77,7 +78,7 @@ get_discogs_for_single_track <- function(album.s.id, album.s.title,artist.s.name
     res %>%
       dplyr::mutate(title_parts = stringr::str_split(.data[['title']], ' - '),
                     album.s.title = album.s.title,
-                    artist.s.name = artist.s.name) %>%
+                    track.s.firstartist.name = track.s.firstartist.name) %>%
         tidyr::hoist(title_parts, artist.dc.name = 1L, .remove = F) %>%
         tidyr::hoist(title_parts, album.dc.title = 2L, .remove = F)
   }
@@ -87,7 +88,7 @@ get_discogs_for_single_track <- function(album.s.id, album.s.title,artist.s.name
       dplyr::mutate(album.dc.quality = 1 - stringdist::stringdist(simplify_name(album.s.title),
                                                                   simplify_name(album.dc.title),
                                                                   'jw'),
-                    artist.dc.quality = 1 - stringdist::stringdist(simplify_name(artist.s.name),
+                    artist.dc.quality = 1 - stringdist::stringdist(simplify_name(track.s.firstartist.name),
                                                                    simplify_name(artist.dc.name),
                                                                    'jw'),
                     res_number = dplyr::row_number()) %>%
@@ -114,7 +115,6 @@ get_discogs_for_single_track <- function(album.s.id, album.s.title,artist.s.name
   res <- get_api_with_connection_management(url)
   if(length(res$results) == 0) {return(.make_empty_frame())}
   res <- .parse_results(res)
-  if(res$album.dc.quality < threshold | res$artist.dc.quality < threshold) {return(.make_empty_frame())}
   res$album.s.id <- album.s.id
   res
 }

@@ -35,7 +35,7 @@ get_artists_deezer <- function(input, threshold = 0.8){
                                        input_distinct$artist.s.name),
                                   get_single_artist_deezer, .progress = 'Retrieving artists from Deezer...')
 
-
+  deezer_artists <- filter_quality_deezer_artists(deezer_artists, threshold)
   message('Done.')
   result <- suppressMessages(dplyr::left_join(input, deezer_artists))
   print_linkage_for_id(result, 'artist.dz.id')

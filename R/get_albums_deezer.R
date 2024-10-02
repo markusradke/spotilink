@@ -25,7 +25,7 @@
 #' @export
 #'
 #'@examples
-get_albums_deezer <- function(input, threshold = 0.8){
+get_albums_deezer <- function(input, album_threshold = 0.8, artist_threshold = 0.8){
   are_needed_columns_present(input, c('album.s.id', 'album.s.title', 'track.s.firstartist.name'))
   input <- rename_existing_variables(input, deezerAlbumVars)
   input_distinct <- dplyr::distinct(input, album.s.id, track.s.firstartist.name, .keep_all = T)
@@ -35,7 +35,7 @@ get_albums_deezer <- function(input, threshold = 0.8){
                                        input_distinct$album.s.id),
                                        get_single_album_deezer, .progress = 'Retrieving albums from Deezer...')
 
-
+  deezer_albums <- filter_quality_deezer_albums(deezer_albums, album_threshold, artist_threshold)
   message('Done.')
   result <- suppressMessages(dplyr::left_join(input, deezer_albums))
   print_linkage_for_id(result, 'album.dz.id')

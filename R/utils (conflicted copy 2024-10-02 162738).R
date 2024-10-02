@@ -61,3 +61,23 @@ filter_low_quality<- function(input, type, threshold = 0.8){
   input %>%
     dplyr::mutate(dplyr::across(dplyr::contains(paste0(type, '.mb')), ~ ifelse(.data[[paste0(type, '.mb.quality')]] >= threshold, .x, NA)))
 }
+
+filter_lowquality_content <- function(input, qualityvecs, thresholds, contentcols){
+  if(length(qualityvecs) != length(thresholds)){
+    stop('Please make sure that you pass  threshold for each quality vector so that qualityvecs and thresholds are of equal length.')
+  }
+  contentcols <- contentcols[! contentcols %in% qualityvecs]
+
+  message('Filtering out data with low linking quality...')
+  res <- input
+  res$keepdata <- TRUE
+  for(i in seq(1:length(qualityvecs))){
+    res <- res %>%
+      dplyr::mutate(keepdata = ifelse(.data[[qualityvecs[i]]] >= thresholds[i], keepdata, FALSE))
+  }
+  res <- res %>%
+    dplyr::mutate(dplyr::across(dplyr::all_of(contentcols), ~ ifelse(keepdata, .x, NA))) %>%
+    dplyr::select(-keepdata)
+  message('Done.')
+  res
+}
