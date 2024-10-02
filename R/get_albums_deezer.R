@@ -43,28 +43,6 @@ get_albums_deezer <- function(input, threshold = 0.8){
 }
 
 get_single_album_deezer <- function(album.s.title, track.s.firstartist.name, album.s.id){
-  .make_empty_frame <- function(){
-    data.frame(album.s.id = album.s.id,
-               album.dz.quality = NA,
-               album.dz.title = NA,
-               album.dz.upc = NA,
-               album.dz.totaltracks = NA,
-               album.dz.duration = NA,
-               album.dz.follower = NA,
-               album.dz.releasedate = NA,
-               album.dz.type = NA,
-               album.dz.explicitlyrics = NA,
-               album.dz.explicitlyricsinfo = NA,
-               album.dz.explicitcoverinfo = NA,
-               album.dz.label = NA,
-               album.dz.genres = NA,
-               album.dz.firstgenre.id = NA,
-               album.dz.firstgenre.name = NA,
-               album.dz.firstartist.id = NA,
-               album.dz.firstartist.name = NA,
-               album.dz.firstartist.quality = NA)
-  }
-
   .create_search_url <- function(album.s.title, track.s.firstartist.name){
     paste0('https://api.deezer.com/search?q=artist:"', track.s.firstartist.name %>% simplify_name(),
            '" album:"', album.s.title %>% simplify_name(), '"') %>% utils::URLencode()
@@ -87,7 +65,7 @@ get_single_album_deezer <- function(album.s.title, track.s.firstartist.name, alb
   url <- .create_search_url(album.s.title, track.s.firstartist.name)
   result <- get_api_with_connection_management(url)
   topresult <- .get_parsed_topresult(result)
-  if(is.null(topresult)){return(.make_empty_frame())}
+  if(is.null(topresult)){return(make_empty_frame_deezer_albums(album.s.id))}
 
   url <- create_dz_album_lookup_url(topresult$album.dz.id)
   album_lookup <- get_api_with_connection_management(url)
@@ -123,6 +101,25 @@ parse_dz_album_lookup <- function(lookup, album.s.id){
   parsed
 }
 
-# write artist function
-# write general filter function
-# write function for all
+
+make_empty_frame_deezer_albums <- function(album.s.id){
+  data.frame(album.s.id = album.s.id,
+             album.dz.quality = NA,
+             album.dz.title = NA,
+             album.dz.upc = NA,
+             album.dz.totaltracks = NA,
+             album.dz.duration = NA,
+             album.dz.follower = NA,
+             album.dz.releasedate = NA,
+             album.dz.type = NA,
+             album.dz.explicitlyrics = NA,
+             album.dz.explicitlyricsinfo = NA,
+             album.dz.explicitcoverinfo = NA,
+             album.dz.label = NA,
+             album.dz.genres = NA,
+             album.dz.firstgenre.id = NA,
+             album.dz.firstgenre.name = NA,
+             album.dz.firstartist.id = NA,
+             album.dz.firstartist.name = NA,
+             album.dz.firstartist.quality = NA)
+}

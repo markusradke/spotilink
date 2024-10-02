@@ -43,16 +43,6 @@ get_artists_deezer <- function(input, threshold = 0.8){
 }
 
 get_single_artist_deezer <- function(artist.s.name, artist.s.id){
-  .make_empty_frame <- function(){
-    data.frame(artist.s.id = artist.s.id,
-               artist.dz.id = NA,
-               artist.dz.name = NA,
-               artist.dz.quality = NA,
-               artist.dz.follower = NA,
-               artist.dz.nalbums = NA,
-               artist.dz.toptracks = NA)
-  }
-
   .create_search_url <- function(album.s.title, artist.s.name){
     paste0('https://api.deezer.com/search?q=artist:"', artist.s.name %>% simplify_name(),'"') %>%
            utils::URLencode()
@@ -73,7 +63,7 @@ get_single_artist_deezer <- function(artist.s.name, artist.s.id){
   result <- get_api_with_connection_management(url)
   test123 <<- result
   topresult <- .get_parsed_topresult(result)
-  if(is.null(topresult)){return(.make_empty_frame())}
+  if(is.null(topresult)){return(make_empty_frame_deezer_artists(artist.s.id))}
 
   url <- create_dz_artist_lookup_url(topresult$artist.dz.id)
   artist_lookup <- get_api_with_connection_management(url)
@@ -96,4 +86,15 @@ parse_dz_artist_lookup <- function(lookup, artist.s.id){
   toptracks <- list(get_api_with_connection_management(parsed$artist.dz.toptracks)$data)
   parsed$artist.dz.toptracks <- toptracks
   parsed
+}
+
+
+make_empty_frame_deezer_artists <- function(artist.s.id){
+  data.frame(artist.s.id = artist.s.id,
+             artist.dz.id = NA,
+             artist.dz.name = NA,
+             artist.dz.quality = NA,
+             artist.dz.follower = NA,
+             artist.dz.nalbums = NA,
+             artist.dz.toptracks = NA)
 }

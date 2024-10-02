@@ -53,3 +53,30 @@ print_linkage_for_id <- function(frame, idcol){
                  'This equals to ', relfreq_na_percent_distinct, '% of all ', entity, 's in the data set.'))
 }
 
+
+filter_low_quality<- function(input, type, threshold = 0.8){
+  cat('---------------------------------------------------\n')
+  cat(paste0('Filter Data with Quality < ', threshold, ' ... \n'))
+
+  input %>%
+    dplyr::mutate(dplyr::across(dplyr::contains(paste0(type, '.mb')), ~ ifelse(.data[[paste0(type, '.mb.quality')]] >= threshold, .x, NA)))
+}
+
+filter_lowquality_content <- function(input, qualityvecs, thresholds, contentcols){
+  if(length(qualityvecs) != length(thresholds)){
+    stop('Please make sure that you pass  threshold for each quality vector so that qualityvecs and thresholds are of equal length.')
+  }
+
+  message('Filtering out data with low linking quality...')
+  res <- input
+  res$keepdata <- TRUE
+  for(i in seq(1:length(qualityvecs))){
+    res <- res %>%
+      dplyr::mutate(keepdata = ifelse(.data[[qualityvecs[i]]] >= thresholds[i], keepdata, FALSE))
+  }
+  res <- res %>%
+    dplyr::mutate(dplyr::across(dplyr::all_of(contentcols), ~ ifelse(keepdata, .x, NA))) %>%
+    dplyr::select(-keepdata)
+  message('Done.')
+  res
+}

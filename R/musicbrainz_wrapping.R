@@ -31,14 +31,6 @@ unzip_tags <- function(tags) {
   }
 }
 
-filter_low_quality<- function(input, type, threshold = 0.8){
-  cat('---------------------------------------------------\n')
-  cat(paste0('Filter Data with Quality < ', threshold, ' ... \n'))
-
-  input %>%
-    dplyr::mutate(dplyr::across(dplyr::contains(paste0(type, '.mb')), ~ ifelse(.data[[paste0(type, '.mb.quality')]] >= threshold, .x, NA)))
-}
-
 print_linking_success <- function(input, sIDcols) {
   for (sIDcol in sIDcols) {
     mbidCol <- stringr::str_replace(sIDcol, '\\.s\\.', '\\.mb\\.')
