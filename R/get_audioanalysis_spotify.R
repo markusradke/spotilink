@@ -63,10 +63,17 @@ clean_analysis <- function(analysisRaw) {
 
 
 spotify_api_connection_management <- function(id, spotify_function){
-  repeat{
-    tryCatch(res <- spotify_function(id),
-                    error = function(e) Sys.sleep(45),
-                    finally = break)
+  repeat {
+    tryCatch({
+      res <- spotify_function(id)
+      return(res)
+    }, error = function(e) {
+      if (grepl("429", e$message)) {
+        message("Received 429 error. Waiting for 45 seconds before retrying...")
+      } else {
+        message("An error occurred: ", e$message)
+      }
+      Sys.sleep(45)
+    })
   }
-  return(res)
 }
