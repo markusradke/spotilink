@@ -48,7 +48,7 @@ pull_tracks_musicbrainz <- function(input, track_threshold) {
   res %>%
     retrieve_track_genre() %>%
     dplyr::left_join(input, .data, by = c('track.s.id')) %>%
-    filter_lowquality_content('track.mb.quality', track_threshold, musicbrainzTrackVars)
+    filter_quality_musicbrainz_tracks(track_threshold)
 }
 
 retrieve_tracks <- function(distinctinput){

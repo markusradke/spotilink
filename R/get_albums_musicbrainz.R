@@ -45,7 +45,7 @@ pull_albums_musicbrainz <- function(input, album_threshold) {
   res %>%
     retrieve_album_genres() %>%
     dplyr::left_join(input, ., by = c('album.s.id')) %>%
-    filter_lowquality_content('album.mb.quality', album_threshold, musicbrainzAlbumVars)
+    filter_quality_musicbrainz_albums(album_threshold)
 }
 
 retrieve_albums <- function(distinctinput){

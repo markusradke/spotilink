@@ -63,12 +63,12 @@ get_all_musicbrainz <- function(input, track_threshold = 0.8, album_threshold = 
   res <- pull_tracks_musicbrainz(res, track_threshold)
   res <- pull_albums_musicbrainz(res, album_threshold)
   res <- pull_artists_musicbrainz(res, artist_threshold)
-  res <- combine_genres(res)
+  res <- combine_genres_musicbrainz(res)
   print_linking_success(res, c('track.s.id', 'album.s.id', 'artist.s.id'))
   res
 }
 
-combine_genres <- function(input) {
+combine_genres_musicbrainz <- function(input) {
   input %>%
     dplyr::mutate(track.mb.combinedgenre = ifelse(!is.na(.data[['track.mb.topgenre']]), .data[['track.mb.topgenre']], .data[['album.mb.topgenre']])) %>%
     dplyr::mutate(track.mb.combinedgenre = ifelse(!is.na(.data[['track.mb.combinedgenre']]), .data[['track.mb.combinedgenre']], .data[['artist.mb.topgenre']])) %>%

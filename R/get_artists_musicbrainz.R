@@ -62,7 +62,7 @@ pull_artists_musicbrainz <- function(input, artist_threshold) {
   cat(paste0(round(artistMBIDCounter / nrow(input) * 100, 2), '% were found using the MBID from the track information. \n'))
   rm(artistMBIDCounter, pos = .GlobalEnv)
   artists %>%
-    filter_lowquality_content('artist.mb.quality', artist_threshold, musicbrainzArtistVars) %>%
+    filter_quality_musicbrainz_artists(artist_threshold) %>%
     dplyr::mutate(artist.mb.birth = as.Date(.data[['artist.mb.birth']]))  %>% # Date conversion must be here; else only integers are returned
     dplyr::mutate(artist.mb.death = as.Date(.data[['artist.mb.death']]))
 }
