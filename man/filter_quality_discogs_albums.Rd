@@ -7,7 +7,7 @@
 filter_quality_discogs_albums(frame, album_threshold, artist_threshold)
 }
 \arguments{
-\item{frame}{Data frame containing Discogs variabels.}
+\item{frame}{Data frame containing Discogs variables.}
 
 \item{album_threshold}{Threshold for Discogs album quality. Ranging between 0 and 1.}
 

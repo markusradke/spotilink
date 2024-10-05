@@ -4,7 +4,7 @@
 \alias{get_artists_musicbrainz}
 \title{Get \emph{MusicBrainz} Artist Information}
 \usage{
-get_artists_musicbrainz(input, threshold = 0.8)
+get_artists_musicbrainz(input, artist_threshold = 0.8)
 }
 \arguments{
 \item{input}{Data Frame containing the following columns:
@@ -17,7 +17,7 @@ with \emph{Spotify} artist name.
 It is advisable to first run \code{\link{get_artists_spotify}} before running this command,
 in order to have all the necessary information.}
 
-\item{threshold}{Floating point number between 0 and 1 indicating which elements to keep that were found using a fuzzy search.
+\item{artist_threshold}{Floating point number between 0 and 1 indicating which elements to keep that were found using a fuzzy search.
 The values correspond to the string similarity (1 - Jaro-Winkler distance) between the artist name on \emph{Spotify} and the found artist name on \emph{Musicbrainz}.}
 }
 \value{

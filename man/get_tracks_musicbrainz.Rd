@@ -4,7 +4,7 @@
 \alias{get_tracks_musicbrainz}
 \title{Get \emph{MusicBrainz} Track Information}
 \usage{
-get_tracks_musicbrainz(input, threshold = 0.8)
+get_tracks_musicbrainz(input, track_threshold = 0.8)
 }
 \arguments{
 \item{input}{Data Frame containing the following columns:
@@ -21,7 +21,7 @@ with track ISRCs from \emph{Spotify}
 It is advisable to first run \code{\link{get_tracks_spotify}} before running this command,
 in order to have all the necessary information.}
 
-\item{threshold}{Floating point number between 0 and 1 indicating which elements to keep that were found using a fuzzy search.
+\item{track_threshold}{Floating point number between 0 and 1 indicating which elements to keep that were found using a fuzzy search.
 The values correspond to the string similarity (1 - Jaro-Winkler distance) between the track title on \emph{Spotify} and the found track title on \emph{Musicbrainz}.}
 }
 \value{

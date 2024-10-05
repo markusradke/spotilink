@@ -4,7 +4,7 @@
 \alias{get_albums_musicbrainz}
 \title{Get \emph{MusicBrainz} Album Information}
 \usage{
-get_albums_musicbrainz(input, threshold = 0.8)
+get_albums_musicbrainz(input, album_threshold = 0.8)
 }
 \arguments{
 \item{input}{Data Frame containing the following columns:
@@ -19,7 +19,7 @@ with album UPCs from \emph{Spotify}.
 It is advisable to first run \code{\link{get_albums_spotify}} before running this command,
 in order to have all the necessary information.}
 
-\item{threshold}{Floating point number between 0 and 1 indicating which elements to keep that were found using a fuzzy search.
+\item{album_threshold}{Floating point number between 0 and 1 indicating which elements to keep that were found using a fuzzy search.
 The values correspond to the string similarity (1 - Jaro-Winkler distance) between the album title on \emph{Spotify} and the found album title on \emph{Musicbrainz}.}
 }
 \value{

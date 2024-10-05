@@ -42,13 +42,13 @@ get_api_with_connection_management <- function(url){
 
 print_linkage_for_id <- function(frame, idcol){
   entity <- stringr::str_extract(idcol, '(album|track|artist)')
-  frame_distinct <- dplyr::distinct(frame, .data[[idcol]], .keep_all = T)
+  frame_distinct <- dplyr::distinct(frame, .data[[paste0(entity, '.s.id')]], .keep_all = T)
 
   relfreq_na <- nrow(dplyr::filter(frame, ! is.na(.data[[idcol]]))) / nrow(frame)
   relfreq_na_percent <- 100 * round(relfreq_na, 4)
   relfreq_na_distinct <- nrow(dplyr::filter(frame_distinct, ! is.na(.data[[idcol]]))) / nrow(frame_distinct)
-  relfreq_na_percent_distinct <- 100 * round(relfreq_na, 4)
+  relfreq_na_percent_distinct <- 100 * round(relfreq_na_distinct, 4)
 
-  message(paste0('Found ', relfreq_na_percent, '% of distinct ', entity, 's in the data set.\n',
-                 'This equals to ', relfreq_na_percent_distinct, '% of all ', entity, 's in the data set.'))
+  message(paste0('Found ', relfreq_na_percent_distinct, '% of distinct ', entity, 's in the data set.\n',
+                 'This equals to ', relfreq_na_percent, '% of all ', entity, 's in the data set.'))
 }

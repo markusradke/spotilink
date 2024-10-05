@@ -7,7 +7,7 @@
 filter_quality_genius_tracks(frame, track_threshold, artist_threshold)
 }
 \arguments{
-\item{frame}{Data frame containing Genius variabels.}
+\item{frame}{Data frame containing Genius variables.}
 
 \item{track_threshold}{Threshold for Genius track quality. Ranging between 0 and 1.}
 

@@ -182,23 +182,35 @@ filter_quality_musicbrainz_albums <- function(frame, album_threshold){
                             contentcols = musicbrainzAlbumVars)
 }
 
-#' Filter low quality results for \emph{Musicbrainz} Tracks
+#' Filter low quality results for \emph{Musicbrainz} and \emph{Acousticbrainz} Tracks
 #'
 #' @param frame Data frame containing Musicbrainz track variables.
 #' @param track_threshold Threshold for Musicbrainz track quality. Ranging between 0 and 1.
 #'
-#' @return Updated input frame with all Musicbrainz track information set to NA where at least one threshold was not met.
+#' @return Updated input frame with all Musicbrainz and Acousticbrainz track information set to NA where at least one threshold was not met.
 #' @export
 #'
 #' @examples
-filter_quality_musicbrainz_tracks <- function(frame, track_threshold){
+filter_quality_musicbrainz_acousticbrainz_tracks <- function(frame, track_threshold){
   if(! all(musicbrainzTrackVars %in% colnames(frame))){
     stop('Please make sure the input frame contains all Musicbrainz track information by running get_tracks_musicbrainz first.')
   }
-  filter_lowquality_content(frame,
-                            c('track.mb.quality'),
-                            c(track_threshold),
-                            contentcols = musicbrainzTrackVars)
+  if(!'track.ab.id' %in% colnames(frame)){
+    result <- filter_lowquality_content(frame,
+                              c('track.mb.quality'),
+                              c(track_threshold),
+                              contentcols = musicbrainzTrackVars)
+  }
+  else{
+    if(! all(acousticbrainzTrackVars %in% colnames(frame))){
+      stop('Please make sure the input frame contains all Acousticbrainz track information by running get_tracks_acousticbrainz first.')
+      filter_lowquality_content(result,
+                              c('track.mb.quality'),
+                              c(track_threshold),
+                              contentcols = c(musicbrainzTrackVars, acousticbrainzTrackVars))
+
+    }
+  }
 }
 
 #' Filter low quality results for all \emph{Musicbrainz} Information
@@ -214,7 +226,7 @@ filter_quality_musicbrainz_tracks <- function(frame, track_threshold){
 #' @examples
 filter_quality_musicbrainz_all <- function(frame, track_threshold, album_threshold, artist_threshold){
   frame %>%
-    filter_quality_musicbrainz_tracks(track_threshold) %>%
+    filter_quality_musicbrainz_acousticbrainz_tracks(track_threshold) %>%
     filter_quality_musicbrainz_albums(album_threshold) %>%
     filter_quality_musicbrainz_artists(artist_threshold) %>%
     combine_genres_musicbrainz()

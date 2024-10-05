@@ -7,7 +7,7 @@
 filter_quality_deezer_tracks(frame, track_threshold, artist_threshold)
 }
 \arguments{
-\item{frame}{Data frame containing Deezer tracks variabels.}
+\item{frame}{Data frame containing Deezer tracks variables.}
 
 \item{track_threshold}{Threshold for Deezer track quality. Ranging between 0 and 1.}
 
