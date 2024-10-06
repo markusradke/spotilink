@@ -32,7 +32,7 @@ get_tracks_genius <- function(input, g_token, track_threshold = 0.8, artist_thre
   message('Done.')
   genius <- filter_quality_genius_tracks(genius, track_threshold, artist_threshold)
   result <- suppressMessages(dplyr::left_join(input, genius))
-  print_linkage_for_id(result, 'track.g.id')
+  print_linkage_for_id('track.g.id', result)
   result
 }
 

@@ -39,7 +39,7 @@ get_albums_deezer <- function(input, album_threshold = 0.8, artist_threshold = 0
   message('Done.')
   result <- suppressMessages(dplyr::left_join(input, deezer_albums)) %>%
     dplyr::mutate(album.dz.releasedate = album.dz.releasedate %>% as.Date())
-  print_linkage_for_id(result, 'album.dz.id')
+  print_linkage_for_id('album.dz.id', result)
   result
 }
 

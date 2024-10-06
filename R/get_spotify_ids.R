@@ -1,7 +1,7 @@
 #' Search \emph{Spotify} for IDs
 #'
 #' Searches for either tracks, albums, or artists \emph{Spotify} IDs, depending on the input supplied. Artist names must always be supplied and artist.s.ids will always be returned.
-#' If additional track titles are supplied, track.s.ids will be returned. If additional album title are supplied, album.s.ids will be returned. Albums and track ids cannot be searched for at the same time. If you want to retrieve both, please first look for track.s.ids and then use [get_all_spotify()] to retrieve the album.s.ids.
+#' If additional track titles are supplied, track.s.ids will be returned. If additional album title are supplied, album.s.ids will be returned. If tracks and albums are supplied the album information is used to find the track in the corresponding album. If release years are supplied, the information is used to find the best suiting track or album.  If you want to retrieve both tracks and album ids, please first look for track.s.ids and then use [get_all_spotify()] to retrieve the album.s.ids.
 #'
 #' @param artists Character vector with artist names
 #' @param pass Character Vector containing two entries: \emph{Client ID} and \emph{Client secret}. See \url{https://developer.spotify.com/documentation/web-api/concepts/authorization} for details.

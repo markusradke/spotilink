@@ -204,13 +204,14 @@ filter_quality_musicbrainz_acousticbrainz_tracks <- function(frame, track_thresh
   else{
     if(! all(acousticbrainzTrackVars %in% colnames(frame))){
       stop('Please make sure the input frame contains all Acousticbrainz track information by running get_tracks_acousticbrainz first.')
-      filter_lowquality_content(result,
-                              c('track.mb.quality'),
-                              c(track_threshold),
-                              contentcols = c(musicbrainzTrackVars, acousticbrainzTrackVars))
-
     }
+    result <- filter_lowquality_content(frame,
+                            c('track.mb.quality'),
+                            c(track_threshold),
+                            contentcols = c(musicbrainzTrackVars, acousticbrainzTrackVars))
+
   }
+  result
 }
 
 #' Filter low quality results for all \emph{Musicbrainz} Information

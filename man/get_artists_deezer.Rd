@@ -18,9 +18,7 @@ It is advisable to first run \code{\link{get_tracks_spotify}} before running thi
 in order to have all the necessary information.}
 
 \item{threshold}{Floating point number between 0 and 1 indicating which elements to keep that were found using a fuzzy search.
-The values correspond to the string similarity (1 - Jaro-Winkler distance) between the track title on \emph{Spotify} and the found track title on \emph{Deezer}.
-
-THE DEEZER API DOES NOT REALLY SUPPORT AN ARTIST SEARCH AT THIS POINT; THIS FUNCTION THEREFORE DOES NOT PROVIDE STATISTFACTORY RESULTS.}
+The values correspond to the string similarity (1 - Jaro-Winkler distance) between the track title on \emph{Spotify} and the found track title on \emph{Deezer}.}
 }
 \value{
 Data Frame with added information from the \emph{Deezer} API using the  \pkg{spotilink} naming convention.

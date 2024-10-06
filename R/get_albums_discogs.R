@@ -35,7 +35,7 @@ get_albums_discogs <- function(input, dc_pass, album_threshold = 0.8, artist_thr
   message('Done.')
   res <- filter_quality_discogs_albums(res, album_threshold, artist_threshold)
   res <- suppressMessages(dplyr::left_join(input, res))
-  print_linkage_for_id(res, 'album.dc.id')
+  print_linkage_for_id('album.dc.id', res)
   res
 }
 

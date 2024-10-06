@@ -7,9 +7,11 @@
 get_spotify_ids(
   artists,
   pass,
-  tracks = character(),
-  albums = character(),
-  threshold = 0.8
+  tracks = NA,
+  albums = NA,
+  releaseyear = NA,
+  artist_threshold = 0.8,
+  track_or_album_threshold = 0.8
 )
 }
 \arguments{
@@ -17,11 +19,14 @@ get_spotify_ids(
 
 \item{pass}{Character Vector containing two entries: \emph{Client ID} and \emph{Client secret}. See \url{https://developer.spotify.com/documentation/web-api/concepts/authorization} for details.}
 
-\item{tracks}{Optional character vector with  track titles. Must be the same length as the artist vector. Cannot be combined with an album vector.}
+\item{tracks}{Optional character vector with  track titles. Must be the same length as the artist vector.}
 
-\item{albums}{Optional character vector with  album titles. Must be the same length as the artist vector. Cannot be combined with a track vector.}
+\item{albums}{Optional character vector with  release years. Must be the same length as the artist vector. Must be combined with a track vector and / or an album vector.}
 
-\item{threshold}{Floating point number between 0 and 1 indicating which elements to keep that were found using a fuzzy search.
+\item{artist_threshold}{Floating point number between 0 and 1 indicating which elements to keep that were found using a fuzzy search.
+The values correspond to the string similarity (1 - Jaro-Winkler distance) between the searched artist / track / album and the found name or title on \emph{Spotify}. For tracks and albums, \emph{spotilink} will only keep results where the artist name as well as the track / album title surpass the threshold.}
+
+\item{track_or_album_threshold}{Floating point number between 0 and 1 indicating which elements to keep that were found using a fuzzy search.
 The values correspond to the string similarity (1 - Jaro-Winkler distance) between the searched artist / track / album and the found name or title on \emph{Spotify}. For tracks and albums, \emph{spotilink} will only keep results where the artist name as well as the track / album title surpass the threshold.}
 }
 \value{
@@ -29,7 +34,7 @@ Data frame with search strings, \emph{Spotify} ids, found title / names and the 
 }
 \description{
 Searches for either tracks, albums, or artists \emph{Spotify} IDs, depending on the input supplied. Artist names must always be supplied and artist.s.ids will always be returned.
-If additional track titles are supplied, track.s.ids will be returned. If additional album title are supplied, album.s.ids will be returned. Albums and track ids cannot be searched for at the same time. If you want to retrieve both, please first look for track.s.ids and then use \code{\link[=get_all_spotify]{get_all_spotify()}} to retrieve the album.s.ids.
+If additional track titles are supplied, track.s.ids will be returned. If additional album title are supplied, album.s.ids will be returned. If tracks and albums are supplied the album information is used to find the track in the corresponding album. If release years are supplied, the information is used to find the best suiting track or album.  If you want to retrieve both tracks and album ids, please first look for track.s.ids and then use \code{\link[=get_all_spotify]{get_all_spotify()}} to retrieve the album.s.ids.
 }
 \examples{
 # get artist ids
