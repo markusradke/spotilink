@@ -43,6 +43,7 @@ get_tracks_musicbrainz <- function(input, track_threshold = 0.8) {
 
 pull_tracks_musicbrainz <- function(input, track_threshold) {
   res <- input %>%
+    dplyr::filter(! is.na(track.s.id)) %>%
     dplyr::distinct(.data[['track.s.id']], .keep_all = TRUE) %>%
     retrieve_tracks()
   res %>%

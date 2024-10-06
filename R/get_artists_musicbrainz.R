@@ -40,6 +40,7 @@ pull_artists_musicbrainz <- function(input, artist_threshold) {
   cat('Looking for artists in Musicbrainz...\n')
   artistMBIDCounter <<- 0
   artists <- input %>%
+    dplyr::filter(! is.na(artist.s.id)) %>%
     dplyr::distinct(.data[['artist.s.id']], .keep_all = TRUE)
   noOfArtists <- nrow(artists)
   # add NA cols for artistlist and track quality for searching for artists only

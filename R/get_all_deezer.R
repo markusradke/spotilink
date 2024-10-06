@@ -31,7 +31,7 @@ get_all_deezer <- function(input, track_threshold = 0.8, album_threshold = 0.8, 
   are_needed_columns_present(input, c('track.s.id', 'track.s.title', 'track.s.firstartist.name', 'album.s.title'))
   input <- rename_existing_variables(input, c(deezerTrackVars))
 
-  input_distinct <- dplyr::distinct(input, track.s.id, track.s.firstartist.name, album.s.title, .keep_all = T)
+  input_distinct <- dplyr::distinct(input, track.s.id, track.s.firstartist.name, album.s.title, .keep_all = T) %>% dplyr::filter(! is.na(track.s.id))
   deezer_tracks <- purrr::pmap_df(list(input_distinct$track.s.title,
                                        input_distinct$track.s.firstartist.name,
                                        input_distinct$track.s.id,

@@ -24,7 +24,7 @@ get_tracks_genius <- function(input, g_token, track_threshold = 0.8, artist_thre
   are_needed_columns_present(input, c('track.s.id', 'track.s.title', 'track.s.firstartist.name'))
   input <- rename_existing_variables(input, geniusLyricsVars)
 
-  input_distinct <- dplyr::distinct(input, track.s.id, track.s.firstartist.name, .keep_all = T)
+  input_distinct <- dplyr::distinct(input, track.s.id, track.s.firstartist.name, .keep_all = T) %>% dplyr::filter(! is.na(track.s.id))
   genius <- purrr::pmap_df(list(input_distinct$track.s.title,
                                 input_distinct$track.s.firstartist.name,
                                 input_distinct$track.s.id),

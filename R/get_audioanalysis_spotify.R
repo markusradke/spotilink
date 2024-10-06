@@ -25,6 +25,7 @@ retrieve_audioanalysis_spotify <- function(input) {
   cat('Retrieving data with get_track_audio_analysis from identifier track.s.id ... \n')
   res <- input %>%
     dplyr::distinct(.data[['track.s.id']]) %>%
+    dplyr::filter(! is.na(track.s.id)) %>%
     dplyr::pull('track.s.id') %>%
     purrr::map_df(retrieve_single_audioanalysis, .progress = TRUE)
   suppressMessages(dplyr::right_join(res, input))

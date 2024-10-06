@@ -40,6 +40,7 @@ get_albums_musicbrainz <- function(input, album_threshold = 0.8) {
 
 pull_albums_musicbrainz <- function(input, album_threshold) {
   res <- input %>%
+    dplyr::filter(! is.na(album.s.id)) %>%
     dplyr::distinct(.data[['album.s.id']], .keep_all = TRUE) %>%
     retrieve_albums()
   res %>%

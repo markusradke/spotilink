@@ -27,7 +27,7 @@
 get_artists_deezer <- function(input, threshold = 0.8){
   are_needed_columns_present(input, c('artist.s.id', 'artist.s.name'))
   input <- rename_existing_variables(input, deezerArtistVars)
-  input_distinct <- dplyr::distinct(input, artist.s.id, artist.s.name, .keep_all = T)
+  input_distinct <- dplyr::distinct(input, artist.s.id, artist.s.name, .keep_all = T) %>% dplyr::filter(! is.na(artist.s.id))
 
   deezer_artists <- purrr::pmap_df(list(input_distinct$artist.s.name,
                                        input_distinct$artist.s.id),
