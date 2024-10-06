@@ -13,12 +13,25 @@
 #'
 #'@examples
 get_albums_spotify <- function(input, pass) {
-  are_needed_columns_present(input, c('album.s.id'))
   renameVars <- spotifyAlbumVars[! spotifyAlbumVars %in% c('album.s.id')]
-  res <- rename_existing_variables(input, renameVars)
+  input <- rename_existing_variables(input, renameVars)
+  are_needed_columns_present(input, c('album.s.id'))
+  input_ready <- input %>% dplyr::filter(!is.na(album.s.id))
+
+  if(nrow(input_ready) == 0){
+    res <- handle_empty_input(input_ready, 'get_albums_spotify', 'make_na_frame_spotify_albums')
+  }
 
   connect_spotify(pass)
-  pull_albums_spotify(res)
+  res <- pull_albums_spotify(input_ready)
+
+  na_ids <- input %>% dplyr::filter(is.na(album.s.id))
+  if(nrow(na_ids) > 0){
+    res <- na_ids %>% dplyr::select(-album.s.id) %>%
+      cbind(make_na_frame_spotify_albums(NA)) %>%
+      rbind(res, .)
+  }
+  res
 }
 
 pull_albums_spotify <- function(input, pass){

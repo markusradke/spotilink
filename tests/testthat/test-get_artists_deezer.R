@@ -1,14 +1,14 @@
 test_that('Assertion all variables in input data frame', {
-  expect_error(get_artists_deezer(data.frame(artist.s.id = c('a', 'b'))),
+  expect_error(suppressWarnings(get_artists_deezer(data.frame(artist.s.id = c('a', 'b')))),
                'Please provide a data frame containing the following columns:\nartist.s.id, artist.s.name\nSee the function reference for further information.')
-  expect_error(get_artists_deezer(data.frame(artist.s.name = c('a', 'b'))),
+  expect_error(suppressWarnings(get_artists_deezer(data.frame(artist.s.name = c('a', 'b')))),
                'Please provide a data frame containing the following columns:\nartist.s.id, artist.s.name\nSee the function reference for further information.')
 
 })
 
 test_that('Returns a frame with correct additional colnames and content', {
   input <- testTracksArtistsAlbums
-  res <- suppressMessages(get_artists_deezer(input))
+  res <- suppressWarnings(suppressMessages(get_artists_deezer(input)))
   res_names <- colnames(res)
   expected_names <- c(colnames(input),
                       deezerArtistVars)

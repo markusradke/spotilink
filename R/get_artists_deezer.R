@@ -19,31 +19,30 @@
 #'Floating point number between 0 and 1 indicating which elements to keep that were found using a fuzzy search.
 #'The values correspond to the string similarity (1 - Jaro-Winkler distance) between the track title on \emph{Spotify} and the found track title on \emph{Deezer}.
 #'
-#'THE DEEZER API DOES NOT REALLY SUPPORT AN ARTIST SEARCH AT THIS POINT; THIS FUNCTION THEREFORE DOES NOT PROVIDE STATISTFACTORY RESULTS.
 #'
 #' @return Data Frame with added information from the \emph{Deezer} API using the  \pkg{spotilink} naming convention.
 #' @export
 #'
 #'@examples
 get_artists_deezer <- function(input, threshold = 0.8){
-  message('THE DEEZER API DOES NOT REALLY SUPPORT AN ARTIST SEARCH AT THIS POINT; THIS FUNCTION THEREFORE DOES NOT PROVIDE STATISTFACTORY RESULTS.')
   are_needed_columns_present(input, c('artist.s.id', 'artist.s.name'))
   input <- rename_existing_variables(input, deezerArtistVars)
   input_distinct <- dplyr::distinct(input, artist.s.id, artist.s.name, .keep_all = T)
 
-  deezer_artists <- purrr::pmap_df(list(input_distinct$artist.s.id,
-                                       input_distinct$artist.s.name),
+  deezer_artists <- purrr::pmap_df(list(input_distinct$artist.s.name,
+                                       input_distinct$artist.s.id),
                                   get_single_artist_deezer, .progress = 'Retrieving artists from Deezer...')
 
   deezer_artists <- filter_quality_deezer_artists(deezer_artists, threshold)
   message('Done.')
   result <- suppressMessages(dplyr::left_join(input, deezer_artists))
   print_linkage_for_id(result, 'artist.dz.id')
+  result <<- result
   result
 }
 
 get_single_artist_deezer <- function(artist.s.name, artist.s.id){
-  .create_search_url <- function(album.s.title, artist.s.name){
+  .create_search_url <- function(artist.s.name){
     paste0('https://api.deezer.com/search?q=artist:"', artist.s.name %>% simplify_name(),'"') %>%
            utils::URLencode()
   }
@@ -59,11 +58,11 @@ get_single_artist_deezer <- function(artist.s.name, artist.s.id){
       dplyr::first()
   }
 
-  url <- .create_search_url(album.s.title, artist.s.name)
+  url <- .create_search_url(artist.s.name)
   result <- get_api_with_connection_management(url)
   test123 <<- result
   topresult <- .get_parsed_topresult(result)
-  if(is.null(topresult)){return(make_empty_frame_deezer_artists(artist.s.id))}
+  if(is.null(topresult)){return(make_na_frame_deezer_artists(artist.s.id))}
 
   url <- create_dz_artist_lookup_url(topresult$artist.dz.id)
   artist_lookup <- get_api_with_connection_management(url)
@@ -88,13 +87,3 @@ parse_dz_artist_lookup <- function(lookup, artist.s.id){
   parsed
 }
 
-
-make_empty_frame_deezer_artists <- function(artist.s.id){
-  data.frame(artist.s.id = artist.s.id,
-             artist.dz.id = NA,
-             artist.dz.name = NA,
-             artist.dz.quality = NA,
-             artist.dz.follower = NA,
-             artist.dz.nalbums = NA,
-             artist.dz.toptracks = NA)
-}

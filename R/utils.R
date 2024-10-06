@@ -52,3 +52,14 @@ print_linkage_for_id <- function(frame, idcol){
   message(paste0('Found ', relfreq_na_percent_distinct, '% of distinct ', entity, 's in the data set.\n',
                  'This equals to ', relfreq_na_percent, '% of all ', entity, 's in the data set.'))
 }
+
+
+handle_empty_input <- function(input, retrievalfunction, emptyframefunction){
+  warning(paste0(retrievalfunction, ' was supplied with an empty input.\n',
+                 'Returning empty frame with updated column names.'))
+
+  na_frame <- do.call(emptyframefunction, args = list(NA))
+  empty_frame <- na_frame %>% dplyr::filter(! is.na(na_frame[colnames(na_frame)[1], 1]))
+
+  cbind(input, empty_frame)
+}

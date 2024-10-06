@@ -37,18 +37,6 @@ get_tracks_genius <- function(input, g_token, track_threshold = 0.8, artist_thre
 }
 
 get_lyrics_for_single_track <- function(track.s.title, artist.s.name, track.s.id, g_token){
-  .make_empty_frame <- function(){
-    data.frame(track.s.id = track.s.id,
-               track.g.id = NA,
-               track.g.title = NA,
-               track.g.quality = NA,
-               track.g.lyrics = NA,
-               track.g.lyricsstate = NA,
-               artist.g.id = NA,
-               artist.g.name = NA,
-               artist.g.quality = NA)
-  }
-
   .get_parsed_topresult <- function(result){
     topresults <- data.frame(track.g.id = sapply(result$response$hits, function(hit) hit$result$id %>% as.character()),
                              track.g.title = sapply(result$response$hits, function(hit) hit$result$title),
@@ -96,7 +84,7 @@ get_lyrics_for_single_track <- function(track.s.title, artist.s.name, track.s.id
   url <- paste0('https://api.genius.com/search/?q="', search_term, '"&page=1&access_token=',g_token, '#') %>% utils::URLencode()
   result <- get_api_with_connection_management(url)
   topresult <- .get_parsed_topresult(result)
-  if(is.null(topresult)){return(.make_empty_frame())}
+  if(is.null(topresult)){return(make_na_frame_genius_tracks(track.s.id))}
   lyrics <- .get_lyrics_for_topresult(topresult)
   topresult %>%
     dplyr::mutate(track.g.lyrics = list(lyrics),

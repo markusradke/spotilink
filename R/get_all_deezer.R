@@ -59,7 +59,7 @@ lookup_firstartists_deezer <- function(deezer_tracks){
 }
 
 lookup_single_firstartist_deezer <- function(url, track.s.id){
-  if(is.na(url)){artist <- make_empty_frame_deezer_artists(track.s.id)}
+  if(is.na(url)){artist <- make_na_frame_deezer_artists(track.s.id)}
   else{
     artist_lookup <- get_api_with_connection_management(url)
     artist <- parse_dz_artist_lookup(artist_lookup, track.s.id)
@@ -81,7 +81,7 @@ lookup_trackalbums_deezer <- function(deezer_tracks){
 }
 
 lookup_single_trackalbum_deezer <- function(url, track.s.id){
-  if(is.na(url)){album <- make_empty_frame_deezer_albums(track.s.id)}
+  if(is.na(url)){album <- make_na_frame_deezer_albums(track.s.id)}
   else{
     album_lookup <- get_api_with_connection_management(url)
     album <- parse_dz_album_lookup(album_lookup, track.s.id)

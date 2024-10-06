@@ -14,12 +14,25 @@
 #'@examples
 get_tracks_spotify <- function(input, pass) {
   are_needed_columns_present(input, c('track.s.id'))
-
   renameVars <- spotifyTrackVars[! spotifyTrackVars %in% c('track.s.id')]
-  res <- rename_existing_variables(input, renameVars)
+  input <- rename_existing_variables(input, renameVars)
+  input_ready <- input %>% dplyr::filter(!is.na(track.s.id))
 
-  connect_spotify(pass)
-  pull_tracks_spotify(res)
+  if(nrow(input_ready) == 0){
+    res <- handle_empty_input(input_ready, 'get_tracks_spotify', 'make_na_frame_spotify_tracks')
+  }
+  else{
+    connect_spotify(pass)
+    res <- pull_tracks_spotify(input_ready)
+
+  }
+  na_ids <- input %>% dplyr::filter(is.na(track.s.id))
+  if(nrow(na_ids) > 0){
+    res <- na_ids %>% dplyr::select(-track.s.id) %>%
+      cbind(make_na_frame_spotify_tracks(NA)) %>%
+      rbind(res, .)
+  }
+  res
 }
 
 pull_tracks_spotify <- function(input) {

@@ -46,22 +46,6 @@ get_tracks_deezer <- function(input, track_threshold = 0.8, artist_threshold = 0
 }
 
 get_single_track_deezer <- function(track.s.title, track.s.firstartist.name, track.s.id, album.s.title){
-  .make_empty_frame <- function(){
-    data.frame(track.s.id = track.s.id,
-               track.dz.id = NA,
-               track.dz.title = NA,
-               track.dz.quality = NA,
-               track.dz.isrc = NA,
-               track.dz.duration = NA,
-               track.dz.rank = NA,
-               track.dz.explicit = NA,
-               track.dz.explicitinfo = NA,
-               track.dz.tempo = NA,
-               track.dz.loudness = NA,
-               track.dz.firstartist.id = NA,
-               track.dz.firstartist.name = NA)
-  }
-
   .create_search_url <- function(track.s.title, track.s.firstartist.name, album.s.title = NA){
     paste0('https://api.deezer.com/search?q=artist:"', track.s.firstartist.name %>% simplify_name(),
           '" track:"',track.s.title %>% simplify_name(),
@@ -88,7 +72,7 @@ get_single_track_deezer <- function(track.s.title, track.s.firstartist.name, tra
   url <- .create_search_url(track.s.title, track.s.firstartist.name, album.s.title)
   result <- get_api_with_connection_management(url)
   topresult <- .get_parsed_topresult(result)
-  if(is.null(topresult)){return(.make_empty_frame())}
+  if(is.null(topresult)){return(make_na_frame_deezer_tracks(track.s.id))}
   url <- create_dz_track_lookup_url(topresult$track.dz.id)
   track_lookup <- get_api_with_connection_management(url)
   res <- parse_dz_track_lookup(track_lookup)

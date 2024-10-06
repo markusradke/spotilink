@@ -37,7 +37,8 @@ get_albums_deezer <- function(input, album_threshold = 0.8, artist_threshold = 0
 
   deezer_albums <- filter_quality_deezer_albums(deezer_albums, album_threshold, artist_threshold)
   message('Done.')
-  result <- suppressMessages(dplyr::left_join(input, deezer_albums))
+  result <- suppressMessages(dplyr::left_join(input, deezer_albums)) %>%
+    dplyr::mutate(album.dz.releasedate = album.dz.releasedate %>% as.Date())
   print_linkage_for_id(result, 'album.dz.id')
   result
 }
@@ -65,7 +66,7 @@ get_single_album_deezer <- function(album.s.title, track.s.firstartist.name, alb
   url <- .create_search_url(album.s.title, track.s.firstartist.name)
   result <- get_api_with_connection_management(url)
   topresult <- .get_parsed_topresult(result)
-  if(is.null(topresult)){return(make_empty_frame_deezer_albums(album.s.id))}
+  if(is.null(topresult)){return(make_na_frame_deezer_albums(album.s.id))}
 
   url <- create_dz_album_lookup_url(topresult$album.dz.id)
   album_lookup <- get_api_with_connection_management(url)
@@ -99,27 +100,4 @@ parse_dz_album_lookup <- function(lookup, album.s.id){
   parsed <- tidyr::hoist(parsed, album.dz.genres, album.dz.firstgenre.name = list(1, 'name'))
   parsed <- tidyr::hoist(parsed, album.dz.genres, album.dz.firstgenre.id = list(1, 'id'))
   parsed
-}
-
-
-make_empty_frame_deezer_albums <- function(album.s.id){
-  data.frame(album.s.id = album.s.id,
-             album.dz.quality = NA,
-             album.dz.title = NA,
-             album.dz.upc = NA,
-             album.dz.totaltracks = NA,
-             album.dz.duration = NA,
-             album.dz.follower = NA,
-             album.dz.releasedate = NA,
-             album.dz.type = NA,
-             album.dz.explicitlyrics = NA,
-             album.dz.explicitlyricsinfo = NA,
-             album.dz.explicitcoverinfo = NA,
-             album.dz.label = NA,
-             album.dz.genres = NA,
-             album.dz.firstgenre.id = NA,
-             album.dz.firstgenre.name = NA,
-             album.dz.firstartist.id = NA,
-             album.dz.firstartist.name = NA,
-             album.dz.firstartist.quality = NA)
 }
