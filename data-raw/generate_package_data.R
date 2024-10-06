@@ -3,7 +3,7 @@ musicbrainzWhitelist <- readRDS('./data-raw/whitelist.rds')
 source('./data-raw/define_test_data.R')
 source('./data-raw/define_variables.R')
 
-s_pass <- c("bf4b7a7cffc547d49199cab4ae0b347f","5fe2a814df864abda82b740ecc307661")
+s_pass <- c("eb2a169a0bc84c3fa675cf52e59a0adf","93b3486b9cea4af8b68231af3114501a")
 dc_pass <- c('bSyzKCYCBBwMYsMfxUhj', 'lZvwpvEOdZnrJsWewPxjvYUgdeWDCENu')
 g_token <- '-jEcwl0b2ANL3rmxjbL5gcsHcmtkV3-sw55SslkLtWBFn3tpBrdHS0ANZteuQjco'
 use_data(musicbrainzWhitelist,

@@ -5,9 +5,12 @@
 #'
 #' @param artists Character vector with artist names
 #' @param pass Character Vector containing two entries: \emph{Client ID} and \emph{Client secret}. See \url{https://developer.spotify.com/documentation/web-api/concepts/authorization} for details.
-#' @param tracks Optional character vector with  track titles. Must be the same length as the artist vector. Cannot be combined with an album vector.
-#' @param albums Optional character vector with  album titles. Must be the same length as the artist vector. Cannot be combined with a track vector.
-#' @param threshold Floating point number between 0 and 1 indicating which elements to keep that were found using a fuzzy search.
+#' @param tracks Optional character vector with  track titles. Must be the same length as the artist vector.
+#' @param albums Optional character vector with  album titles. Must be the same length as the artist vector.
+#' @param albums Optional character vector with  release years. Must be the same length as the artist vector. Must be combined with a track vector and / or an album vector.
+#' @param artist_threshold Floating point number between 0 and 1 indicating which elements to keep that were found using a fuzzy search.
+#'The values correspond to the string similarity (1 - Jaro-Winkler distance) between the searched artist / track / album and the found name or title on \emph{Spotify}. For tracks and albums, \emph{spotilink} will only keep results where the artist name as well as the track / album title surpass the threshold.
+#' @param track_or_album_threshold Floating point number between 0 and 1 indicating which elements to keep that were found using a fuzzy search.
 #'The values correspond to the string similarity (1 - Jaro-Winkler distance) between the searched artist / track / album and the found name or title on \emph{Spotify}. For tracks and albums, \emph{spotilink} will only keep results where the artist name as well as the track / album title surpass the threshold.
 #'
 #' @return Data frame with search strings, \emph{Spotify} ids, found title / names and the calculated string similarity.
@@ -20,22 +23,28 @@
 #' get_spotify_ids(c('Nina Hagen', 'Olivia Rodrigo'), tracks = c('TV GLOTZER', 'drivers license'), pass = s_pass)
 #' # get album ids
 #' get_spotify_ids(c('Nina Hagen', 'Olivia Rodrigo'), albums = c('Nunsexmonkrock', 'SOUR'), pass = s_pass)
-get_spotify_ids <- function(artists, pass, tracks = character(), albums = character(), threshold = 0.8){
-  check_assertions_get_spotify_ids(artists, tracks, albums, threshold)
+get_spotify_ids <- function(artists, pass, tracks = NA, albums = NA, releaseyear = NA, artist_threshold = 0.8, track_or_album_threshold = 0.8){
+  check_assertions_get_spotify_ids(artists, tracks, albums, releaseyear, artist_threshold, track_or_album_threshold)
   connect_spotify(pass)
 
-  if(length(tracks != 0)){
-    input <- data.frame(artists = artists, tracks = tracks) %>% dplyr::distinct(artists, tracks)
-    res <- purrr::map2_df(input$artists, input$tracks, search_track_on_spotify, threshold, .progress = 'Looking up tracks IDs on Spotify...')
+
+  input <- data.frame(artists = artists, tracks = tracks, albums = albums, releaseyear = releaseyear) %>%
+    dplyr::distinct(artists, tracks, albums, .keep_all = T)
+  if(! all(is.na(input$tracks))){
+    res <- purrr::pmap_df(list(input$artists, input$tracks, input$albums, input$releaseyear),
+                          search_track_on_spotify,
+                          artist_threshold, track_or_album_threshold,
+                          .progress = 'Looking up tracks IDs on Spotify...')
   }
   else{
-    if(length(albums != 0)){
-      input <- data.frame(artists = artists, albums = albums) %>% dplyr::distinct(artists, albums)
-      res <- purrr::map2_df(input$artists, input$albums, search_album_on_spotify, threshold, .progress = 'Looking up albums IDs on Spotify...')
+    if(! all(is.na(input$albums))){
+      res <- purrr::pmap_df(list(input$artists, input$albums, input$releaseyear),
+                            search_album_on_spotify,
+                            artist_threshold, track_or_album_threshold,
+                            .progress = 'Looking up albums IDs on Spotify...')
     }
     else{
-      artist <- unique(artists)
-      res <- purrr::map_df(artists, search_artist_on_spotify, threshold, .progress = 'Looking up artists IDs on Spotify...')
+      res <- purrr::map_df(input$artists, search_artist_on_spotify, artist_threshold, .progress = 'Looking up artists IDs on Spotify...')
     }
   }
 
@@ -43,35 +52,56 @@ get_spotify_ids <- function(artists, pass, tracks = character(), albums = charac
   res
 }
 
-check_assertions_get_spotify_ids <- function(artists, tracks, albums, threshold){
-  if(class(artists) != 'character'){
-    stop('Please make sure the artists vector and the optional track / album vector are character vectors of the same length.')
+check_assertions_get_spotify_ids <- function(artists, tracks, albums, releaseyear, artist_threshold, track_or_album_threshold){
+  if(any(is.na(artists)) | class(artists) != 'character'){
+    stop('Please make sure the artists vector is a character vector without NAs.')
   }
-  if(class(tracks) != 'character'){
-    stop('Please make sure the artists vector and the optional track / album vector are character vectors of the same length.')
+  if(length(tracks) > 1 & (any(is.na(tracks)) | class(tracks) != 'character')){
+    stop('Please make sure the tracks vector is a character vector without NAs.')
   }
-  if(class(albums) != 'character'){
-    stop('Please make sure the artists vector and the optional track / album vector are character vectors of the same length.')
+  if(length(tracks) == 1){
+    if((! class(tracks) %in% c('character', 'logical') & ! is.na(tracks))){
+      stop('Please make sure the tracks vector is a character vector without NAs.')
+    }
   }
-  if(length(tracks) != 0 & length(tracks) != length(artists)){
-    stop('Please make sure the artists vector and the optional track / album vector are character vectors of the same length.')
+  if(length(albums) > 1 & (any(is.na(albums)) | class(albums) != 'character')){
+    stop('Please make sure the albums vector is a character vector without NAs.')
   }
-  if(length(albums) != 0 & length(albums) != length(artists)){
-    stop('Please make sure the artists vector and the optional track / album vector are character vectors of the same length.')
+  if(length(albums) == 1) {
+    if((! class(albums) %in% c('character', 'logical') & ! is.na(albums))){
+      stop('Please make sure the albums vector is a character vector without NAs.')
+    }
   }
-  if(length(tracks) != 0 & length(albums) != 0){
-    stop('Please provide either track or album together with the artist to search for the corresponding type.')
+  if(!all(is.na(tracks)) & length(tracks) != length(artists)){
+    stop('Please make sure the artists vector and the optional track / album / release year vectors are all vectors of the same length.')
   }
-  if(length(threshold) != 1 | class(threshold) != 'numeric'){
+  if(!all(is.na(albums)) & length(albums) != length(artists)){
+    stop('Please make sure the artists vector and the optional track / album / release year vectors are all vectors of the same length.')
+  }
+  if(!all(is.na(releaseyear)) & length(releaseyear) != length(artists)){
+    stop('Please make sure the artists vector and the optional track / album / release year vectors are all vectors of the same length.')
+  }
+
+  if(!all(is.na(releaseyear)) & all(is.na(tracks)) & all(is.na(albums))){
+    stop('Please provide a track or album vector when specifiing releaseyears.')
+  }
+
+  if(length(artist_threshold) != 1 | class(artist_threshold) != 'numeric'){
     stop('Please make sure the threshold is a single number between 0 and 1.')
   }
-  if(threshold < 0 | threshold > 1){
+  if(artist_threshold < 0 | artist_threshold > 1){
+    stop('Please make sure the threshold is a single number between 0 and 1.')
+  }
+  if(length(track_or_album_threshold) != 1 | class(track_or_album_threshold) != 'numeric'){
+    stop('Please make sure the threshold is a single number between 0 and 1.')
+  }
+  if(track_or_album_threshold < 0 | track_or_album_threshold > 1){
     stop('Please make sure the threshold is a single number between 0 and 1.')
   }
 }
 
 
-search_track_on_spotify <- function(artist, track, threshold){
+search_track_on_spotify <- function(artist, track, album, releaseyear, artist_threshold, track_threshold){
   .make_empty_frame <- function(){
     data.frame(artist.search = artist,
                track.search = track,
@@ -91,9 +121,12 @@ search_track_on_spotify <- function(artist, track, threshold){
                     track.s.id = id) %>%
       dplyr::mutate(artist.search = artist,
                     track.search = track,
-                    track.s.quality = 1 - stringdist::stringdist(simplify_name(track.s.title), simplify_name(track.search), 'jw'),
-                    artist.s.quality = 1 - stringdist::stringdist(simplify_name(artist.s.name), simplify_name(artist.search), 'jw')) %>%
-      dplyr::arrange(-artist.s.quality, -track.s.quality, -popularity) %>%
+                    track.s.quality = stringdist::stringsim(simplify_name(track.s.title), simplify_name(track.search), 'jw'),
+                    artist.s.quality = stringdist::stringsim(simplify_name(artist.s.name), simplify_name(artist.search), 'jw'),
+                    album.s.quality = stringdist::stringsim(simplify_name(album), simplify_name(album.name), 'jw'),
+                    album.s.releaseyear = stringr::str_sub(album.release_date, start = 1, 4) %>% as.integer(),
+                    releasediff = abs(album.s.releaseyear - releaseyear)) %>%
+      dplyr::arrange(-artist.s.quality, -track.s.quality, -album.s.quality, releasediff, -popularity) %>%
       dplyr::first() %>%
       dplyr::select(artist.search,
                     track.search,
@@ -104,15 +137,17 @@ search_track_on_spotify <- function(artist, track, threshold){
                     artist.s.name,
                     artist.s.quality)
   }
-  query = paste0('artist:', artist, ' track:',track)
+  if(!is.na(album)){query <- paste0('artist:', artist, ' track:',track, ' album:',album)}
+  else{query <- paste0('artist:', artist, ' track:',track)}
+
   res <- spotifyr::search_spotify(query, type = 'track')
   if(nrow(res) == 0){return(.make_empty_frame())}
   res <- .parse_results(res)
-  if(res$artist.s.quality < threshold | res$track.s.quality < threshold) {return(.make_empty_frame())}
+  if(res$artist.s.quality < artist_threshold | res$track.s.quality < track_threshold) {return(.make_empty_frame())}
   res
 }
 
-search_album_on_spotify <- function(artist, album, threshold){
+search_album_on_spotify <- function(artist, album, releaseyear, artist_threshold, album_threshold){
   .make_empty_frame <- function(){
     data.frame(artist.search = artist,
                album.search = album,
@@ -132,8 +167,10 @@ search_album_on_spotify <- function(artist, album, threshold){
       dplyr::mutate(artist.search = artist,
                     album.search = album,
                     album.s.quality = 1 - stringdist::stringdist(simplify_name(album.s.title), simplify_name(album.search), 'jw'),
-                    artist.s.quality = 1 - stringdist::stringdist(simplify_name(artist.s.name), simplify_name(artist.search), 'jw')) %>%
-      dplyr::arrange(-artist.s.quality, -album.s.quality, -total_tracks) %>%
+                    artist.s.quality = 1 - stringdist::stringdist(simplify_name(artist.s.name), simplify_name(artist.search), 'jw'),
+                    album.s.releaseyear = stringr::str_sub(release_date, start = 1, 4) %>% as.integer(),
+                    releasediff = abs(album.s.releaseyear - releaseyear)) %>%
+      dplyr::arrange(-artist.s.quality, -album.s.quality, releasediff, -total_tracks) %>%
       dplyr::first() %>%
       dplyr::select(artist.search,
                     album.search,
@@ -149,7 +186,7 @@ search_album_on_spotify <- function(artist, album, threshold){
   res <- spotifyr::search_spotify(query, type = 'album')
   if(nrow(res) == 0){return(.make_empty_frame())}
   res <- .parse_results(res)
-  if(res$artist.s.quality < threshold | res$album.s.quality < threshold) {return(.make_empty_frame())}
+  if(res$artist.s.quality < artist_threshold | res$album.s.quality < album_threshold) {return(.make_empty_frame())}
   res
 }
 

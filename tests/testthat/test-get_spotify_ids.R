@@ -1,23 +1,25 @@
 test_that('Assertion artist und track vector are charcters and threhshold is a number between 0 and 1', {
   expect_error(get_spotify_ids('Olivia Rodrigo', s_pass, tracks = 1),
-               'Please make sure the artists vector and the optional track / album vector are character vectors of the same length.')
+               'Please make sure the tracks vector is a character vector without NAs.')
   expect_error(get_spotify_ids(1, s_pass),
-               'Please make sure the artists vector and the optional track / album vector are character vectors of the same length.')
+               'Please make sure the artists vector is a character vector without NAs.')
   expect_error(get_spotify_ids('Olivia Rodrigo', s_pass, albums = 1),
-               'Please make sure the artists vector and the optional track / album vector are character vectors of the same length.')
+               'Please make sure the albums vector is a character vector without NAs.')
   expect_error(get_spotify_ids('Olivia Rodrigo', s_pass, tracks = c('vampire', 'drivers license')),
-               'Please make sure the artists vector and the optional track / album vector are character vectors of the same length.')
+               'Please make sure the artists vector and the optional track / album / release year vectors are all vectors of the same length.')
   expect_error(get_spotify_ids('Olivia Rodrigo', s_pass, albums = c('GUTS', 'SOUR')),
-               'Please make sure the artists vector and the optional track / album vector are character vectors of the same length.')
+               'Please make sure the artists vector and the optional track / album / release year vectors are all vectors of the same length.')
+  expect_error(get_spotify_ids('Olivia Rodrigo', s_pass, albums = c('GUTS', 'SOUR'), releaseyear = 1992),
+               'Please make sure the artists vector and the optional track / album / release year vectors are all vectors of the same length.')
 
-  expect_error(get_spotify_ids('Olivia Rodrigo', s_pass, albums = c('GUTS'), tracks = 'vampire'),
-               'Please provide either track or album together with the artist to search for the corresponding type.')
+  expect_error(get_spotify_ids('Olivia Rodrigo', s_pass, releaseyear = 1992),
+               'Please provide a track or album vector when specifiing releaseyears.')
 
-  expect_error(get_spotify_ids('Olivia Rodrigo', s_pass, threshold = -1),
+  expect_error(get_spotify_ids('Olivia Rodrigo', s_pass, artist_threshold = -1),
                'Please make sure the threshold is a single number between 0 and 1.')
-  expect_error(get_spotify_ids('Olivia Rodrigo', s_pass, threshold = 2),
+  expect_error(get_spotify_ids('Olivia Rodrigo', s_pass, artist_threshold = 2),
                'Please make sure the threshold is a single number between 0 and 1.')
-  expect_error(get_spotify_ids('Olivia Rodrigo', s_pass, threshold = c(0.2, 0.1)),
+  expect_error(get_spotify_ids('Olivia Rodrigo', s_pass, tracks = 'vampire', track_or_album_threshold = c(0.2, 0.1)),
                'Please make sure the threshold is a single number between 0 and 1.')
 })
 
@@ -32,7 +34,8 @@ test_that('Returned content is correct', {
 
   res_track_artist <- suppressMessages(get_spotify_ids(c('Olivia Rodrigo', 'Johann Sebastian Bach'),
                                       s_pass,
-                                      tracks = c('vampire', 'Der Geist hilft unserer Schwachheit auf')))
+                                      tracks = c('vampire', 'Der Geist hilft unserer Schwachheit auf'),
+                                      releaseyear = c(2023, 2012)))
   expect_setequal(colnames(res_track_artist), c('artist.search', 'artist.s.id', 'artist.s.name', 'artist.s.quality',
                                                'track.search', 'track.s.id', 'track.s.title', 'track.s.quality'))
   expect_true(all((res_track_artist$artist.s.quality <= 1 & res_track_artist$artist.s.quality >= 0) | is.na(res_track_artist$artist.s.quality)))
