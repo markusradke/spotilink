@@ -29,14 +29,13 @@
 #'@examples
 #'data <- data.frame(track.s.id = c('4ZXLWTmQFzM02hZwMiZfgS'),
 #'                   track.s.title = c('Der Geist hilft unser Schwachheit auf, BWV 226'),
-#'                   track.s.isrc = c('GBHNG1200003'))
+#'                   track.s.isrc = c('GBHNG1200003'),
+#'                   track.s.firstartist.name = c('Johann Sebastian Bach'))
 #'
 #'get_tracks_musicbrainz(data)
 get_tracks_musicbrainz <- function(input, track_threshold = 0.8) {
   are_needed_columns_present(input, c('track.s.id', 'track.s.title', 'track.s.isrc'))
-
-  renameVars <- musicbrainzTrackVars[! musicbrainzTrackVars %in% c('track.s.id', 'track.s.title', 'track.s.isrc')]
-  res <- rename_existing_variables(input, renameVars)
+  res <- rename_existing_variables(input, musicbrainzTrackVars)
 
   pull_tracks_musicbrainz(res, track_threshold)
 }
@@ -97,9 +96,10 @@ find_tracks_with_ISRC <- function(observation) {
 find_tracks_without_ISRC <- function(observation) {
   cat('no ISRC, searching...\n')
   musicbrainz::search_recordings(paste0('artist:', observation$track.s.firstartist.name,' and recording:', observation$track.s.title)) %>%
-    .[1,] %>%
     dplyr::mutate(track.mb.quality = calculate_and_print_quality(search = observation$track.s.title,
-                                                                 found = .data[['title']]))
+                                                                 found = .data[['title']])) %>%
+    dplyr::arrange(-track.mb.quality) %>%
+    dplyr::first()
 }
 
 retrieve_track_genre <- function(tracks){

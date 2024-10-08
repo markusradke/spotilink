@@ -70,6 +70,7 @@ retrieve_albums <- function(distinctinput){
   mbAlbums <- mbAlbums %>%
     dplyr::select('album.mb.id' = 'mbid',
                   'album.mb.title' = 'title',
+                  'album.mb.language' = 'language',
                   'album.mb.quality')
   cbind(album.s.id = distinctinput$album.s.id, mbAlbums)
 }
@@ -105,6 +106,6 @@ retrieve_album_genres <- function(albums){
 
 
 lookup_musicbrainz_album_tags_from_ID  <- function(mbID) {
-  musicbrainz::lookup_release_by_id(mbID, includes=c('tags')) %>%
-    dplyr::mutate(score = .data[['score']] %>% as.character())
+  res <- musicbrainz::lookup_release_by_id(mbID, includes=c('tags'))
+  suppressWarnings(dplyr::mutate(res, score = .data[['score']] %>% as.character()))
 }

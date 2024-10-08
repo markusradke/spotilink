@@ -49,7 +49,8 @@ musicbrainzAlbumVars <- c('album.mb.id',
                           'album.mb.title',
                           'album.mb.quality',
                           'album.mb.genres',
-                          'album.mb.topgenre')
+                          'album.mb.topgenre',
+                          'album.mb.language')
 
 spotifyArtistVars <- c(    'artist.s.id',
                            'artist.s.name',
@@ -142,7 +143,8 @@ musicbrainzAllVars <- c('track.mb.id',
                         'album.mb.quality',
                         'album.mb.genres',
                         'album.mb.topgenre',
-                        'album.mb.combinedgenre')
+                        'album.mb.combinedgenre',
+                        'album.mb.language')
 
 correctTypesAll <- c(
   track.s.id	= 'character',
@@ -211,6 +213,7 @@ correctTypesAll <- c(
   album.mb.id	= 'character',
   album.mb.title	= 'character',
   album.mb.quality	= 'numeric',
+  album.mb.language	= 'character',
   album.mb.genres	= 'list',
   album.mb.topgenre	= 'character',
   album.mb.combinedgenre	= 'character'

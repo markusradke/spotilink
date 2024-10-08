@@ -116,5 +116,6 @@ get_discogs_for_single_track <- function(album.s.id, album.s.title,track.s.first
   if(length(res$results) == 0) {return(.make_empty_frame())}
   res <- .parse_results(res)
   res$album.s.id <- album.s.id
+  Sys.sleep(1) # Discogs rate limit for authenticated requests is 60 per minute
   res
 }
