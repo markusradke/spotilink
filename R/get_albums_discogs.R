@@ -9,7 +9,7 @@
 #'  with \emph{Spotify} album id,
 #'  \item \code{album.s.title} \cr
 #'  with \emph{Spotify} album title,
-#'  \item \code{track.s.firstartist.name} \cr
+#'  \item \code{album.s.firstartist.name} \cr
 #'  with \emph{Spotify} artist name.
 #'}
 #'It is advisable to first run \code{\link{get_all_spotify}} before running this command,
@@ -24,12 +24,12 @@
 #'
 #' @examples
 get_albums_discogs <- function(input, dc_pass, album_threshold = 0.8, artist_threshold = 0.8){
-  are_needed_columns_present(input, c('album.s.id', 'album.s.title', 'track.s.firstartist.name'))
+  are_needed_columns_present(input, c('album.s.id', 'album.s.title', 'album.s.firstartist.name'))
   input <- rename_existing_variables(input, discogsAlbumVars)
 
   distinct_input <- dplyr::distinct(input, album.s.id, .keep_all = TRUE)
   res <- purrr::pmap_df(list(distinct_input$album.s.id, distinct_input$album.s.title,
-                             distinct_input$track.s.firstartist.name),
+                             distinct_input$album.s.firstartist.name),
                         get_discogs_for_single_track, dc_pass,
                         .progress = 'Linking DC album genres...')
   message('Done.')
@@ -39,10 +39,10 @@ get_albums_discogs <- function(input, dc_pass, album_threshold = 0.8, artist_thr
   res
 }
 
-get_discogs_for_single_track <- function(album.s.id, album.s.title,track.s.firstartist.name, dc_pass){
+get_discogs_for_single_track <- function(album.s.id, album.s.title,album.s.firstartist.name, dc_pass){
   .build_search_url <- function(){
     title <- simplify_name(album.s.title)
-    artist <- simplify_name(track.s.firstartist.name)
+    artist <- simplify_name(album.s.firstartist.name)
     url <- paste0('https://api.discogs.com/database/search?q=',
                   URLencode(title,reserved=T),
                   '&type=track&artist=',
@@ -78,7 +78,7 @@ get_discogs_for_single_track <- function(album.s.id, album.s.title,track.s.first
     res %>%
       dplyr::mutate(title_parts = stringr::str_split(.data[['title']], ' - '),
                     album.s.title = album.s.title,
-                    track.s.firstartist.name = track.s.firstartist.name) %>%
+                    album.s.firstartist.name = album.s.firstartist.name) %>%
         tidyr::hoist(title_parts, artist.dc.name = 1L, .remove = F) %>%
         tidyr::hoist(title_parts, album.dc.title = 2L, .remove = F)
   }
@@ -88,7 +88,7 @@ get_discogs_for_single_track <- function(album.s.id, album.s.title,track.s.first
       dplyr::mutate(album.dc.quality = 1 - stringdist::stringdist(simplify_name(album.s.title),
                                                                   simplify_name(album.dc.title),
                                                                   'jw'),
-                    artist.dc.quality = 1 - stringdist::stringdist(simplify_name(track.s.firstartist.name),
+                    artist.dc.quality = 1 - stringdist::stringdist(simplify_name(album.s.firstartist.name),
                                                                    simplify_name(artist.dc.name),
                                                                    'jw'),
                     res_number = dplyr::row_number()) %>%

@@ -11,7 +11,7 @@
 #'  with \emph{Spotify} album ids,
 #'  \item \code{album.s.title} \cr
 #'  with \emph{Spotify} album title,
-#'  \item \code{track.s.firstartist.name} \cr
+#'  \item \code{album.s.firstartist.name} \cr
 #'  with \code{Spotify} name of first artist,
 #'}
 #'It is advisable to first run \code{\link{get_tracks_spotify}} before running this command,
@@ -26,12 +26,12 @@
 #'
 #'@examples
 get_albums_deezer <- function(input, album_threshold = 0.8, artist_threshold = 0.8){
-  are_needed_columns_present(input, c('album.s.id', 'album.s.title', 'track.s.firstartist.name'))
+  are_needed_columns_present(input, c('album.s.id', 'album.s.title', 'album.s.firstartist.name'))
   input <- rename_existing_variables(input, deezerAlbumVars)
-  input_distinct <- dplyr::distinct(input, album.s.id, track.s.firstartist.name, .keep_all = T) %>% dplyr::filter(! is.na(album.s.id))
+  input_distinct <- dplyr::distinct(input, album.s.id, album.s.firstartist.name, .keep_all = T) %>% dplyr::filter(! is.na(album.s.id))
 
   deezer_albums <- purrr::pmap_df(list(input_distinct$album.s.title,
-                                       input_distinct$track.s.firstartist.name,
+                                       input_distinct$album.s.firstartist.name,
                                        input_distinct$album.s.id),
                                        get_single_album_deezer, .progress = 'Retrieving albums from Deezer...')
 
@@ -43,9 +43,9 @@ get_albums_deezer <- function(input, album_threshold = 0.8, artist_threshold = 0
   result
 }
 
-get_single_album_deezer <- function(album.s.title, track.s.firstartist.name, album.s.id){
-  .create_search_url <- function(album.s.title, track.s.firstartist.name){
-    paste0('https://api.deezer.com/search?q=artist:"', track.s.firstartist.name %>% simplify_name(),
+get_single_album_deezer <- function(album.s.title, album.s.firstartist.name, album.s.id){
+  .create_search_url <- function(album.s.title, album.s.firstartist.name){
+    paste0('https://api.deezer.com/search?q=artist:"', album.s.firstartist.name %>% simplify_name(),
            '" album:"', album.s.title %>% simplify_name(), '"') %>% utils::URLencode()
   }
 
@@ -56,14 +56,14 @@ get_single_album_deezer <- function(album.s.title, track.s.firstartist.name, alb
                              album.dz.firstartist.name = sapply(result$data, function(hit) hit$artist$name))
     if(nrow(topresults) == 0){return(NULL)}
     topresults %>%
-      dplyr::mutate(album.dz.firstartist.quality = stringdist::stringsim(track.s.firstartist.name %>% simplify_name(), album.dz.firstartist.name %>% simplify_name()),
+      dplyr::mutate(album.dz.firstartist.quality = stringdist::stringsim(album.s.firstartist.name %>% simplify_name(), album.dz.firstartist.name %>% simplify_name()),
                     album.dz.quality = stringdist::stringsim(album.s.title %>% simplify_name(), album.dz.title %>% simplify_name())) %>%
       dplyr::arrange(-album.dz.firstartist.quality, -album.dz.quality, album.dz.id) %>%
       dplyr::mutate(album.dz.id = album.dz.id %>% as.character()) %>%
       dplyr::first()
   }
 
-  url <- .create_search_url(album.s.title, track.s.firstartist.name)
+  url <- .create_search_url(album.s.title, album.s.firstartist.name)
   result <- get_api_with_connection_management(url)
   topresult <- .get_parsed_topresult(result)
   if(is.null(topresult)){return(make_na_frame_deezer_albums(album.s.id))}

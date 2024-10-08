@@ -172,13 +172,13 @@ filter_quality_musicbrainz_artists <- function(frame, artist_threshold){
 #' @export
 #'
 #' @examples
-filter_quality_musicbrainz_albums <- function(frame, album_threshold){
+filter_quality_musicbrainz_albums <- function(frame, album_threshold, artist_threshold){
   if(! all(musicbrainzAlbumVars %in% colnames(frame))){
     stop('Please make sure the input frame contains all Musicbrainz album information by running get_albums_musicbrainz first.')
   }
   filter_lowquality_content(frame,
-                            c('album.mb.quality'),
-                            c(album_threshold),
+                            c('album.mb.quality', 'album.mb.firstartist.quality'),
+                            c(album_threshold, artist_threshold),
                             contentcols = musicbrainzAlbumVars)
 }
 

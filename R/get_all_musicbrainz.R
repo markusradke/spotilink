@@ -13,6 +13,8 @@
 #'  with \emph{Spotify} track name,
 #'  \item \code{track.s.isrc} \cr
 #'  with track ISRCs from \emph{Spotify},
+#'  \item \code{track.s.firstartist.name} \cr
+#'  with the track's first artist name from \emph{Spotify},
 #'  \item \code{album.s.id} \cr
 #'  with \emph{Spotify} album id,
 #'  \item \code{album.s.title} \cr
@@ -43,6 +45,7 @@
 #'data <- data.frame(track.s.id = c('4ZXLWTmQFzM02hZwMiZfgS'),
 #'                   track.s.title = c('Der Geist hilft unser Schwachheit auf, BWV 226'),
 #'                   track.s.isrc = c('GBHNG1200003'),
+#'                   track.s.firstartist.name = c('Johann Sebastian Bach'),
 #'                   album.s.id = c('2rlWvQ1GuTOSkyNpmcoaMC'),
 #'                   album.s.title = c('Bach: Motets'),
 #'                   album.s.upc = c('843183071623'),
@@ -54,6 +57,7 @@ get_all_musicbrainz <- function(input, track_threshold = 0.8, album_threshold = 
   are_needed_columns_present(input, c('track.s.id',
                                       'track.s.title',
                                       'track.s.isrc',
+                                      'track.s.firstartist.name',
                                       'album.s.id',
                                       'album.s.title',
                                       'album.s.upc',

@@ -27,18 +27,19 @@
 #'@examples
 #'data <- data.frame(album.s.id = c('2rlWvQ1GuTOSkyNpmcoaMC'),
 #'                   album.s.title = c('Bach: Motets'),
+#'                   album.s.firstartist.name = c('Johann Sebastian Bach'),
+#'                   album.s.releaseyear = c(2012),
 #'                   album.s.upc = c('843183071623'))
 #'
 #'get_albums_musicbrainz(data)
-get_albums_musicbrainz <- function(input, album_threshold = 0.8) {
-  are_needed_columns_present(input, c('album.s.id', 'album.s.title', 'album.s.upc'))
-  renameVars <- musicbrainzAlbumVars[! musicbrainzAlbumVars %in% c('album.s.id', 'album.s.title', 'album.s.upc')]
-  res <- rename_existing_variables(input, renameVars)
+get_albums_musicbrainz <- function(input, album_threshold = 0.8,artist_threshold = 0.8) {
+  are_needed_columns_present(input, c('album.s.id', 'album.s.title', 'album.s.upc', 'album.s.firstartist.name', 'album.s.releaseyear'))
+  res <- rename_existing_variables(input, musicbrainzAlbumVars)
 
-  pull_albums_musicbrainz(res, album_threshold)
+  pull_albums_musicbrainz(res, album_threshold, artist_threshold)
 }
 
-pull_albums_musicbrainz <- function(input, album_threshold) {
+pull_albums_musicbrainz <- function(input, album_threshold, artist_threshold) {
   res <- input %>%
     dplyr::filter(! is.na(album.s.id)) %>%
     dplyr::distinct(.data[['album.s.id']], .keep_all = TRUE) %>%
@@ -46,7 +47,7 @@ pull_albums_musicbrainz <- function(input, album_threshold) {
   res %>%
     retrieve_album_genres() %>%
     dplyr::left_join(input, ., by = c('album.s.id')) %>%
-    filter_quality_musicbrainz_albums(album_threshold)
+    filter_quality_musicbrainz_albums(album_threshold, artist_threshold)
 }
 
 retrieve_albums <- function(distinctinput){
@@ -71,6 +72,9 @@ retrieve_albums <- function(distinctinput){
     dplyr::select('album.mb.id' = 'mbid',
                   'album.mb.title' = 'title',
                   'album.mb.language' = 'language',
+                  'album.mb.firstartist.id',
+                  'album.mb.firstartist.name',
+                  'album.mb.firstartist.quality',
                   'album.mb.quality')
   cbind(album.s.id = distinctinput$album.s.id, mbAlbums)
 }
@@ -81,15 +85,29 @@ find_album_with_UPC <- function(observation) {
     cat('found via UPC\n')
     upcCounter <<- upcCounter + 1
     result <- result[1,] %>%
-      dplyr::mutate(album.mb.quality = 1)
+      tidyr::hoist('artists', album.mb.firstartist.id = list('artist_mbid', 1L), .remove = FALSE) %>%
+      tidyr::hoist('artists', album.mb.firstartist.name = list('name', 1L), .remove = FALSE) %>%
+      dplyr::mutate(album.mb.quality = 1, album.mb.firstartist.quality = 1)
   }
   result
 }
 
 find_album_without_UPC <- function(observation) {
   cat('no UPC, searching...\n')
-  musicbrainz::search_releases(paste0('artist:', observation$artist.s.name,' and release:', observation$album.s.title)) %>%
-    .[1,] %>%
+  musicbrainz::search_releases(paste0('artist:', observation$album.s.firstartist.name,' and release:', observation$album.s.title)) %>%
+    tidyr::hoist('artists', album.mb.firstartist.id = list('artist_mbid', 1L), .remove = FALSE) %>%
+    tidyr::hoist('artists', album.mb.firstartist.name = list('name', 1L), .remove = FALSE) %>%
+    dplyr::mutate(album.mb.quality = stringdist::stringsim(observation$album.s.title %>% simplify_name(),
+                                                           title%>% simplify_name(),
+                                                           'jw'),
+                  album.mb.firstartist.quality = stringdist::stringsim(observation$album.s.firstartist.name %>% simplify_name(),
+                                                                       album.mb.firstartist.name %>% simplify_name(),
+                                                                       'jw'),
+                  album.mb.releaseyear = stringr::str_sub(date, 1, 4) %>% as.integer(),
+                  releasediff = abs(observation$album.s.releaseyear - album.mb.releaseyear)) %>%
+    dplyr::arrange(-album.mb.firstartist.quality, -album.mb.quality, releasediff, -score) %>%
+    dplyr::first() %>%
+    dplyr::select(-releasediff, -album.mb.releaseyear) %>%
     dplyr::mutate(album.mb.quality = calculate_and_print_quality(search = observation$album.s.title,
                                                                  found = .data[['title']]))
 }

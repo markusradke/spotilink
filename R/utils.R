@@ -9,12 +9,13 @@ rename_existing_variables <- function(input, variableSet) {
 
 simplify_name <- function(name) {
   name %>%
+    toupper() %>%
     stringr::str_replace(pattern = ' \\(.*', replacement = '') %>%
     stringr::str_replace(pattern = ' -.*', replacement = '') %>%
-    stringr::str_replace(pattern = 'feat.*', replacement = '') %>%
+    stringr::str_replace(pattern = 'FEAT.*', replacement = '') %>%
     stringr::str_replace(pattern = ' &.*', replacement = '') %>%
-    stringr::str_replace(pattern = ' Ft.*', replacement = '') %>%
-    toupper()
+    stringr::str_replace(pattern = ' FT.*', replacement = '') %>%
+    stringr::str_replace(pattern = ':.*', replacement = '')
 }
 
 are_needed_columns_present <- function(input, neededCols)
