@@ -64,8 +64,8 @@ get_all_musicbrainz <- function(input, track_threshold = 0.8, album_threshold = 
                                       'artist.s.id',
                                       'artist.s.name'))
   res <- rename_existing_variables(input, musicbrainzAllVars)
-  res <- pull_tracks_musicbrainz(res, track_threshold)
-  res <- pull_albums_musicbrainz(res, album_threshold)
+  res <- pull_tracks_musicbrainz(res, track_threshold, artist_threshold)
+  res <- pull_albums_musicbrainz(res, album_threshold, artist_threshold)
   res <- pull_artists_musicbrainz(res, artist_threshold)
   res <- combine_genres_musicbrainz(res)
   print_linking_success(res, c('track.s.id', 'album.s.id', 'artist.s.id'))

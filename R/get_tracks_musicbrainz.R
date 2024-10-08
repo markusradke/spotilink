@@ -33,14 +33,14 @@
 #'                   track.s.firstartist.name = c('Johann Sebastian Bach'))
 #'
 #'get_tracks_musicbrainz(data)
-get_tracks_musicbrainz <- function(input, track_threshold = 0.8) {
-  are_needed_columns_present(input, c('track.s.id', 'track.s.title', 'track.s.isrc'))
+get_tracks_musicbrainz <- function(input, track_threshold = 0.8, artist_threshold = 0.8) {
+  are_needed_columns_present(input, c('track.s.id', 'track.s.title', 'track.s.isrc', 'track.s.firstartist.name'))
   res <- rename_existing_variables(input, musicbrainzTrackVars)
 
-  pull_tracks_musicbrainz(res, track_threshold)
+  pull_tracks_musicbrainz(res, track_threshold, artist_threshold)
 }
 
-pull_tracks_musicbrainz <- function(input, track_threshold) {
+pull_tracks_musicbrainz <- function(input, track_threshold, artist_threshold) {
   res <- input %>%
     dplyr::filter(! is.na(track.s.id)) %>%
     dplyr::distinct(.data[['track.s.id']], .keep_all = TRUE) %>%
@@ -48,7 +48,7 @@ pull_tracks_musicbrainz <- function(input, track_threshold) {
   res %>%
     retrieve_track_genre() %>%
     dplyr::left_join(input, .data, by = c('track.s.id')) %>%
-    filter_quality_musicbrainz_acousticbrainz_tracks(track_threshold)
+    filter_quality_musicbrainz_acousticbrainz_tracks(track_threshold, artist_threshold)
 }
 
 retrieve_tracks <- function(distinctinput){
@@ -70,14 +70,13 @@ retrieve_tracks <- function(distinctinput){
   cat(paste0(round(isrcCounter / nrow(distinctinput),4) * 100, '% of tracks were found using the ISRC.\n'))
   rm(isrcCounter, pos = .GlobalEnv)
   mbTracks <- mbTracks %>%
-    tidyr::hoist('artists', track.mb.firstartist.id = list('artist_mbid', 1L), .remove = FALSE) %>%
-    tidyr::hoist('artists', track.mb.firstartist.name = list('name', 1L), .remove = FALSE) %>%
     dplyr::select('track.mb.id' = 'mbid',
                   'track.mb.title' = 'title',
                   'track.mb.quality',
                   'track.mb.artistlist' = 'artists',
                   'track.mb.firstartist.id',
                   'track.mb.firstartist.name',
+                  'track.mb.firstartist.quality',
                   'track.mb.releases' = 'releases')
   cbind(track.s.id = distinctinput$track.s.id, mbTracks)
 }
@@ -88,7 +87,9 @@ find_tracks_with_ISRC <- function(observation) {
     cat('found via ISRC\n')
     isrcCounter <<- isrcCounter + 1
     result <- result[1,] %>%
-      dplyr::mutate(track.mb.quality = 1)
+      tidyr::hoist('artists', track.mb.firstartist.id = list('artist_mbid', 1L), .remove = FALSE) %>%
+      tidyr::hoist('artists', track.mb.firstartist.name = list('name', 1L), .remove = FALSE) %>%
+      dplyr::mutate(track.mb.quality = 1, track.mb.firstartist.quality = 1)
   }
   result
 }
@@ -96,10 +97,18 @@ find_tracks_with_ISRC <- function(observation) {
 find_tracks_without_ISRC <- function(observation) {
   cat('no ISRC, searching...\n')
   musicbrainz::search_recordings(paste0('artist:', observation$track.s.firstartist.name,' and recording:', observation$track.s.title)) %>%
+    tidyr::hoist('artists', track.mb.firstartist.id = list('artist_mbid', 1L), .remove = FALSE) %>%
+    tidyr::hoist('artists', track.mb.firstartist.name = list('name', 1L), .remove = FALSE) %>%
+    dplyr::mutate(track.mb.quality = stringdist::stringsim(observation$track.s.title %>% simplify_name(),
+                                                           title%>% simplify_name(),
+                                                           'jw'),
+                  track.mb.firstartist.quality = stringdist::stringsim(observation$track.s.firstartist.name %>% simplify_name(),
+                                                                       track.mb.firstartist.name %>% simplify_name(),
+                                                                       'jw')) %>%
+    dplyr::arrange(-track.mb.quality, -track.mb.firstartist.quality, -score) %>%
+    dplyr::first() %>%
     dplyr::mutate(track.mb.quality = calculate_and_print_quality(search = observation$track.s.title,
-                                                                 found = .data[['title']])) %>%
-    dplyr::arrange(-track.mb.quality) %>%
-    dplyr::first()
+                                                                 found = .data[['title']]))
 }
 
 retrieve_track_genre <- function(tracks){

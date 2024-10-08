@@ -191,14 +191,14 @@ filter_quality_musicbrainz_albums <- function(frame, album_threshold, artist_thr
 #' @export
 #'
 #' @examples
-filter_quality_musicbrainz_acousticbrainz_tracks <- function(frame, track_threshold){
+filter_quality_musicbrainz_acousticbrainz_tracks <- function(frame, track_threshold, artist_threshold){
   if(! all(musicbrainzTrackVars %in% colnames(frame))){
     stop('Please make sure the input frame contains all Musicbrainz track information by running get_tracks_musicbrainz first.')
   }
   if(!'track.ab.id' %in% colnames(frame)){
     result <- filter_lowquality_content(frame,
-                              c('track.mb.quality'),
-                              c(track_threshold),
+                              c('track.mb.quality', 'track.mb.firstartist.quality'),
+                              c(track_threshold, artist_threshold),
                               contentcols = musicbrainzTrackVars)
   }
   else{
@@ -206,8 +206,8 @@ filter_quality_musicbrainz_acousticbrainz_tracks <- function(frame, track_thresh
       stop('Please make sure the input frame contains all Acousticbrainz track information by running get_tracks_acousticbrainz first.')
     }
     result <- filter_lowquality_content(frame,
-                            c('track.mb.quality'),
-                            c(track_threshold),
+                            c('track.mb.quality', 'track.mb.firstartist.quality'),
+                            c(track_threshold, artist_threshold),
                             contentcols = c(musicbrainzTrackVars, acousticbrainzTrackVars))
 
   }
