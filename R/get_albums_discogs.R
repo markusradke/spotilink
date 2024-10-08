@@ -10,7 +10,9 @@
 #'  \item \code{album.s.title} \cr
 #'  with \emph{Spotify} album title,
 #'  \item \code{album.s.firstartist.name} \cr
-#'  with \emph{Spotify} artist name.
+#'  with \emph{Spotify} artist name,
+#'  \item \code{album.s.releaseyear} \cr
+#'  with \emph{Spotify} release year.
 #'}
 #'It is advisable to first run \code{\link{get_all_spotify}} before running this command,
 #'in order to have all the necessary information.
@@ -24,12 +26,12 @@
 #'
 #' @examples
 get_albums_discogs <- function(input, dc_pass, album_threshold = 0.8, artist_threshold = 0.8){
-  are_needed_columns_present(input, c('album.s.id', 'album.s.title', 'album.s.firstartist.name'))
+  are_needed_columns_present(input, c('album.s.id', 'album.s.title', 'album.s.firstartist.name', 'album.s.releaseyear'))
   input <- rename_existing_variables(input, discogsAlbumVars)
 
   distinct_input <- dplyr::distinct(input, album.s.id, .keep_all = TRUE)
   res <- purrr::pmap_df(list(distinct_input$album.s.id, distinct_input$album.s.title,
-                             distinct_input$album.s.firstartist.name),
+                             distinct_input$album.s.firstartist.name, distinct_input$album.s.releaseyear),
                         get_discogs_for_single_track, dc_pass,
                         .progress = 'Linking DC album genres...')
   message('Done.')
@@ -39,7 +41,7 @@ get_albums_discogs <- function(input, dc_pass, album_threshold = 0.8, artist_thr
   res
 }
 
-get_discogs_for_single_track <- function(album.s.id, album.s.title,album.s.firstartist.name, dc_pass){
+get_discogs_for_single_track <- function(album.s.id, album.s.title,album.s.firstartist.name, album.s.releaseyear, dc_pass){
   .build_search_url <- function(){
     title <- simplify_name(album.s.title)
     artist <- simplify_name(album.s.firstartist.name)
@@ -58,6 +60,9 @@ get_discogs_for_single_track <- function(album.s.id, album.s.title,album.s.first
                              title = sapply(res, function(hit) hit$title))
     topresults$genre = lapply(res, function(hit) hit$genre)
     topresults$style = lapply(res, function(hit) hit$style)
+    topresults$releaseyear = lapply(res, function(hit) hit$year)
+    topresults$releaseyear <- as.integer(topresults$releaseyear)
+    topresults$album.s.releaseyear = album.s.releaseyear
 
     topresults %>%
       .extract_albumtitle_and_artistname_from_dctitle() %>%
@@ -91,8 +96,9 @@ get_discogs_for_single_track <- function(album.s.id, album.s.title,album.s.first
                     artist.dc.quality = 1 - stringdist::stringdist(simplify_name(album.s.firstartist.name),
                                                                    simplify_name(artist.dc.name),
                                                                    'jw'),
+                    releasediff = abs(album.s.releaseyear - releaseyear),
                     res_number = dplyr::row_number()) %>%
-      dplyr::arrange(artist.dc.quality, album.dc.quality, res_number) %>%
+      dplyr::arrange(-artist.dc.quality, -album.dc.quality,  releasediff, res_number) %>%
       dplyr::first()
   }
 

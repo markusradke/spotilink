@@ -1,15 +1,15 @@
 test_that('Assertion all variables in input data frame', {
   expect_error(get_albums_discogs(data.frame(album.s.id = c('a', 'b'), album.s.title = c('a', 'b')), dc_pass),
-               'Please provide a data frame containing the following columns:\nalbum.s.id, album.s.title, album.s.firstartist.name\nSee the function reference for further information.')
+               'Please provide a data frame containing the following columns:\nalbum.s.id, album.s.title, album.s.firstartist.name, album.s.releaseyear\nSee the function reference for further information.')
   expect_error(get_albums_discogs(data.frame(album.s.id = c('a', 'b'), artist.s.name = c('a', 'b')), dc_pass),
-               'Please provide a data frame containing the following columns:\nalbum.s.id, album.s.title, album.s.firstartist.name\nSee the function reference for further information.')
+               'Please provide a data frame containing the following columns:\nalbum.s.id, album.s.title, album.s.firstartist.name, album.s.releaseyear\nSee the function reference for further information.')
   expect_error(get_albums_discogs(data.frame(album.s.title = c('a', 'b'), artist.s.name = c('a', 'b')), dc_pass),
-               'Please provide a data frame containing the following columns:\nalbum.s.id, album.s.title, album.s.firstartist.name\nSee the function reference for further information.')
+               'Please provide a data frame containing the following columns:\nalbum.s.id, album.s.title, album.s.firstartist.name, album.s.releaseyear\nSee the function reference for further information.')
 })
 
 test_that('Returns a frame with correct additional colnames and content', {
   dc_pass <- c('bSyzKCYCBBwMYsMfxUhj', 'lZvwpvEOdZnrJsWewPxjvYUgdeWDCENu')
-  input <- testTracksArtistsAlbums %>% dplyr::rename(album.s.firstartist.name = artist.s.name)
+  input <-  suppressMessages(testTracksArtistsAlbums %>% get_albums_spotify(s_pass))
   res <- suppressMessages(get_albums_discogs(input, dc_pass))
   res_names <- colnames(res)
   expected_names <- c(colnames(input),
@@ -46,7 +46,7 @@ test_that('Returns a frame with correct additional colnames and content', {
 test_that('Renames already existing columns', {
   dc_pass <- c('bSyzKCYCBBwMYsMfxUhj', 'lZvwpvEOdZnrJsWewPxjvYUgdeWDCENu')
 
-  input <- testTracksArtistsAlbums %>% dplyr::rename(album.s.firstartist.name = artist.s.name)
+  input <- suppressMessages(testTracksArtistsAlbums %>% get_albums_spotify(s_pass))
   input$album.dc.genres <- NA
 
   res <- suppressMessages(get_albums_discogs(input, dc_pass))
