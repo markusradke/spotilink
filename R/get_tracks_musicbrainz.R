@@ -41,88 +41,114 @@ get_tracks_musicbrainz <- function(input, track_threshold = 0.8, artist_threshol
 }
 
 pull_tracks_musicbrainz <- function(input, track_threshold, artist_threshold) {
-  res <- input %>%
+  distinctinput <- input %>%
     dplyr::filter(! is.na(track.s.id)) %>%
-    dplyr::distinct(.data[['track.s.id']], .keep_all = TRUE) %>%
-    retrieve_tracks()
-  res %>%
-    retrieve_track_genre() %>%
-    dplyr::left_join(input, .data, by = c('track.s.id')) %>%
-    filter_quality_musicbrainz_acousticbrainz_tracks(track_threshold, artist_threshold)
+    dplyr::distinct(.data[['track.s.id']], .keep_all = TRUE)
+  result <- search_tracks_mbids(distinctinput)
+  result <- lookup_tracks_mb(result)
+
+  result <- filter_quality_musicbrainz_acousticbrainz_tracks(result, track_threshold, artist_threshold)
+  result <- dplyr::left_join(input, result, by = c('track.s.id'))
+  saveRDS(result, 'mb_tracks.rds')
+  mbtracks_remove_checkpoints()
+  result
 }
 
-retrieve_tracks <- function(distinctinput){
-  mbTracks <- c()
-  isrcCounter <<- 0L
-  n <- nrow(distinctinput)
-  cat('---------------------------------------------------\n')
-  cat('Looking for tracks in Musicbrainz...\n')
-  for (i in 1:nrow(distinctinput)){
-    cat('---------------------------------------------------\n')
-    cat('track', i, 'of', n, '\n')
-    result <- find_tracks_with_ISRC(distinctinput[i,])
-    if  (nrow(result) == 0) {
-      result <- find_tracks_without_ISRC(distinctinput[i,])
-    }
-    mbTracks <- rbind(mbTracks, result)
+search_tracks_mbids <- function(distinctinput){
+  checkpoint_name <- 'mb_tracks_search'
+  checkpoint <- read_checkpoint(checkpoint_name)
+  last_index <- checkpoint$last_index
+  if(! last_index == nrow(distinctinput)){
+    saved_data <- checkpoint$saved_data
+    if(last_index > 0) {distinctinput <- tail(distinctinput, -last_index)}
+    purrr::pmap_df(list(distinctinput$track.s.id,
+                                  distinctinput$track.s.title,
+                                  distinctinput$track.s.firstartist.name,
+                                  distinctinput$track.s.isrc),
+                             search_single_track_mbid %>% save_checkpoint_and_count(checkpoint_name, last_index, saved_data),
+                             .progress = 'Searching tracks on Musicbrainz...')
   }
-  cat('---------------------------------------------------\n')
-  cat(paste0(round(isrcCounter / nrow(distinctinput),4) * 100, '% of tracks were found using the ISRC.\n'))
-  rm(isrcCounter, pos = .GlobalEnv)
-  mbTracks <- mbTracks %>%
-    dplyr::select('track.mb.id' = 'mbid',
+  else{message('Track search already done.')}
+  result <- suppressMessages(read_checkpoint(checkpoint_name)$saved_data)
+  n_found_by_isrc <- result %>% dplyr::filter(track.mb.foundbyisrc) %>% nrow()
+  message(paste0(round(n_found_by_isrc / nrow(distinctinput) * 100, 2), '% distinct track were found using the ISRC from the Spotify track information.'))
+  result
+}
+
+search_single_track_mbid <- function(track.s.id, track.s.title, track.s.firstartist.name, track.s.isrc) {
+  result <- find_tracks_with_ISRC(track.s.isrc)
+  if  (nrow(result) == 0) {
+    result <- find_tracks_without_ISRC(track.s.firstartist.name, track.s.title)
+  }
+  result %>% dplyr::mutate(track.s.id = track.s.id) %>%
+    dplyr::select('track.s.id',
+                  'track.mb.id' = 'mbid',
                   'track.mb.title' = 'title',
                   'track.mb.quality',
+                  'track.mb.foundbyisrc',
                   'track.mb.artistlist' = 'artists',
                   'track.mb.firstartist.id',
                   'track.mb.firstartist.name',
                   'track.mb.firstartist.quality',
                   'track.mb.releases' = 'releases')
-  cbind(track.s.id = distinctinput$track.s.id, mbTracks)
 }
 
-find_tracks_with_ISRC <- function(observation) {
-  result <- musicbrainz::search_recordings(paste0('isrc:', observation$track.s.isrc))
+find_tracks_with_ISRC <- function(track.s.isrc) {
+  result <- suppressMessages(musicbrainz::search_recordings(paste0('isrc:', track.s.isrc)))
   if (nrow(result) != 0){
-    cat('found via ISRC\n')
-    isrcCounter <<- isrcCounter + 1
     result <- result[1,] %>%
       tidyr::hoist('artists', track.mb.firstartist.id = list('artist_mbid', 1L), .remove = FALSE) %>%
       tidyr::hoist('artists', track.mb.firstartist.name = list('name', 1L), .remove = FALSE) %>%
-      dplyr::mutate(track.mb.quality = 1, track.mb.firstartist.quality = 1)
+      dplyr::mutate(track.mb.quality = 1, track.mb.firstartist.quality = 1, track.mb.foundbyisrc = TRUE)
   }
   result
 }
 
-find_tracks_without_ISRC <- function(observation) {
-  cat('no ISRC, searching...\n')
-  musicbrainz::search_recordings(paste0('artist:', observation$track.s.firstartist.name,' and recording:', observation$track.s.title)) %>%
-    tidyr::hoist('artists', track.mb.firstartist.id = list('artist_mbid', 1L), .remove = FALSE) %>%
+find_tracks_without_ISRC <- function(track.s.firstartist.name, track.s.title) {
+  search <- suppressMessages(musicbrainz::search_recordings(paste0('artist:', track.s.firstartist.name,' and recording:', track.s.title)))
+  search %>%  tidyr::hoist('artists', track.mb.firstartist.id = list('artist_mbid', 1L), .remove = FALSE) %>%
     tidyr::hoist('artists', track.mb.firstartist.name = list('name', 1L), .remove = FALSE) %>%
-    dplyr::mutate(track.mb.quality = stringdist::stringsim(observation$track.s.title %>% simplify_name(),
+    dplyr::mutate(track.mb.quality = stringdist::stringsim(track.s.title %>% simplify_name(),
                                                            title%>% simplify_name(),
                                                            'jw'),
-                  track.mb.firstartist.quality = stringdist::stringsim(observation$track.s.firstartist.name %>% simplify_name(),
+                  track.mb.firstartist.quality = stringdist::stringsim(track.s.firstartist.name %>% simplify_name(),
                                                                        track.mb.firstartist.name %>% simplify_name(),
-                                                                       'jw')) %>%
+                                                                       'jw'),
+                  track.mb.foundbyisrc = FALSE) %>%
     dplyr::arrange(-track.mb.quality, -track.mb.firstartist.quality, -score) %>%
-    dplyr::first() %>%
-    dplyr::mutate(track.mb.quality = calculate_and_print_quality(search = observation$track.s.title,
-                                                                 found = .data[['title']]))
+    dplyr::first()
 }
 
-retrieve_track_genre <- function(tracks){
-  cat('Looking up track genre...\n')
-  trackGenres <- purrr::map_df(tracks$track.mb.id, lookup_musibrainz_track_tags_from_ID, .progress = TRUE) %>%
+lookup_tracks_mb <- function(track_mbids){
+  checkpoint_name <- 'mb_tracks_lookup'
+  checkpoint <- read_checkpoint(checkpoint_name)
+  last_index <- checkpoint$last_index
+  if(! last_index == nrow(track_mbids)){
+    saved_data <- checkpoint$saved_data
+    if(last_index > 0) {track_mbids <- tail(track_mbids, -last_index)}
+    purrr::map_df(track_mbids$track.mb.id,
+                  lookup_single_track_mb %>% save_checkpoint_and_count(checkpoint_name, last_index, saved_data),
+                 .progress = 'Looking up track genres on Musicbrainz...')
+  }
+  else{message('Track Lookup already done.')}
+  trackGenres <- suppressMessages(read_checkpoint(checkpoint_name)$saved_data)
+  cbind(track_mbids, trackGenres)
+}
+
+lookup_single_track_mb  <- function(mbID) {
+  musicbrainz::lookup_recording_by_id(mbID, includes=c('tags')) %>%
+    dplyr::mutate(score = .data[['score']] %>% as.character()) %>%
+    dplyr::mutate(length = .data[['length']] %>% as.integer()) %>%
     get_highest_ranking_genre() %>%
     dplyr::rename('track.mb.genres' = 'genres',
                   'track.mb.topgenre' = 'topgenre') %>%
     dplyr::mutate(track.mb.topgenre = .data[['track.mb.topgenre']] %>% as.character())
-  cbind(tracks, trackGenres)
 }
 
-lookup_musibrainz_track_tags_from_ID  <- function(mbID) {
-  musicbrainz::lookup_recording_by_id(mbID, includes=c('tags')) %>%
-    dplyr::mutate(score = .data[['score']] %>% as.character()) %>%
-    dplyr::mutate(length = .data[['length']] %>% as.integer())
+mbtracks_remove_checkpoints <- function(){
+  pattern <- paste0('^mb_tracks_(search|lookup)_(\\d+)\\.rds$')
+  files <- list.files()
+  matching_files <- grep(pattern, files, value = TRUE)
+  for(file in matching_files){file.remove(file)}
 }
+

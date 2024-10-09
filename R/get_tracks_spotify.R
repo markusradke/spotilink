@@ -32,7 +32,7 @@ get_tracks_spotify <- function(input, pass) {
       cbind(make_na_frame_spotify_tracks(NA)) %>%
       rbind(res, .)
   }
-  saveRDS('spotify_tracks.rds')
+  saveRDS(res, 'spotify_tracks.rds')
   res
 }
 

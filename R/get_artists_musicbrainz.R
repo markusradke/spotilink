@@ -75,7 +75,7 @@ search_artist_mbids <- function(artists){
                    search_single_artist_mbid %>% save_checkpoint_and_count(checkpoint_name, last_index, saved_data),
                    .progress = 'Searching artists on Musicbrainz...')
   }
-  else{message('Detected checkpoint. Artist search already done.')}
+  else{message('Artist search already done.')}
   suppressMessages(read_checkpoint(checkpoint_name)$saved_data)
 }
 
@@ -126,7 +126,7 @@ lookup_artists_mb <- function(artist_mbids){
                    lookup_single_artist_mb %>% save_checkpoint_and_count(checkpoint_name, last_index, saved_data),
                    .progress = 'Looking up artist information on Muiscbrainz...')
   }
-  else{message('Detected checkpoint. Artist Lookup already done.')}
+  else{message('Artist Lookup already done.')}
   suppressMessages(read_checkpoint(checkpoint_name)$saved_data)
 }
 

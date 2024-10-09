@@ -62,7 +62,7 @@ search_tracks_deezer <- function(input_distinct){
                                     get_single_track_deezer %>% save_checkpoint_and_count(checkpoint_name, last_index, saved_data),
                                     .progress = 'Retrieving tracks from Deezer...')
   }
-  else{message('Detected checkpoint. Tracks already done.')}
+  else{message('Tracks already linked.')}
   suppressMessages(read_checkpoint(checkpoint_name)$saved_data)
 }
 
@@ -79,7 +79,7 @@ lookup_firstartists_deezer <- function(deezer_tracks){
                    lookup_single_firstartist_deezer %>% save_checkpoint_and_count(checkpoint_name, last_index, saved_data),
                    .progress = 'Looking up corresponding albums...')
   }
-  else{message('Detected checkpoint. Artists already done.')}
+  else{message('Artist already linked.')}
   suppressMessages(read_checkpoint(checkpoint_name)$saved_data)
 }
 
@@ -111,7 +111,7 @@ lookup_trackalbums_deezer <- function(deezer_tracks){
                    lookup_single_trackalbum_deezer %>% save_checkpoint_and_count(checkpoint_name, last_index, saved_data),
                    .progress = 'Looking up corresponding albums...')
   }
-  else{message('Detected checkpoint. Albums already done.')}
+  else{message('Albums already linked.')}
   suppressMessages(read_checkpoint(checkpoint_name)$saved_data)
 }
 

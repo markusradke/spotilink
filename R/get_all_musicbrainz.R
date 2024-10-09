@@ -69,6 +69,8 @@ get_all_musicbrainz <- function(input, track_threshold = 0.8, album_threshold = 
   res <- pull_artists_musicbrainz(res, artist_threshold)
   res <- combine_genres_musicbrainz(res)
   print_linking_success(res, c('track.s.id', 'album.s.id', 'artist.s.id'))
+  # saveRDS(res, 'musicbrainz_all.rds')
+  # musicbrainz_all_remove_checkpoints()
   res
 }
 
