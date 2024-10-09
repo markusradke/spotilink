@@ -69,6 +69,52 @@ handle_empty_input <- function(input, retrievalfunction, emptyframefunction){
   cbind(input, empty_frame)
 }
 
+save_checkpoint_and_count <- function(f, checkpoint_filename, last_index, checkpoint_data) {
+  force(f)
+
+  i <- last_index
+  saved_data <- checkpoint_data
+
+  function(...) {
+    i <<- i + 1
+    result <- f(...)
+    saved_data <<- rbind(saved_data, result)
+    current_filename <- paste0(checkpoint_filename, '_', i, '.rds')
+    old_filename <- paste0(checkpoint_filename, '_', i-1, '.rds')
+    saveRDS(saved_data, current_filename)
+    if (file.exists(old_filename))
+      file.remove(old_filename)
+    result
+  }
+}
+
+read_checkpoint <- function(checkpointfilename){
+  pattern <- paste0('^', checkpointfilename, '_(\\d+)\\.rds$')
+  files <- list.files()
+  matching_files <- grep(pattern, files, value = TRUE)
+
+  if (length(matching_files) > 0) {
+    last_index <- sub(pattern, '\\1', matching_files) %>% as.integer() %>% max()
+    message(paste0('Detected checkpoint. Continuing with index ', last_index + 1, '...'))
+    saved_data <- readRDS(paste0(checkpointfilename, '_', last_index, '.rds'))
+    return(list(last_index = last_index, saved_data = saved_data))
+  }
+  else {
+    return(list(last_index = 0, saved_data = c()))
+  }
+}
+
+save_file_and_remove_checkpoints <- function(result, checkpointfilename) {
+  saveRDS(result, paste0(checkpointfilename, '.rds'))
+
+  pattern <- paste0('^', checkpointfilename, '_(\\d+)\\.rds$')
+  files <- list.files()
+  matching_files <- grep(pattern, files, value = TRUE)
+  for(file in matching_files){
+    file.remove(file)
+  }
+}
+
 #' Show Linkage Quality
 #'
 #' Show linkage quality for each database and each quality measure that was calculated available in the input data frame.

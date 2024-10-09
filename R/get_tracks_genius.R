@@ -24,15 +24,28 @@ get_tracks_genius <- function(input, g_token, track_threshold = 0.8, artist_thre
   are_needed_columns_present(input, c('track.s.id', 'track.s.title', 'track.s.firstartist.name'))
   input <- rename_existing_variables(input, geniusLyricsVars)
 
+
   input_distinct <- dplyr::distinct(input, track.s.id, track.s.firstartist.name, .keep_all = T) %>% dplyr::filter(! is.na(track.s.id))
-  genius <- purrr::pmap_df(list(input_distinct$track.s.title,
+
+  checkpoint_name <- 'genius'
+  checkpoint <- read_checkpoint(checkpoint_name)
+  last_index <- checkpoint$last_index
+  saved_data <- checkpoint$saved_data
+  if(last_index > 0) {input_distinct <- tail(input_distinct, -last_index)}
+  purrr::pmap_df(list(input_distinct$track.s.title,
                                 input_distinct$track.s.firstartist.name,
                                 input_distinct$track.s.id),
-                           get_lyrics_for_single_track, g_token, .progress = 'Retrieving lyrics from Genius...')
+                           get_lyrics_for_single_track %>% save_checkpoint_and_count(checkpoint_name, last_index, saved_data),
+                           g_token, .progress = 'Retrieving lyrics from Genius...')
+
+  genius <- read_checkpoint(checkpoint_name)$saved_data
   message('Done.')
+
+
   genius <- filter_quality_genius_tracks(genius, track_threshold, artist_threshold)
   result <- suppressMessages(dplyr::left_join(input, genius))
   print_linkage_for_id('track.g.id', result)
+  save_file_and_remove_checkpoints(result, 'genius')
   result
 }
 

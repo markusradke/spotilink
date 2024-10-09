@@ -14,3 +14,10 @@ test_that('Returns a frame with correct additional colnames and content', {
                       acousticbrainzTrackVars)
   expect_setequal(res_names, expected_names)
 })
+
+test_that('Handles NA', {
+  result <- get_spotify_ids("Vini Vici", tracks="The Tribe", pass=passport) %>%
+    get_all_spotify(s_pass) %>%
+    get_all_musicbrainz() %>%
+    get_tracks_acousticbrainz()
+})
