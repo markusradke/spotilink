@@ -30,15 +30,10 @@
 get_all_deezer <- function(input, track_threshold = 0.8, album_threshold = 0.8, artist_threshold = 0.8){
   are_needed_columns_present(input, c('track.s.id', 'track.s.title', 'track.s.firstartist.name', 'album.s.title'))
   input <- rename_existing_variables(input, c(deezerTrackVars))
-
   input_distinct <- dplyr::distinct(input, track.s.id, track.s.firstartist.name, album.s.title, .keep_all = T) %>% dplyr::filter(! is.na(track.s.id))
-  deezer_tracks <- purrr::pmap_df(list(input_distinct$track.s.title,
-                                       input_distinct$track.s.firstartist.name,
-                                       input_distinct$track.s.id,
-                                       input_distinct$album.s.title),
-                                  get_single_track_deezer, .progress = 'Retrieving tracks from Deezer...')
 
 
+  deezer_tracks <- search_tracks_deezer(input_distinct)
   deezer_artists <- lookup_firstartists_deezer(deezer_tracks)
   deezer_albums <- lookup_trackalbums_deezer(deezer_tracks)
 
@@ -48,14 +43,44 @@ get_all_deezer <- function(input, track_threshold = 0.8, album_threshold = 0.8, 
   result <- filter_quality_deezer_all(result, track_threshold, album_threshold, artist_threshold)
   result <- suppressMessages(dplyr::left_join(input, result))
   print_linkage_for_id('track.dz.id', result)
+  saveRDS(result, 'deezer_all.rds')
+  deezer_remove_checkpoints()
   result
 }
 
+search_tracks_deezer <- function(input_distinct){
+  checkpoint_name <- 'deezer_all_tracks'
+  checkpoint <- read_checkpoint(checkpoint_name)
+  last_index <- checkpoint$last_index
+  if(! last_index == nrow(input_distinct)){
+    saved_data <- checkpoint$saved_data
+    if(last_index > 0) {input_distinct <- tail(input_distinct, -last_index)}
+    purrr::pmap_df(list(input_distinct$track.s.title,
+                                         input_distinct$track.s.firstartist.name,
+                                         input_distinct$track.s.id,
+                                         input_distinct$album.s.title),
+                                    get_single_track_deezer %>% save_checkpoint_and_count(checkpoint_name, last_index, saved_data),
+                                    .progress = 'Retrieving tracks from Deezer...')
+  }
+  else{message('Detected checkpoint. Tracks already done.')}
+  supressMessages(read_checkpoint(checkpoint_name)$saved_data)
+}
+
 lookup_firstartists_deezer <- function(deezer_tracks){
-  artist_urls <- purrr::map_chr(deezer_tracks$track.dz.firstartist.id, create_dz_artist_lookup_url)
-  artist_urls[artist_urls == 'https://api.deezer.com/artist/NA'] <- NA
-  purrr::map2_df(artist_urls, deezer_tracks$track.s.id, lookup_single_firstartist_deezer,
-                 .progress = 'Looking up corresponding albums...')
+  checkpoint_name <- 'deezer_all_artists'
+  checkpoint <- read_checkpoint(checkpoint_name)
+  last_index <- checkpoint$last_index
+  if(! last_index == nrow(deezer_tracks)){
+    saved_data <- checkpoint$saved_data
+    if(last_index > 0) {deezer_tracks <- tail(deezer_tracks, -last_index)}
+    artist_urls <- purrr::map_chr(deezer_tracks$track.dz.firstartist.id, create_dz_artist_lookup_url)
+    artist_urls[artist_urls == 'https://api.deezer.com/artist/NA'] <- NA
+    purrr::map2_df(artist_urls, deezer_tracks$track.s.id,
+                   lookup_single_firstartist_deezer %>% save_checkpoint_and_count(checkpoint_name, last_index, saved_data),
+                   .progress = 'Looking up corresponding albums...')
+  }
+  else{message('Detected checkpoint. Artists already done.')}
+  suppressMessages(read_checkpoint(checkpoint_name)$saved_data)
 }
 
 lookup_single_firstartist_deezer <- function(url, track.s.id){
@@ -74,10 +99,20 @@ lookup_single_firstartist_deezer <- function(url, track.s.id){
 
 
 lookup_trackalbums_deezer <- function(deezer_tracks){
-  album_urls <- purrr::map_chr(deezer_tracks$track.dz.album.id, create_dz_album_lookup_url)
-  album_urls[album_urls == 'https://api.deezer.com/album/NA'] <- NA
-  purrr::map2_df(album_urls, deezer_tracks$track.s.id, lookup_single_trackalbum_deezer,
-                 .progress = 'Looking up corresponding albums...')
+  checkpoint_name <- 'deezer_all_albums'
+  checkpoint <- read_checkpoint(checkpoint_name)
+  last_index <- checkpoint$last_index
+  if(! last_index == nrow(deezer_tracks)){
+    saved_data <- checkpoint$saved_data
+    if(last_index > 0) {deezer_tracks <- tail(deezer_tracks, -last_index)}
+    album_urls <- purrr::map_chr(deezer_tracks$track.dz.album.id, create_dz_album_lookup_url)
+    album_urls[album_urls == 'https://api.deezer.com/album/NA'] <- NA
+    purrr::map2_df(album_urls, deezer_tracks$track.s.id,
+                   lookup_single_trackalbum_deezer %>% save_checkpoint_and_count(checkpoint_name, last_index, saved_data),
+                   .progress = 'Looking up corresponding albums...')
+  }
+  else{message('Detected checkpoint. Albums already done.')}
+  suppressMessages(read_checkpoint(checkpoint_name)$saved_data)
 }
 
 lookup_single_trackalbum_deezer <- function(url, track.s.id){
@@ -101,4 +136,11 @@ lookup_single_trackalbum_deezer <- function(url, track.s.id){
                 track.dz.album.genres = album.dz.genres,
                 track.dz.album.firstgenre.id = album.dz.firstgenre.id,
                 track.dz.album.firstgenre.name = album.dz.firstgenre.name)
+}
+
+deezer_remove_checkpoints <- function(){
+  pattern <- paste0('^deezer_all_(albums|tracks|artists)_(\\d+)\\.rds$')
+  files <- list.files()
+  matching_files <- grep(pattern, files, value = TRUE)
+  for(file in matching_files){file.remove(file)}
 }

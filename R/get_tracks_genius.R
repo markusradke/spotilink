@@ -38,14 +38,14 @@ get_tracks_genius <- function(input, g_token, track_threshold = 0.8, artist_thre
                            get_lyrics_for_single_track %>% save_checkpoint_and_count(checkpoint_name, last_index, saved_data),
                            g_token, .progress = 'Retrieving lyrics from Genius...')
 
-  genius <- read_checkpoint(checkpoint_name)$saved_data
+  genius <- suppressMessages(read_checkpoint(checkpoint_name)$saved_data)
   message('Done.')
 
 
   genius <- filter_quality_genius_tracks(genius, track_threshold, artist_threshold)
   result <- suppressMessages(dplyr::left_join(input, genius))
   print_linkage_for_id('track.g.id', result)
-  save_file_and_remove_checkpoints(result, 'genius')
+  save_file_and_remove_checkpoints(result, checkpoint_name)
   result
 }
 

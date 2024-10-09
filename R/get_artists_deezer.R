@@ -29,15 +29,22 @@ get_artists_deezer <- function(input, threshold = 0.8){
   input <- rename_existing_variables(input, deezerArtistVars)
   input_distinct <- dplyr::distinct(input, artist.s.id, artist.s.name, .keep_all = T) %>% dplyr::filter(! is.na(artist.s.id))
 
-  deezer_artists <- purrr::pmap_df(list(input_distinct$artist.s.name,
-                                       input_distinct$artist.s.id),
-                                  get_single_artist_deezer, .progress = 'Retrieving artists from Deezer...')
+  checkpoint_name <- 'deezer_artists'
+  checkpoint <- read_checkpoint(checkpoint_name)
+  last_index <- checkpoint$last_index
+  saved_data <- checkpoint$saved_data
+  if(last_index > 0) {input_distinct <- tail(input_distinct, -last_index)}
+  purrr::pmap_df(list(input_distinct$artist.s.name,
+                      input_distinct$artist.s.id),
+                      get_single_artist_deezer %>% save_checkpoint_and_count(checkpoint_name, last_index, saved_data),
+                      .progress = 'Retrieving artists from Deezer...')
 
+  deezer_artists <- suppressMessages(read_checkpoint(checkpoint_name)$saved_data)
   deezer_artists <- filter_quality_deezer_artists(deezer_artists, threshold)
   message('Done.')
   result <- suppressMessages(dplyr::left_join(input, deezer_artists))
   print_linkage_for_id('artist.dz.id', result)
-  result <<- result
+  save_file_and_remove_checkpoints(result, checkpoint_name)
   result
 }
 
@@ -60,7 +67,6 @@ get_single_artist_deezer <- function(artist.s.name, artist.s.id){
 
   url <- .create_search_url(artist.s.name)
   result <- get_api_with_connection_management(url)
-  test123 <<- result
   topresult <- .get_parsed_topresult(result)
   if(is.null(topresult)){return(make_na_frame_deezer_artists(artist.s.id))}
 

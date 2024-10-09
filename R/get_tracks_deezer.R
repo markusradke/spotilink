@@ -32,16 +32,24 @@ get_tracks_deezer <- function(input, track_threshold = 0.8, artist_threshold = 0
   input <- rename_existing_variables(input, c(deezerTrackVars))
 
   input_distinct <- dplyr::distinct(input, track.s.id, track.s.firstartist.name, album.s.title, .keep_all = T) %>% dplyr::filter(! is.na(track.s.id))
-  deezer_tracks <- purrr::pmap_df(list(input_distinct$track.s.title,
-                                input_distinct$track.s.firstartist.name,
-                                input_distinct$track.s.id,
-                                input_distinct$album.s.title),
-                                get_single_track_deezer, .progress = 'Retrieving tracks from Deezer...')
 
+  checkpoint_name <- 'deezer_tracks'
+  checkpoint <- read_checkpoint(checkpoint_name)
+  last_index <- checkpoint$last_index
+  saved_data <- checkpoint$saved_data
+  if(last_index > 0) {input_distinct <- tail(input_distinct, -last_index)}
+     purrr::pmap_df(list(input_distinct$track.s.title,
+                      input_distinct$track.s.firstartist.name,
+                      input_distinct$track.s.id,
+                      input_distinct$album.s.title),
+                      get_single_track_deezer %>% save_checkpoint_and_count(checkpoint_name, last_index, saved_data),
+                      .progress = 'Retrieving tracks from Deezer...')
+  deezer_tracks <- suppressMessages(read_checkpoint(checkpoint_name)$saved_data)
   message('Done.')
   deezer_tracks <- filter_quality_deezer_tracks(deezer_tracks, track_threshold, artist_threshold)
   result <- suppressMessages(dplyr::left_join(input, deezer_tracks))
   print_linkage_for_id('track.dz.id', result)
+  save_file_and_remove_checkpoints(result, checkpoint_name)
   result
 }
 
