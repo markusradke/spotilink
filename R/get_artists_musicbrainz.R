@@ -91,7 +91,6 @@ search_single_artist_mbid <- function(artist.s.id, artist.s.name, track.mb.artis
   }
   if(! is.na(artist.mb.id)){
     artist.mb.foundbyid <- TRUE
-    artistMBIDCounter <<- artistMBIDCounter + 1
     artist.mb.quality <- track.mb.quality
   }
   else {

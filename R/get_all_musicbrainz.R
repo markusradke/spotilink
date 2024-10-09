@@ -64,13 +64,27 @@ get_all_musicbrainz <- function(input, track_threshold = 0.8, album_threshold = 
                                       'artist.s.id',
                                       'artist.s.name'))
   res <- rename_existing_variables(input, musicbrainzAllVars)
-  res <- pull_tracks_musicbrainz(res, track_threshold, artist_threshold)
-  res <- pull_albums_musicbrainz(res, album_threshold, artist_threshold)
-  res <- pull_artists_musicbrainz(res, artist_threshold)
+
+  if(file.exists('mb_tracks.rds')){
+    message('Checkpoint detected. Track retrieval already done.')
+    res <- readRDS('mb_tracks.rds')
+  }
+  else{res <- pull_tracks_musicbrainz(res, track_threshold, artist_threshold)}
+  if(file.exists('mb_albums.rds')){
+    message('Checkpoint detected. Album retrieval already done.')
+    res <- readRDS('mb_albums.rds')
+  }
+  else{res <- pull_albums_musicbrainz(res, album_threshold, artist_threshold)}
+  if(file.exists('mb_artists.rds')){
+    message('Checkpoint detected. Artist retrieval already done.')
+    res <- readRDS('mb_artists.rds')
+  }
+  else{res <- pull_artists_musicbrainz(res, artist_threshold)}
+
   res <- combine_genres_musicbrainz(res)
   print_linking_success(res, c('track.s.id', 'album.s.id', 'artist.s.id'))
-  # saveRDS(res, 'musicbrainz_all.rds')
-  # musicbrainz_all_remove_checkpoints()
+  saveRDS(res, 'musicbrainz_all.rds')
+  musicbrainz_all_remove_checkpoints()
   res
 }
 
@@ -82,4 +96,12 @@ combine_genres_musicbrainz <- function(input) {
     dplyr::mutate(album.mb.combinedgenre = ifelse(!is.na(.data[['album.mb.combinedgenre']]), .data[['album.mb.combinedgenre']], .data[['artist.mb.topgenre']])) %>%
     dplyr::mutate(artist.mb.combinedgenre = ifelse(!is.na(.data[['artist.mb.topgenre']]), .data[['artist.mb.topgenre']], .data[['album.mb.topgenre']])) %>%
     dplyr::mutate(artist.mb.combinedgenre = ifelse(!is.na(.data[['artist.mb.combinedgenre']]), .data[['artist.mb.combinedgenre']], .data[['track.mb.topgenre']]))
+}
+
+
+musicbrainz_all_remove_checkpoints <- function(){
+  pattern <- paste0('^mb_(albums|tracks|artists).rds$')
+  files <- list.files()
+  matching_files <- grep(pattern, files, value = TRUE)
+  for(file in matching_files){file.remove(file)}
 }
