@@ -36,72 +36,56 @@ get_artists_musicbrainz <- function(input, artist_threshold = 0.8) {
 }
 
 pull_artists_musicbrainz <- function(input, artist_threshold) {
-  cat('---------------------------------------------------\n')
-  cat('Looking for artists in Musicbrainz...\n')
-  artistMBIDCounter <<- 0
-  artists <- input %>%
-    dplyr::filter(! is.na(artist.s.id)) %>%
-    dplyr::distinct(.data[['artist.s.id']], .keep_all = TRUE)
-  noOfArtists <- nrow(artists)
-  # add NA cols for artistlist and track quality for searching for artists only
-  if (!('track.mb.artistlist' %in% colnames(artists) & 'track.mb.quality' %in% colnames(artists))) {
+  artists <- input %>% dplyr::filter(! is.na(artist.s.id)) %>% dplyr::distinct(artist.s.id, .keep_all = TRUE)
+
+  if (!('track.mb.artistlist' %in% colnames(artists) & 'track.mb.quality' %in% colnames(artists))) { # add NA cols for artistlist and track quality for searching for artists only
     artists <- artists %>%
       dplyr::mutate('track.mb.artistlist' = list(NA)) %>%
       dplyr::mutate('track.mb.quality' = NA)
   }
 
-  artists <- artists %>%
-    dplyr::select('artist.s.id',
-                  'artist.s.name',
-                  'track.mb.artistlist',
-                  'track.mb.quality') %>%
-    purrr::pmap_df(get_artist_MBIDs %>% count_artists(noOfArtists), .progress = TRUE) %>%
-    purrr::pmap_df(lookup_artists %>% count_artists(noOfArtists), .progress = TRUE) %>%
-    retrieve_artist_genre() %>%
-    dplyr::left_join(input, ., by = c('artist.s.id'))
-  cat('---------------------------------------------------\n')
-  cat(paste0(round(artistMBIDCounter / nrow(input) * 100, 2), '% were found using the MBID from the track information. \n'))
-  rm(artistMBIDCounter, pos = .GlobalEnv)
-  artists %>%
+  artists <- dplyr::select(artists, 'artist.s.id', 'artist.s.name', 'track.mb.artistlist','track.mb.quality')
+
+  artist_mbids <- purrr::pmap_df(artists, get_artist_MBIDs,
+                                 .progress = 'Searching artists on Musicbrainz...')
+
+  result <- purrr::pmap_df(artist_mbids, lookup_artists,
+                           .progress = 'Looking up artist information on Muiscbrainz...')
+
+  result <- dplyr::left_join(input, result, by = c('artist.s.id'))
+
+  n_found_by_id <- result %>% dplyr::filter(artist.mb.foundbyid) %>% nrow()
+  message(paste0(round(n_found_by_id / nrow(artists) * 100, 2), '% distinct artists were found using the Musicbrainz ID from the track information.'))
+
+  result %>%
     filter_quality_musicbrainz_artists(artist_threshold) %>%
     dplyr::mutate(artist.mb.birth = as.Date(.data[['artist.mb.birth']]))  %>% # Date conversion must be here; else only integers are returned
     dplyr::mutate(artist.mb.death = as.Date(.data[['artist.mb.death']]))
 }
 
 
-count_artists <- function(f, noOfArtists){
-  force(f)
-  force(noOfArtists)
-
-  i <- 0
-  function(...) {
-    i <<- i + 1
-    cat('---------------------------------------------------\n')
-    cat(paste0('Artist ', i, ' of ', noOfArtists, '\n'))
-    f(...)
-  }
-}
-
 get_artist_MBIDs <- function(artist.s.id, artist.s.name, track.mb.artistlist, track.mb.quality) {
   if(!is.na(track.mb.quality)) {
     artist<- track.mb.artistlist %>%
       dplyr::select('artist_mbid', 'name') %>%
-      dplyr::filter(.data[['name']] == artist.s.name)
+      dplyr::filter(.data[['name']] %>% simplify_name() == artist.s.name %>% simplify_name())
     artist.mb.id <- artist$artist_mbid[1]
   }
   else {
     artist.mb.id <- NA
   }
   if(! is.na(artist.mb.id)){
+    artist.mb.foundbyid <- TRUE
     artistMBIDCounter <<- artistMBIDCounter + 1
-    cat('found via mbid \n')
     artist.mb.quality <- track.mb.quality
   }
   else {
-    artist <- musicbrainz::search_artists(artist.s.name)[1,]
+    artist.mb.foundbyid <- FALSE
+    artist <- suppressMessages(musicbrainz::search_artists(artist.s.name)[1,])
     if(! all(is.na(artist))) {
-      artist.mb.quality <- calculate_and_print_quality(search = artist.s.name,
-                                                       found = artist$name)
+      artist.mb.quality <-  stringdist::stringsim(artist.s.name %>% simplify_name(),
+                                                  artist$name %>% simplify_name(),
+                                                  'jw')
       artist.mb.id <- artist$mbid
     }
     else {
@@ -109,25 +93,28 @@ get_artist_MBIDs <- function(artist.s.id, artist.s.name, track.mb.artistlist, tr
       artist.mb.id <- NA
     }
   }
-  cbind(artist.s.id, artist.mb.id, artist.mb.quality) %>%
-    dplyr::as_tibble() %>%
-    dplyr::mutate(artist.mb.quality = .data[['artist.mb.quality']] %>% as.double())
+  dplyr::tibble(artist.s.id = artist.s.id,
+                artist.mb.id = artist.mb.id,
+                artist.mb.quality = artist.mb.quality,
+                artist.mb.foundbyid = artist.mb.foundbyid)
 }
 
 
-lookup_artists <- function(artist.s.id, artist.mb.id, artist.mb.quality) {
-  cat('Looking up information... \n')
+lookup_artists <- function(artist.s.id, artist.mb.id, artist.mb.quality, artist.mb.foundbyid) {
+  if(is.na(artist.mb.id)){return(make_na_frame_musicbrainz_artists(artist.s.id = artist.s.id))}
+
   musicbrainz::lookup_artist_by_id(artist.mb.id, includes = c('tags')) %>%
     dplyr::mutate(artist.mb.birth = ifelse(stringr::str_length(.data[['life_span_begin']]) == 4, paste0(.data[['life_span_begin']], '-01-01'),.data[['life_span_begin']])) %>%
     dplyr::mutate(artist.mb.birthyear = stringr::str_sub(.data[['life_span_begin']], 1,4) %>% as.integer()) %>%
     dplyr::mutate(artist.mb.death = ifelse(stringr::str_length(.data[['life_span_end']]) == 4, paste0(.data[['life_span_end']], '-01-01'),.data[['life_span_end']])) %>%
     dplyr::mutate(artist.mb.deathyear = stringr::str_sub(.data[['life_span_end']], 1,4) %>% as.integer()) %>%
     dplyr::mutate(artist.mb.dead = .data[['life_span_ended']] %>% as.logical()) %>%
-    cbind(artist.s.id, artist.mb.id, artist.mb.quality) %>%
+    cbind(artist.s.id, artist.mb.id, artist.mb.quality, artist.mb.foundbyid) %>%
     dplyr::select('artist.s.id',
                   'artist.mb.name' = 'name',
                   'artist.mb.id',
                   'artist.mb.quality',
+                  'artist.mb.foundbyid',
                   'artist.mb.type' = 'type',
                   'artist.mb.gender' = 'gender',
                   'artist.mb.area' = 'country',
@@ -137,7 +124,8 @@ lookup_artists <- function(artist.s.id, artist.mb.id, artist.mb.quality) {
                   'artist.mb.deathyear',
                   'artist.mb.dead',
                   'tags',
-                  'artist.mb.origin' = 'begin_area_name')
+                  'artist.mb.origin' = 'begin_area_name') %>%
+  retrieve_artist_genre()
 }
 
 retrieve_artist_genre <- function(artists){

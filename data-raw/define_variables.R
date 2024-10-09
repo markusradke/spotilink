@@ -78,6 +78,7 @@ musicbrainzArtistVars <- c('artist.mb.id',
                            'artist.mb.deathyear',
                            'artist.mb.dead',
                            'artist.mb.genres',
+                           'artist.mb.foundbyid',
                            'artist.mb.topgenre')
 
 spotifyAllVars <- union(spotifyTrackVars, spotifyAlbumVars) %>% union(spotifyArtistVars)
@@ -125,6 +126,7 @@ correctTypesAll <- c(
   artist.s.popularity	= 'integer',
   artist.s.followers	= 'integer',
   artist.mb.id	= 'character',
+  artist.mb.foundbyid = 'logical',
   artist.mb.name	= 'character',
   artist.mb.quality	= 'numeric',
   artist.mb.type	= 'character',

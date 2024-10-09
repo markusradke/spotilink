@@ -30,7 +30,7 @@ get_artists_spotify <- function(input, pass) {
       cbind(make_na_frame_spotify_artists(NA)) %>%
       rbind(res, .)
   }
-  saveRDS('spotify_artists.rds')
+  saveRDS(res, 'spotify_artists.rds')
   res
 }
 

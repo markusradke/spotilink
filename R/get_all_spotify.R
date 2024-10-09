@@ -37,7 +37,7 @@ get_all_spotify <- function(input, pass) {
       cbind(make_na_frame_spotify_all(NA)) %>%
       rbind(res, .)
   }
-  saveRDS('spotify.rds')
+  saveRDS(res, 'spotify.rds')
   res
 }
 

@@ -63,7 +63,7 @@ search_tracks_deezer <- function(input_distinct){
                                     .progress = 'Retrieving tracks from Deezer...')
   }
   else{message('Detected checkpoint. Tracks already done.')}
-  supressMessages(read_checkpoint(checkpoint_name)$saved_data)
+  suppressMessages(read_checkpoint(checkpoint_name)$saved_data)
 }
 
 lookup_firstartists_deezer <- function(deezer_tracks){

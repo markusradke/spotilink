@@ -71,6 +71,9 @@ handle_empty_input <- function(input, retrievalfunction, emptyframefunction){
 
 save_checkpoint_and_count <- function(f, checkpoint_filename, last_index, checkpoint_data) {
   force(f)
+  force(checkpoint_filename)
+  force(last_index)
+  force(checkpoint_data)
 
   i <- last_index
   saved_data <- checkpoint_data
