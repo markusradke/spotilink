@@ -23,17 +23,27 @@ get_audioanalysis_spotify <- function(input, pass) {
 
 retrieve_audioanalysis_spotify <- function(input) {
   cat('Retrieving data with get_track_audio_analysis from identifier track.s.id ... \n')
-  res <- input %>%
+  unique_ids <- input %>%
     dplyr::distinct(.data[['track.s.id']]) %>%
     dplyr::filter(! is.na(track.s.id)) %>%
-    dplyr::pull('track.s.id') %>%
-    purrr::map_df(retrieve_single_audioanalysis, .progress = TRUE)
-  suppressMessages(dplyr::right_join(res, input))
+    dplyr::pull('track.s.id')
+
+  checkpoint_name <- 'spotify_audioanalysis'
+  checkpoint <- read_checkpoint(checkpoint_name)
+  last_index <- checkpoint$last_index
+  saved_data <- checkpoint$saved_data
+  if(last_index > 0) {unique_ids <- tail(unique_ids, -last_index)}
+  purrr::map_df(unique_ids,
+                retrieve_single_audioanalysis %>% save_checkpoint_and_count(checkpoint_name, last_index, saved_data),
+                .progress = TRUE)
+  res <- suppressMessages(read_checkpoint(checkpoint_name)$saved_data)
+  res <- suppressMessages(dplyr::right_join(res, input))
+  save_file_and_remove_checkpoints(res, checkpoint_name)
+  res
 }
 
 retrieve_single_audioanalysis <- function(track.s.id) {
   res <- spotify_api_connection_management(id = track.s.id, spotify_function = spotifyr::get_track_audio_analysis)
-  # res <- spotifyr::get_track_audio_analysis(track.s.id)
   Sys.sleep(2)
   res %>%
     clean_analysis() %>%
