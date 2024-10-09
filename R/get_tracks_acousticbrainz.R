@@ -34,6 +34,7 @@ get_tracks_acousticbrainz <- function(input){
 
   result <- suppressMessages(dplyr::left_join(input, acousticbrainz_tracks))
   print_linkage_for_id('track.ab.id', result)
+  saveRDS('acousticbrainz.rds')
   result
 }
 

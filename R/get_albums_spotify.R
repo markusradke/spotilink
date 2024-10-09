@@ -31,6 +31,7 @@ get_albums_spotify <- function(input, pass) {
       cbind(make_na_frame_spotify_albums(NA)) %>%
       rbind(res, .)
   }
+  saveRDS('spotify_albums.rds')
   res
 }
 
