@@ -130,7 +130,7 @@ lookup_tracks_mb <- function(track_mbids){
                   lookup_single_track_mb %>% save_checkpoint_and_count(checkpoint_name, last_index, saved_data),
                  .progress = 'Looking up track genres on Musicbrainz...')
   }
-  else{message('Track Lookup already done.')}
+  else{message('Track lookup already done.')}
   trackGenres <- suppressMessages(read_checkpoint(checkpoint_name)$saved_data)
   cbind(track_mbids, trackGenres)
 }
