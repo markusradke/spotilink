@@ -104,8 +104,15 @@ parse_dz_album_lookup <- function(lookup, album.s.id){
     dplyr::mutate(album.dz.explicitlyricsinfo = purrr::map_chr(.data$album.dz.explicitlyricsinfo, decode_explicit_info),
                   album.dz.explicitcoverinfo = purrr::map_chr(.data$album.dz.explicitcoverinfo, decode_explicit_info))
 
+
   parsed$album.dz.genres  <- lookup$genres
-  parsed <- tidyr::hoist(parsed, album.dz.genres, album.dz.firstgenre.name = list(1, 'name'))
-  parsed <- tidyr::hoist(parsed, album.dz.genres, album.dz.firstgenre.id = list(1, 'id'))
+  if(length(parsed$album.dz.genres$data) > 0){
+    parsed <- tidyr::hoist(parsed, album.dz.genres, album.dz.firstgenre.name = list(1, 'name'))
+    parsed <- tidyr::hoist(parsed, album.dz.genres, album.dz.firstgenre.id = list(1, 'id'))
+  }
+  else {
+    parsed <- dplyr::mutate(parsed, album.dz.firstgenre.name = NA,
+                                    album.dz.firstgenre.id = NA)
+  }
   parsed
 }
