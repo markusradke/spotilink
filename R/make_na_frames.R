@@ -67,3 +67,13 @@ make_na_frame_audioanalysis_spotify <- function(track.s.id){
   data.frame(setNames(replicate(length(spotifyAudioanalysisVars), NA, simplify = FALSE), spotifyAudioanalysisVars)) %>%
     dplyr::mutate(track.s.id = track.s.id)
 }
+
+make_na_frame_acousticbrainz_tracks_highlevel <- function(track.mb.id){
+  data.frame(setNames(replicate(length(acousticbrainzTrackVarsHighlevel), NA, simplify = FALSE), acousticbrainzTrackVarsHighlevel)) %>%
+    dplyr::mutate(track.mb.id = track.mb.id)
+}
+
+make_na_frame_acousticbrainz_tracks_lowlevel <- function(track.mb.id){
+  data.frame(setNames(replicate(length(acousticbrainzTrackVarsLowlevel), NA, simplify = FALSE), acousticbrainzTrackVarsLowlevel)) %>%
+    dplyr::mutate(track.mb.id = track.mb.id)
+}

@@ -56,3 +56,16 @@ test_that('Renames already existing columns', {
                       'album.dc.genres_old')
   expect_setequal(res_names, expected_names)
 })
+
+test_that('release year bug fix for topresults', {
+  input <- data.frame(album.s.id = '2UgmfoJF7x7cQmWADnoQdG',
+                      album.s.title = 'Reload (Vocal Version / Radio Edit)',
+                      album.s.firstartist.name = 'Sebastian Ingrosso',
+                      album.s.releaseyear = 2013L)
+  res <- suppressMessages(get_albums_discogs(input, dc_pass))
+  res_names <- colnames(res)
+  expected_names <- c(colnames(input),
+                      discogsAlbumVars)
+  expect_setequal(res_names, expected_names)
+
+})

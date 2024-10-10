@@ -229,20 +229,39 @@ deezerAllVars <- c(deezerTrackVars,
                    'track.dz.album.genres',
                    'track.dz.firstartist.follower', 'track.dz.firstartist.nalbums', 'track.dz.firstartist.toptracks')
 
-acousticbrainzTrackVars <- c('track.ab.tonal_atonal','track.ab.id','track.ab.voice_instrumental','track.ab.danceability',
-                            'track.ab.p.danceability', 'track.ab.gender','track.ab.p.gender', 'track.ab.genre_dortmund',
-                            'track.ab.p.genre_dortmund', 'track.ab.genre_electronic','track.ab.p.genre_electronic',
-                            'track.ab.genre_rosamerica', 'track.ab.p.genre_rosamerica', 'track.ab.genre_tzanetakis',
-                            'track.ab.p.genre_tzanetakis','track.ab.ismir04_rhythm', 'track.ab.p.ismir04_rhythm','track.ab.mood_acoustic',
-                            'track.ab.p.mood_acoustic', 'track.ab.mood_aggressive', 'track.ab.p.mood_aggressive','track.ab.mood_electronic',
-                            'track.ab.p.mood_electronic', 'track.ab.mood_happy', 'track.ab.p.mood_happy', 'track.ab.mood_party',
-                            'track.ab.p.mood_party', 'track.ab.mood_relaxed', 'track.ab.p.mood_relaxed', 'track.ab.mood_sad',
-                            'track.ab.p.mood_sad', 'track.ab.moods_mirex', 'track.ab.p.moods_mirex', 'track.ab.timbre',
-                            'track.ab.p.timbre', 'track.ab.p.danceable', 'track.ab.p.notdanceable', 'track.ab.p.female',
-                            'track.ab.p.male', 'track.ab.p.rosa.classical', 'track.ab.p.rosa.dance', 'track.ab.p.rosa.hiphop',
-                            'track.ab.p.rosa.jazz', 'track.ab.p.rosa.pop', 'track.ab.p.rosa.rhythmandblues', 'track.ab.p.rosa.rock',
-                            'track.ab.p.rosa.speech', 'track.ab.p.acoustic', 'track.ab.p.notacoustic', 'track.ab.p.aggressive',
-                            'track.ab.p.not_aggressive', 'track.ab.p.electronic', 'track.ab.p.notelectronic','track.ab.p.happy',
-                            'track.ab.p.nothappy', 'track.ab.p.notparty', 'track.ab.p.party', 'track.ab.p.notrelaxed',
-                            'track.ab.p.relaxed', 'track.ab.p.notsad', 'track.ab.p.sad', 'track.ab.p.bright', 'track.ab.p.dark',
-                            'track.ab.p.atonal', 'track.ab.p.tonal', 'track.ab.p.instrumental', 'track.ab.p.voice')
+acousticbrainzTrackVarsHighlevel <- c(
+  'track.ab.id', 'track.ab.danceability', 'track.ab.gender',
+  'track.ab.genredortmund', 'track.ab.genreelectronic', 'track.ab.genrerosamerica',
+  'track.ab.genretzanetakis', 'track.ab.ismir04rhythm', 'track.ab.acoustic',
+  'track.ab.aggressive', 'track.ab.electronic', 'track.ab.happy',
+  'track.ab.party', 'track.ab.relaxed', 'track.ab.sad',
+  'track.ab.mirex', 'track.ab.timbre', 'track.ab.tonalatonal',
+  'track.ab.voiceinstrumental', 'track.ab.p.danceable', 'track.ab.p.female',
+  'track.ab.p.acoustic', 'track.ab.p.aggressive', 'track.ab.p.electronic',
+  'track.ab.p.happy', 'track.ab.p.party', 'track.ab.p.relaxed',
+  'track.ab.p.sad', 'track.ab.p.bright', 'track.ab.p.tonal',
+  'track.ab.p.voice', 'track.ab.p.drtmd.alternative', 'track.ab.p.drtmd.blues',
+  'track.ab.p.drtmd.electronic', 'track.ab.p.drtmd.folk.country', 'track.ab.p.drtmd.funk.soul.rnb',
+  'track.ab.p.drtmd.jazz', 'track.ab.p.drtmd.pop', 'track.ab.p.drtmd.rap.hiphop',
+  'track.ab.p.drtmd.rock', 'track.ab.p.eltrc.ambient', 'track.ab.p.eltrc.drumandbass',
+  'track.ab.p.eltrc.house', 'track.ab.p.eltrc.techno', 'track.ab.p.eltrc.trance',
+  'track.ab.p.rosa.classical', 'track.ab.p.rosa.dance', 'track.ab.p.rosa.hiphop',
+  'track.ab.p.rosa.jazz', 'track.ab.p.rosa.pop', 'track.ab.p.rosa.rhythmandblues',
+  'track.ab.p.rosa.rock', 'track.ab.p.rosa.speech', 'track.ab.p.tzntk.blues',
+  'track.ab.p.tzntk.classical', 'track.ab.p.tzntk.country', 'track.ab.p.tzntk.disco',
+  'track.ab.p.tzntk.hiphop', 'track.ab.p.tzntk.jazz', 'track.ab.p.tzntk.metal',
+  'track.ab.p.tzntk.pop', 'track.ab.p.tzntk.reggae', 'track.ab.p.tzntk.rock',
+  'track.ab.p.ismir.chachacha', 'track.ab.p.ismir.jive', 'track.ab.p.ismir.quickstep',
+  'track.ab.p.ismir.rumbaamerican', 'track.ab.p.ismir.rumbainternational', 'track.ab.p.ismir.rumbamisc',
+  'track.ab.p.ismir.samba', 'track.ab.p.ismir.tango', 'track.ab.p.ismir.viennesewaltz',
+  'track.ab.p.ismir.waltz', 'track.ab.p.mirex.aggressive', 'track.ab.p.mirex.humorous',
+  'track.ab.p.mirex.literate', 'track.ab.p.mirex.passionate', 'track.ab.p.mirex.rollicking')
+
+acousticbrainzTrackVarsLowlevel <- c(
+  'track.ab.rhythm.tempo', 'track.ab.rhythm.danceability', 'track.ab.rhythm.onsetrate',
+  'track.ab.low.loudness', 'track.ab.low.dynamiccomplexity', 'track.ab.tonal.chordchangerate',
+  'track.ab.tonal.key', 'track.ab.tonal.chordsnumberrate', 'track.ab.tonal.mode',
+  'track.ab.tonal.keystrength'
+)
+
+acousticbrainzTrackVars <- union(acousticbrainzTrackVarsHighlevel, acousticbrainzTrackVarsLowlevel)

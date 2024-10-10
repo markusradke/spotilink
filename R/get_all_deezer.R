@@ -77,7 +77,7 @@ lookup_firstartists_deezer <- function(deezer_tracks){
     artist_urls[artist_urls == 'https://api.deezer.com/artist/NA'] <- NA
     purrr::map2_df(artist_urls, deezer_tracks$track.s.id,
                    lookup_single_firstartist_deezer %>% save_checkpoint_and_count(checkpoint_name, last_index, saved_data),
-                   .progress = 'Looking up corresponding albums...')
+                   .progress = 'Looking up corresponding artists...')
   }
   else{message('Artist already linked.')}
   suppressMessages(read_checkpoint(checkpoint_name)$saved_data)

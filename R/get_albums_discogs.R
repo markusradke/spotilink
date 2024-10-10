@@ -70,7 +70,7 @@ get_discogs_for_single_track <- function(album.s.id, album.s.title,album.s.first
     topresults$genre = lapply(res, function(hit) hit$genre)
     topresults$style = lapply(res, function(hit) hit$style)
     topresults$releaseyear = lapply(res, function(hit) hit$year)
-    topresults$releaseyear <- as.integer(topresults$releaseyear)
+    topresults$releaseyear <- lapply(topresults$releaseyear, function(x) if (is.null(x)) NA else x) %>% as.integer()
     topresults$album.s.releaseyear = album.s.releaseyear
 
     topresults %>%
@@ -129,6 +129,7 @@ get_discogs_for_single_track <- function(album.s.id, album.s.title,album.s.first
   url <- .build_search_url()
   res <- get_api_with_connection_management(url)
   if(length(res$results) == 0) {return(.make_empty_frame())}
+  res <<- res
   res <- .parse_results(res)
   res$album.s.id <- album.s.id
   Sys.sleep(1) # Discogs rate limit for authenticated requests is 60 per minute
