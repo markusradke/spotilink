@@ -31,20 +31,14 @@ get_spotify_ids <- function(artists, pass, tracks = NA, albums = NA, releaseyear
   input <- data.frame(artists = artists, tracks = tracks, albums = albums, releaseyear = releaseyear) %>%
     dplyr::distinct(artists, tracks, albums, .keep_all = T)
   if(! all(is.na(input$tracks))){
-    res <- purrr::pmap_df(list(input$artists, input$tracks, input$albums, input$releaseyear),
-                          search_track_on_spotify,
-                          artist_threshold, track_or_album_threshold,
-                          .progress = 'Looking up tracks IDs on Spotify...')
+    res <- search_tracks_on_spotify(input, artist_threshold, track_or_album_threshold)
   }
   else{
     if(! all(is.na(input$albums))){
-      res <- purrr::pmap_df(list(input$artists, input$albums, input$releaseyear),
-                            search_album_on_spotify,
-                            artist_threshold, track_or_album_threshold,
-                            .progress = 'Looking up albums IDs on Spotify...')
+      res <- search_albums_on_spotify(input, artist_threshold, track_or_album_threshold)
     }
     else{
-      res <- purrr::map_df(input$artists, search_artist_on_spotify, artist_threshold, .progress = 'Looking up artists IDs on Spotify...')
+      res <- search_artists_on_spotify(input, artist_threshold)
     }
   }
 
@@ -101,7 +95,54 @@ check_assertions_get_spotify_ids <- function(artists, tracks, albums, releaseyea
 }
 
 
-search_track_on_spotify <- function(artist, track, album, releaseyear, artist_threshold, track_threshold){
+search_tracks_on_spotify <- function(input, artist_threshold, track_or_album_threshold){
+  checkpoint_name <- 'spotify_search'
+  checkpoint <- read_checkpoint(checkpoint_name)
+  last_index <- checkpoint$last_index
+  saved_data <- checkpoint$saved_data
+  if(last_index > 0) {input <- tail(input, -last_index)}
+  purrr::pmap_df(list(input$artists, input$tracks, input$albums, input$releaseyear),
+                        search_single_track_on_spotify %>% save_checkpoint_and_count(checkpoint_name, last_index, saved_data),
+                 artist_threshold, track_or_album_threshold,
+                        .progress = 'Looking up tracks IDs on Spotify...')
+  res <- suppressMessages(read_checkpoint(checkpoint_name)$saved_data)
+  message('Done.')
+  save_file_and_remove_checkpoints(res, checkpoint_name)
+  res
+}
+
+search_albums_on_spotify <- function(input, artist_threshold, track_or_album_threshold){
+  checkpoint_name <- 'spotify_search'
+  checkpoint <- read_checkpoint(checkpoint_name)
+  last_index <- checkpoint$last_index
+  saved_data <- checkpoint$saved_data
+  if(last_index > 0) {input <- tail(input, -last_index)}
+  purrr::pmap_df(list(input$artists, input$albums, input$releaseyear),
+                 search_single_album_on_spotify %>% save_checkpoint_and_count(checkpoint_name, last_index, saved_data),
+                 artist_threshold, track_or_album_threshold,
+                 .progress = 'Looking up albums IDs on Spotify...')
+  res <- suppressMessages(read_checkpoint(checkpoint_name)$saved_data)
+  message('Done.')
+  save_file_and_remove_checkpoints(res, checkpoint_name)
+  res
+}
+
+search_artists_on_spotify <- function(input, artist_threshold){
+  checkpoint_name <- 'spotify_search'
+  checkpoint <- read_checkpoint(checkpoint_name)
+  last_index <- checkpoint$last_index
+  saved_data <- checkpoint$saved_data
+  if(last_index > 0) {input <- tail(input, -last_index)}
+  purrr::map_df(input$artists,
+               search_single_artist_on_spotify %>% save_checkpoint_and_count(checkpoint_name, last_index, saved_data),
+               artist_threshold, .progress = 'Looking up artists IDs on Spotify...')
+  res <- suppressMessages(read_checkpoint(checkpoint_name)$saved_data)
+  message('Done.')
+  save_file_and_remove_checkpoints(res, checkpoint_name)
+  res
+}
+
+search_single_track_on_spotify <- function(artist, track, album, releaseyear, artist_threshold, track_threshold){
   .make_empty_frame <- function(){
     data.frame(artist.search = artist,
                track.search = track,
@@ -147,7 +188,7 @@ search_track_on_spotify <- function(artist, track, album, releaseyear, artist_th
   res
 }
 
-search_album_on_spotify <- function(artist, album, releaseyear, artist_threshold, album_threshold){
+search_single_album_on_spotify <- function(artist, album, releaseyear, artist_threshold, album_threshold){
   .make_empty_frame <- function(){
     data.frame(artist.search = artist,
                album.search = album,
@@ -190,7 +231,7 @@ search_album_on_spotify <- function(artist, album, releaseyear, artist_threshold
   res
 }
 
-search_artist_on_spotify <- function(artist, threshold){
+search_single_artist_on_spotify <- function(artist, threshold){
   .make_empty_frame <- function(){
     data.frame(artist.search = artist,
                artist.s.id = NA,
