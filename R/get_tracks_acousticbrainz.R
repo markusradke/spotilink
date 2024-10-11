@@ -185,16 +185,16 @@ parse_tracks_acousticbrainz_lowlevel <- function(response){
 
     result_temp <- data.frame(track.mb.id = metadata$tags$musicbrainz_recordingid[[1]],
                               track.ab.id = metadata$tags$musicbrainz_recordingid[[1]],
-                              ifelse(!is.null(track.ab.rhythm.tempo), track.ab.rhythm.tempo, NA),
-                              ifelse(!is.null(track.ab.rhythm.danceability),track.ab.rhythm.danceability, NA),
-                              ifelse(!is.null(track.ab.rhythm.onsetrate), track.ab.rhythm.onsetrate, NA),
-                              ifelse(!is.null(track.ab.low.loudness), track.ab.low.loudness, NA),
-                              ifelse(!is.null(track.ab.low.dynamiccomplexity), track.ab.low.dynamiccomplexity, NA),
-                              ifelse(!is.null(track.ab.tonal.chordchangerate), track.ab.tonal.chordchangerate, NA),
-                              ifelse(!is.null(track.ab.tonal.key), track.ab.tonal.key, NA),
-                              ifelse(!is.null(track.ab.tonal.chordsnumberrate), track.ab.tonal.chordsnumberrate, NA),
-                              ifelse(!is.null(track.ab.tonal.mode), track.ab.tonal.mode, NA),
-                              ifelse(!is.null(track.ab.tonal.keystrength), track.ab.tonal.keystrength, NA))
+                              track.ab.rhythm.tempo = ifelse(!is.null(track.ab.rhythm.tempo), track.ab.rhythm.tempo, NA),
+                              track.ab.rhythm.danceability = ifelse(!is.null(track.ab.rhythm.danceability),track.ab.rhythm.danceability, NA),
+                              track.ab.rhythm.onsetrate = ifelse(!is.null(track.ab.rhythm.onsetrate), track.ab.rhythm.onsetrate, NA),
+                              track.ab.low.loudness = ifelse(!is.null(track.ab.low.loudness), track.ab.low.loudness, NA),
+                              track.ab.low.dynamiccomplexity = ifelse(!is.null(track.ab.low.dynamiccomplexity), track.ab.low.dynamiccomplexity, NA),
+                              track.ab.tonal.chordchangerate = ifelse(!is.null(track.ab.tonal.chordchangerate), track.ab.tonal.chordchangerate, NA),
+                              track.ab.tonal.key = ifelse(!is.null(track.ab.tonal.key), track.ab.tonal.key, NA),
+                              track.ab.tonal.chordsnumberrate = ifelse(!is.null(track.ab.tonal.chordsnumberrate), track.ab.tonal.chordsnumberrate, NA),
+                              track.ab.tonal.mode = ifelse(!is.null(track.ab.tonal.mode), track.ab.tonal.mode, NA),
+                              track.ab.tonal.keystrength = ifelse(!is.null(track.ab.tonal.keystrength), track.ab.tonal.keystrength, NA))
     result <- rbind(result, result_temp)
   }
   result
