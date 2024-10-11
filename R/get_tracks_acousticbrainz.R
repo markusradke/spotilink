@@ -26,7 +26,14 @@ get_tracks_acousticbrainz <- function(input){
   unique_mbids <- na.omit(unique(input$track.mb.id))
 
   message('Searching mbids on acousticbrainz...')
-  abids <- search_mbids_on_acousticbrainz(unique_mbids)
+  if(file.exists('acousticbrainz_search.rds')){
+    abids <- readRDS('acousticbrainz_search.rds')
+  }
+  else{
+    message('Detected search results. Loading...')
+    abids <- search_mbids_on_acousticbrainz(unique_mbids)
+  }
+  saveRDS(abids, 'acoustibrainz_search.rds')
   abids <<- abids
 
   message('Looking up tracks on acousticbrainz...')
@@ -71,9 +78,9 @@ lookup_tracks_on_acousticbrainz <- function(abids){
   start <- 1
   stepsize <- 25
   repeat{
-    message(paste0('Looking up track ', start, ' to ', stepsize - 1, ' of ', length(abids), '...'))
     end <- min(c(start + stepsize - 1,length(abids)))
-    # manche haben nur lowlevel und keine highlevel features, bzw. vielleicht auch anders herum, das muss berücksichtigt werden
+    message(paste0('Looking up track ', start, ' to ', end - 1, ' of ', length(abids), '...'))
+    # manche haben nur lowlevel und keine highlevel features, bzw. vielleicht auch anders herum, das muss berücksichtigt werden, fehler bei 1351:(1351+25)
     url <- paste0('https://acousticbrainz.org/api/v1/high-level?recording_ids=',
                   paste0(abids[start:end], collapse=';'),
                   '&map_classes=true')
@@ -96,7 +103,7 @@ lookup_tracks_on_acousticbrainz <- function(abids){
 }
 
 parse_tracks_acousticbrainz_highlevel <- function(response){
-  if(ncol(response) == 0){return(make)}
+  if(ncol(response) == 0){return(make_na_frame_acousticbrainz_tracks_highlevel('test'))}
   result <- c()
   for(i in 1:(ncol(response))){
     track <- response[i]
@@ -156,6 +163,7 @@ parse_tracks_acousticbrainz_highlevel <- function(response){
 }
 
 parse_tracks_acousticbrainz_lowlevel <- function(response){
+  response <<- response
   result <- c()
   for(i in 1:(ncol(response))){
     track <- response[i]
@@ -164,18 +172,29 @@ parse_tracks_acousticbrainz_lowlevel <- function(response){
     rhythm_features <- track[[1]]$rhythm
     tonal_features <- track[[1]]$tonal
 
+    track.ab.rhythm.tempo <- rhythm_features$bpm
+    track.ab.rhythm.danceability <- rhythm_features$danceability
+    track.ab.rhythm.onsetrate <- rhythm_features$onset_rate
+    track.ab.low.loudness <- lowlevel_features$average_loudness
+    track.ab.low.dynamiccomplexity <- lowlevel_features$dynamic_complexity
+    track.ab.tonal.chordchangerate <- tonal_features$chords_changes_rate
+    track.ab.tonal.key <- tonal_features$key_key
+    track.ab.tonal.chordsnumberrate <- tonal_features$chords_number_rate
+    track.ab.tonal.mode <- tonal_features$key_scale
+    track.ab.tonal.keystrength <- tonal_features$key_strength
+
     result_temp <- data.frame(track.mb.id = metadata$tags$musicbrainz_recordingid[[1]],
                               track.ab.id = metadata$tags$musicbrainz_recordingid[[1]],
-                              track.ab.rhythm.tempo = rhythm_features$bpm,
-                              track.ab.rhythm.danceability = rhythm_features$danceability,
-                              track.ab.rhythm.onsetrate = rhythm_features$onset_rate,
-                              track.ab.low.loudness = lowlevel_features$average_loudness,
-                              track.ab.low.dynamiccomplexity = lowlevel_features$dynamic_complexity,
-                              track.ab.tonal.chordchangerate = tonal_features$chords_changes_rate,
-                              track.ab.tonal.key = tonal_features$key_key,
-                              track.ab.tonal.chordsnumberrate = tonal_features$chords_number_rate,
-                              track.ab.tonal.mode = tonal_features$key_scale,
-                              track.ab.tonal.keystrength = tonal_features$key_strength)
+                              ifelse(!is.null(track.ab.rhythm.tempo), track.ab.rhythm.tempo, NA),
+                              ifelse(!is.null(track.ab.rhythm.danceability),track.ab.rhythm.danceability, NA),
+                              ifelse(!is.null(track.ab.rhythm.onsetrate), track.ab.rhythm.onsetrate, NA),
+                              ifelse(!is.null(track.ab.low.loudness), track.ab.low.loudness, NA),
+                              ifelse(!is.null(track.ab.low.dynamiccomplexity), track.ab.low.dynamiccomplexity, NA),
+                              ifelse(!is.null(track.ab.tonal.chordchangerate), track.ab.tonal.chordchangerate, NA),
+                              ifelse(!is.null(track.ab.tonal.key), track.ab.tonal.key, NA),
+                              ifelse(!is.null(track.ab.tonal.chordsnumberrate), track.ab.tonal.chordsnumberrate, NA),
+                              ifelse(!is.null(track.ab.tonal.mode), track.ab.tonal.mode, NA),
+                              ifelse(!is.null(track.ab.tonal.keystrength), track.ab.tonal.keystrength, NA))
     result <- rbind(result, result_temp)
   }
   result
