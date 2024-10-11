@@ -19,7 +19,7 @@
 #'It is advisable to first run \code{\link{get_tracks_spotify}} before running this command,
 #'in order to have all the necessary information.
 #'
-#'@param threshold
+#'@param track_threshold,firstartist_threshold
 #'Floating point number between 0 and 1 indicating which elements to keep that were found using a fuzzy search.
 #'The values correspond to the string similarity (1 - Jaro-Winkler distance) between the track title on \emph{Spotify} and the found track title on \emph{Deezer}.
 #'
@@ -27,7 +27,7 @@
 #' @export
 #'
 #'@examples
-get_tracks_deezer <- function(input, track_threshold = 0.8, artist_threshold = 0.8){
+get_tracks_deezer <- function(input, track_threshold = 0.8, firstartist_threshold = 0.8){
   are_needed_columns_present(input, c('track.s.id', 'track.s.title', 'track.s.firstartist.name', 'album.s.title'))
   input <- rename_existing_variables(input, c(deezerTrackVars))
 
@@ -46,7 +46,7 @@ get_tracks_deezer <- function(input, track_threshold = 0.8, artist_threshold = 0
                       .progress = 'Retrieving tracks from Deezer...')
   deezer_tracks <- suppressMessages(read_checkpoint(checkpoint_name)$saved_data)
   message('Done.')
-  deezer_tracks <- filter_quality_deezer_tracks(deezer_tracks, track_threshold, artist_threshold)
+  deezer_tracks <- filter_quality_deezer_tracks(deezer_tracks, track_threshold, firstartist_threshold)
   result <- suppressMessages(dplyr::left_join(input, deezer_tracks))
   print_linkage_for_id('track.dz.id', result)
   save_file_and_remove_checkpoints(result, checkpoint_name)

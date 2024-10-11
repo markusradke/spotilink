@@ -13,14 +13,15 @@
 #'It is advisable to first run \code{\link{get_all_spotify}} before running this command,
 #'in order to have all the necessary information.
 #' @param g_token Genius Authentification. Please refer to \url{https://genius.com/api-clients} for generating an access token.
-#' @param threshold Floating point number between 0 and 1 indicating which elements to keep that were found using a fuzzy search.
-#'The values correspond to the string similarity (1 - Jaro-Winkler distance) between the searched artist / album and the found name / title on \emph{Spotify}. \emph{spotilink} will only keep results where the artist name as well as the album title surpass the threshold.
+#' @param track_threshold,firstartist_threshold
+#' Floating point number between 0 and 1 indicating which elements to keep that were found using a fuzzy search.
+#'The values correspond to the string similarity (1 - Jaro-Winkler distance) between the searched artist / track and the found name / title on \emph{Spotify}. \emph{spotilink} will only keep results where the artist name as well as the album title surpass the threshold.
 #'
 #' @return
 #' @export
 #'
 #' @examples
-get_tracks_genius <- function(input, g_token, track_threshold = 0.8, artist_threshold = 0.8){
+get_tracks_genius <- function(input, g_token, track_threshold = 0.8, firstartist_threshold = 0.8){
   are_needed_columns_present(input, c('track.s.id', 'track.s.title', 'track.s.firstartist.name'))
   input <- rename_existing_variables(input, geniusLyricsVars)
 
@@ -42,7 +43,7 @@ get_tracks_genius <- function(input, g_token, track_threshold = 0.8, artist_thre
   message('Done.')
 
 
-  genius <- filter_quality_genius_tracks(genius, track_threshold, artist_threshold)
+  genius <- filter_quality_genius_tracks(genius, track_threshold, firstartist_threshold)
   result <- suppressMessages(dplyr::left_join(input, genius))
   print_linkage_for_id('track.g.id', result)
   save_file_and_remove_checkpoints(result, checkpoint_name)
@@ -53,15 +54,15 @@ get_lyrics_for_single_track <- function(track.s.title, artist.s.name, track.s.id
   .get_parsed_topresult <- function(result){
     topresults <- data.frame(track.g.id = sapply(result$response$hits, function(hit) hit$result$id %>% as.character()),
                              track.g.title = sapply(result$response$hits, function(hit) hit$result$title),
-                             artist.g.id = sapply(result$response$hits, function(hit) hit$result$primary_artist$id %>% as.character()),
-                             artist.g.name = sapply(result$response$hits, function(hit) hit$result$primary_artist$name),
+                             track.g.firstartist.id = sapply(result$response$hits, function(hit) hit$result$primary_artist$id %>% as.character()),
+                             track.g.firstartist.name = sapply(result$response$hits, function(hit) hit$result$primary_artist$name),
                              track.g.lyricsstate = sapply(result$response$hits, function(hit) hit$result$lyrics_state),
                              track.g.url = sapply(result$response$hits, function(hit) hit$result$url))
     if(nrow(topresults) == 0){return(NULL)}
     topresults %>%
       dplyr::mutate(track.g.quality = stringdist::stringsim(track.s.title %>% simplify_name(), track.g.title %>% simplify_name()),
-                    artist.g.quality = stringdist::stringsim(artist.s.name %>% simplify_name(), artist.g.name %>% simplify_name())) %>%
-      dplyr::arrange(-artist.g.quality, -track.g.quality) %>%
+                    track.g.firstartist.quality = stringdist::stringsim(artist.s.name %>% simplify_name(), track.g.firstartist.name %>% simplify_name())) %>%
+      dplyr::arrange(-track.g.firstartist.quality, -track.g.quality) %>%
       dplyr::first()
   }
 

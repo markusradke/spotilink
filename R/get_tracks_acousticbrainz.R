@@ -1,6 +1,6 @@
 #'Get \emph{Acousticbrainz} Track Information
 #'
-#'Retrieve a data frame containing information from the \emph{Acousticbrainz} API using the IDs from retrieved from Musicbrainz.
+#'Retrieve a data frame containing information from the \emph{Acousticbrainz} API using the IDs from retrieved from Musicbrainz. Filtering information with \code{\link{filter_quality_musicbrainz_acousticbrainz_tracks}} will be based on the track and firstartist quality of the corresponding Musicbrainz entry.
 #'The result contains information on tracks.
 #'The \pkg{spotilink} naming convention is used.
 #'
@@ -33,7 +33,7 @@ get_tracks_acousticbrainz <- function(input){
     message('Detected search results. Loading...')
     abids <- search_mbids_on_acousticbrainz(unique_mbids)
   }
-  saveRDS(abids, 'acoustibrainz_search.rds')
+  saveRDS(abids, 'acousticbrainz_search.rds')
   abids <<- abids
 
   message('Looking up tracks on acousticbrainz...')

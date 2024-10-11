@@ -36,14 +36,14 @@ test_that('Returned content is correct', {
                                       s_pass,
                                       tracks = c('vampire', 'Der Geist hilft unserer Schwachheit auf'),
                                       releaseyear = c(2023, 2012)))
-  expect_setequal(colnames(res_track_artist), c('artist.search', 'artist.s.id', 'artist.s.name', 'artist.s.quality',
+  expect_setequal(colnames(res_track_artist), c('artist.search', 'track.s.firstartist.id', 'track.s.firstartist.name', 'track.s.firstartist.quality',
                                                'track.search', 'track.s.id', 'track.s.title', 'track.s.quality'))
-  expect_true(all((res_track_artist$artist.s.quality <= 1 & res_track_artist$artist.s.quality >= 0) | is.na(res_track_artist$artist.s.quality)))
-  expect_true(all((res_track_artist$track.s.quality <= 1 & res_track_artist$track.s.quality >= 0)| is.na(res_track_artist$artist.s.quality)))
+  expect_true(all((res_track_artist$track.s.firstartist.quality <= 1 & res_track_artist$track.s.firstartist.quality >= 0) | is.na(res_track_artist$track.s.firstartist.quality)))
+  expect_true(all((res_track_artist$track.s.quality <= 1 & res_track_artist$track.s.quality >= 0)| is.na(res_track_artist$track.s.firstartist.quality)))
   expect_true(class(res_track_artist$artist.search) == 'character')
-  expect_true(class(res_track_artist$artist.s.id) == 'character')
-  expect_true(class(res_track_artist$artist.s.name) == 'character')
-  expect_true(class(res_track_artist$artist.s.quality) == 'numeric')
+  expect_true(class(res_track_artist$track.s.firstartist.id) == 'character')
+  expect_true(class(res_track_artist$track.s.firstartist.name) == 'character')
+  expect_true(class(res_track_artist$track.s.firstartist.quality) == 'numeric')
   expect_true(class(res_track_artist$track.search) == 'character')
   expect_true(class(res_track_artist$track.s.id) == 'character')
   expect_true(class(res_track_artist$track.s.title) == 'character')
@@ -52,14 +52,14 @@ test_that('Returned content is correct', {
   res_album_artist <- suppressMessages(get_spotify_ids(c('Olivia Rodrigo', 'Johann Sebastian Bach'),
                                       s_pass,
                                       albums = c('GUTS', 'Bach: Motets')))
-  expect_setequal(colnames(res_album_artist), c('artist.search', 'artist.s.id', 'artist.s.name', 'artist.s.quality',
+  expect_setequal(colnames(res_album_artist), c('artist.search', 'album.s.firstartist.id', 'album.s.firstartist.name', 'album.s.firstartist.quality',
                                                'album.search', 'album.s.id', 'album.s.title', 'album.s.quality'))
-  expect_true(all((res_album_artist$artist.s.quality <= 1 & res_album_artist$artist.s.quality >= 0) | is.na(res_album_artist$artist.s.quality)))
-  expect_true(all((res_album_artist$album.s.quality <= 1 & res_album_artist$album.s.quality >= 0) | is.na(res_album_artist$artist.s.quality)))
+  expect_true(all((res_album_artist$album.s.firstartist.quality <= 1 & res_album_artist$album.s.firstartist.quality >= 0) | is.na(res_album_artist$album.s.firstartist.quality)))
+  expect_true(all((res_album_artist$album.s.quality <= 1 & res_album_artist$album.s.quality >= 0) | is.na(res_album_artist$album.s.firstartist.quality)))
   expect_true(class(res_album_artist$artist.search) == 'character')
-  expect_true(class(res_album_artist$artist.s.id) == 'character')
-  expect_true(class(res_album_artist$artist.s.name) == 'character')
-  expect_true(class(res_album_artist$artist.s.quality) == 'numeric')
+  expect_true(class(res_album_artist$album.s.firstartist.id) == 'character')
+  expect_true(class(res_album_artist$album.s.firstartist.name) == 'character')
+  expect_true(class(res_album_artist$album.s.firstartist.quality) == 'numeric')
   expect_true(class(res_album_artist$album.search) == 'character')
   expect_true(class(res_album_artist$album.s.id) == 'character')
   expect_true(class(res_album_artist$album.s.title) == 'character')
@@ -69,7 +69,7 @@ test_that('Returned content is correct', {
 
 # takes longer to perform
 # test_that('function also works for larger amounts of data',{
-# (test <- get_spotify_ids(testTracksArtistsAlbums_larger$artist.s.name,
+# (test <- get_spotify_ids(testTracksArtistsAlbums_larger$track.s.firstartist.s.name,
 #                  tracks = testTracksArtistsAlbums_larger$track.s.title,
 #                  pass = s_pass))
 #   expect_true(T)

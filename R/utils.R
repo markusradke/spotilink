@@ -46,14 +46,18 @@ print_linkage_for_id <- function(idcol, frame){
   entity <- stringr::str_extract(idcol, '(album|track|artist)')
   frame_distinct <- dplyr::distinct(frame, .data[[paste0(entity, '.s.id')]], .keep_all = T)
 
-  relfreq_na <- nrow(dplyr::filter(frame, ! is.na(.data[[idcol]]))) / nrow(frame)
+  freq_na <- nrow(dplyr::filter(frame, ! is.na(.data[[idcol]])))
+  relfreq_na <- freq_na / nrow(frame)
   relfreq_na_percent <- 100 * round(relfreq_na, 4)
-  relfreq_na_distinct <- nrow(dplyr::filter(frame_distinct, ! is.na(.data[[idcol]]))) / nrow(frame_distinct)
+  freq_na_distinct <- nrow(dplyr::filter(frame_distinct, ! is.na(.data[[idcol]])))
+  relfreq_na_distinct <- freq_na_distinct / nrow(frame_distinct)
   relfreq_na_percent_distinct <- 100 * round(relfreq_na_distinct, 4)
 
   message(paste0('Found ', relfreq_na_percent_distinct, '% of distinct ', entity, 's in the data set.\n',
                  'This equals to ', relfreq_na_percent, '% of all ', entity, 's in the data set.'))
   data.frame(database = idcol,
+             'freq' = freq_na,
+             'distfreq' = freq_na_distinct,
              'relfreq' = relfreq_na_percent,
              'distrelfreq' = relfreq_na_percent_distinct)
 }
@@ -74,9 +78,11 @@ save_checkpoint_and_count <- function(f, checkpoint_filename, last_index, checkp
   force(checkpoint_filename)
   force(last_index)
   force(checkpoint_data)
+  force(ndatapoints)
 
   if (savingstep > 1 & ndatapoints == -1) {stop(paste0('Please provide the number of data points ndatapoints when using a saving stepsize > 1; used savingstep = ', savingstep, ' and ndatapoints = ', ndatapoints, '...'))}
   i <- last_index
+  ndatapoints <- last_index + ndatapoints
   old_filename <- suppressMessages(read_checkpoint(checkpoint_filename)$last_checkpoint)
   saved_data <- checkpoint_data
 
@@ -198,7 +204,8 @@ show_linkage_success_in_frame <- function(frame){
     stringr::str_subset('(firstartist|album\\.(id|firstgenre)|artist\\.g)', negate = T)
   res <- suppressMessages(purrr::map_df(idvecs, print_linkage_for_id, frame))
   complete <- .get_complete_linkage(frame, idvecs)
-  res <- rbind(res, complete)
+  genre <- .get_complete_linkage(frame, idves[idvecs %in% c('dz', 'dc', 'mb')]) %>% dplyr::mutate(database = 'complete genre linkage')
+  res <- rbind(res, genre, complete)
   print(dplyr::as_tibble(res))
   res
 }

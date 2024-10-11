@@ -20,9 +20,9 @@ test_that('Returns a frame with correct additional colnames and content', {
   expect_true(class(res$track.g.id) == 'character')
   expect_true(class(res$track.g.title) == 'character')
   expect_true(class(res$track.g.lyrics) == 'list')
-  expect_true(class(res$artist.g.id) == 'character')
-  expect_true(class(res$artist.g.name) == 'character')
-  expect_true(class(res$artist.g.quality) == 'numeric')
+  expect_true(class(res$track.g.firstartist.id) == 'character')
+  expect_true(class(res$track.g.firstartist.name) == 'character')
+  expect_true(class(res$track.g.firstartist.quality) == 'numeric')
   expect_true(class(res$track.g.lyricsstate) == 'character')
 
   expect_setequal(res$track.g.lyrics[3][[1]] %>% colnames(), c('line', 'section'))

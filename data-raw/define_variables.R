@@ -201,10 +201,10 @@ correctTypesAudioanalysis <- c(
 
 discogsAlbumVars <- c('album.dc.id', 'album.dc.title', 'album.dc.genres', 'album.dc.styles',
                       'album.dc.firstgenre', 'album.dc.firststyle',
-                      'album.dc.quality', 'artist.dc.name', 'artist.dc.quality')
+                      'album.dc.quality', 'album.dc.firstartist.name', 'album.dc.firstartist.quality')
 
 geniusLyricsVars <- c('track.g.id', 'track.g.title', 'track.g.quality',
-                      'artist.g.id', 'artist.g.name', 'artist.g.quality',
+                      'track.g.firstartist.id', 'track.g.firstartist.name', 'track.g.firstartist.quality',
                       'track.g.lyrics', 'track.g.lyricsstate')
 
 deezerTrackVars <- c('track.dz.id', 'track.dz.title', 'track.dz.isrc', 'track.dz.duration', 'track.dz.rank',

@@ -19,7 +19,7 @@
 #'It is advisable to first run \code{\link{get_tracks_spotify}} before running this command,
 #'in order to have all the necessary information.
 #'
-#'@param track_threshold
+#'@param track_threshold,firstartist_threshold
 #'Floating point number between 0 and 1 indicating which elements to keep that were found using a fuzzy search.
 #'The values correspond to the string similarity (1 - Jaro-Winkler distance) between the track title on \emph{Spotify} and the found track title on \emph{Musicbrainz}.
 #'
@@ -33,21 +33,21 @@
 #'                   track.s.firstartist.name = c('Johann Sebastian Bach'))
 #'
 #'get_tracks_musicbrainz(data)
-get_tracks_musicbrainz <- function(input, track_threshold = 0.8, artist_threshold = 0.8) {
+get_tracks_musicbrainz <- function(input, track_threshold = 0.8, firstartist_threshold = 0.8) {
   are_needed_columns_present(input, c('track.s.id', 'track.s.title', 'track.s.isrc', 'track.s.firstartist.name'))
   res <- rename_existing_variables(input, musicbrainzTrackVars)
 
-  pull_tracks_musicbrainz(res, track_threshold, artist_threshold)
+  pull_tracks_musicbrainz(res, track_threshold, firstartist_threshold)
 }
 
-pull_tracks_musicbrainz <- function(input, track_threshold, artist_threshold) {
+pull_tracks_musicbrainz <- function(input, track_threshold, firstartist_threshold) {
   distinctinput <- input %>%
     dplyr::filter(! is.na(track.s.id)) %>%
     dplyr::distinct(.data[['track.s.id']], .keep_all = TRUE)
   result <- search_tracks_mbids(distinctinput)
   result <- lookup_tracks_mb(result)
 
-  result <- filter_quality_musicbrainz_acousticbrainz_tracks(result, track_threshold, artist_threshold)
+  result <- filter_quality_musicbrainz_acousticbrainz_tracks(result, track_threshold, firstartist_threshold)
   result <- dplyr::left_join(input, result, by = c('track.s.id'))
   saveRDS(result, 'mb_tracks.rds')
   mbtracks_remove_checkpoints()

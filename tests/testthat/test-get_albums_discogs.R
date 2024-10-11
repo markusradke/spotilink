@@ -17,14 +17,14 @@ test_that('Returns a frame with correct additional colnames and content', {
   expect_setequal(res_names, expected_names)
 
   expect_true(all((res$album.dc.quality <= 1 & res$album.dc.quality >= 0) | is.na(res$album.dc.quality)))
-  expect_true(all((res$artist.dc.quality <= 1 & res$artist.dc.quality >= 0) | is.na(res$album.dc.quality)))
+  expect_true(all((res$album.dc.firstartist.quality <= 1 & res$album.dc.firstartist.quality >= 0) | is.na(res$album.dc.firstartist.quality)))
   expect_true(class(res$album.dc.id) == 'character')
   expect_true(class(res$album.dc.title) == 'character')
   expect_true(class(res$album.dc.genres) == 'list')
   expect_true(class(res$album.dc.styles) == 'list')
   expect_true(class(res$album.dc.quality) == 'numeric')
-  expect_true(class(res$artist.dc.name) == 'character')
-  expect_true(class(res$artist.dc.quality) == 'numeric')
+  expect_true(class(res$album.dc.firstartist.name) == 'character')
+  expect_true(class(res$album.dc.firstartist.quality) == 'numeric')
 
   expect_true(all(res$album.dc.firstgenre %in% c('Blues',
                                             'Brass & Military',

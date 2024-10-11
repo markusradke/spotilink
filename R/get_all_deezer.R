@@ -19,15 +19,15 @@
 #'It is advisable to first run \code{\link{get_tracks_spotify}} before running this command,
 #'in order to have all the necessary information.
 #'
-#'@param threshold
+#'@param track_threshold,album_threshold,firstartist_threshold
 #'Floating point number between 0 and 1 indicating which elements to keep that were found using a fuzzy search.
-#'The values correspond to the string similarity (1 - Jaro-Winkler distance) between the track title on \emph{Spotify} and the found track title on \emph{Deezer}.
+#'The values correspond to the string similarity (1 - Jaro-Winkler distance) between the track / album title or artist name  on \emph{Spotify} and the found track / album title or artist name on \emph{Deezer}.
 #'
 #' @return Data Frame with added information from the \emph{Deezer} API using the  \pkg{spotilink} naming convention.
 #' @export
 #'
 #'@examples
-get_all_deezer <- function(input, track_threshold = 0.8, album_threshold = 0.8, artist_threshold = 0.8){
+get_all_deezer <- function(input, track_threshold = 0.8, album_threshold = 0.8, firstartist_threshold = 0.8){
   are_needed_columns_present(input, c('track.s.id', 'track.s.title', 'track.s.firstartist.name', 'album.s.title'))
   input <- rename_existing_variables(input, c(deezerTrackVars))
   input_distinct <- dplyr::distinct(input, track.s.id, track.s.firstartist.name, album.s.title, .keep_all = T) %>% dplyr::filter(! is.na(track.s.id))
@@ -40,9 +40,11 @@ get_all_deezer <- function(input, track_threshold = 0.8, album_threshold = 0.8, 
   message('Done.')
   result <- suppressMessages(dplyr::left_join(deezer_tracks, deezer_artists) %>%
                      dplyr::left_join(deezer_albums))
-  result <- filter_quality_deezer_all(result, track_threshold, album_threshold, artist_threshold)
+  result <- filter_quality_deezer_all(result, track_threshold, album_threshold, firstartist_threshold)
   result <- suppressMessages(dplyr::left_join(input, result))
+
   print_linkage_for_id('track.dz.id', result)
+  result <- result %>% dplyr::select(-track.dz.firstartist.toptracks)
   saveRDS(result, 'deezer_all.rds')
   deezer_remove_checkpoints()
   result

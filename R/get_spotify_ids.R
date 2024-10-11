@@ -1,6 +1,6 @@
 #' Search \emph{Spotify} for IDs
 #'
-#' Searches for either tracks, albums, or artists \emph{Spotify} IDs, depending on the input supplied. Artist names must always be supplied and artist.s.ids will always be returned.
+#' Searches for either tracks, albums, or artists \emph{Spotify} IDs, depending on the input supplied. Artist names must always be supplied and track.s.firstartist.ids will always be returned.
 #' If additional track titles are supplied, track.s.ids will be returned. If additional album title are supplied, album.s.ids will be returned. If tracks and albums are supplied the album information is used to find the track in the corresponding album. If release years are supplied, the information is used to find the best suiting track or album.  If you want to retrieve both tracks and album ids, please first look for track.s.ids and then use [get_all_spotify()] to retrieve the album.s.ids.
 #'
 #' @param artists Character vector with artist names
@@ -149,34 +149,34 @@ search_single_track_on_spotify <- function(artist, track, album, releaseyear, ar
                track.s.id = NA,
                track.s.title = NA,
                track.s.quality = NA,
-               artist.s.id = NA,
-               artist.s.name = NA,
-               artist.s.quality = NA)
+               track.s.firstartist.id = NA,
+               track.s.firstartist.name = NA,
+               track.s.firstartist.quality = NA)
   }
 
   .parse_results <- function(res){
     res %>%
-      tidyr::hoist(artists, artist.s.name = list('name', 1L), .remove = F) %>%
-      tidyr::hoist(artists, artist.s.id = list('id', 1L), .remove = F) %>%
+      tidyr::hoist(artists, track.s.firstartist.name = list('name', 1L), .remove = F) %>%
+      tidyr::hoist(artists, track.s.firstartist.id = list('id', 1L), .remove = F) %>%
       dplyr::rename(track.s.title = name,
                     track.s.id = id) %>%
       dplyr::mutate(artist.search = artist,
                     track.search = track,
                     track.s.quality = stringdist::stringsim(simplify_name(track.s.title), simplify_name(track.search), 'jw'),
-                    artist.s.quality = stringdist::stringsim(simplify_name(artist.s.name), simplify_name(artist.search), 'jw'),
+                    track.s.firstartist.quality = stringdist::stringsim(simplify_name(track.s.firstartist.name), simplify_name(artist.search), 'jw'),
                     album.s.quality = stringdist::stringsim(simplify_name(album), simplify_name(album.name), 'jw'),
                     album.s.releaseyear = stringr::str_sub(album.release_date, start = 1, 4) %>% as.integer(),
                     releasediff = abs(album.s.releaseyear - releaseyear)) %>%
-      dplyr::arrange(-artist.s.quality, -track.s.quality, -album.s.quality, releasediff, -popularity) %>%
+      dplyr::arrange(-track.s.firstartist.quality, -track.s.quality, -album.s.quality, releasediff, -popularity) %>%
       dplyr::first() %>%
       dplyr::select(artist.search,
                     track.search,
                     track.s.id,
                     track.s.title,
                     track.s.quality,
-                    artist.s.id,
-                    artist.s.name,
-                    artist.s.quality)
+                    track.s.firstartist.id,
+                    track.s.firstartist.name,
+                    track.s.firstartist.quality)
   }
   if(!is.na(album)){query <- paste0('artist:', artist, ' track:',track, ' album:',album)}
   else{query <- paste0('artist:', artist, ' track:',track)}
@@ -184,7 +184,7 @@ search_single_track_on_spotify <- function(artist, track, album, releaseyear, ar
   res <- spotifyr::search_spotify(query, type = 'track')
   if(nrow(res) == 0){return(.make_empty_frame())}
   res <- .parse_results(res)
-  if(res$artist.s.quality < artist_threshold | res$track.s.quality < track_threshold) {return(.make_empty_frame())}
+  if(res$track.s.firstartist.quality < artist_threshold | res$track.s.quality < track_threshold) {return(.make_empty_frame())}
   res
 }
 
@@ -195,39 +195,39 @@ search_single_album_on_spotify <- function(artist, album, releaseyear, artist_th
                album.s.id = NA,
                album.s.title = NA,
                album.s.quality = NA,
-               artist.s.id = NA,
-               artist.s.name = NA,
-               artist.s.quality = NA)
+               album.s.firstartist.id = NA,
+               album.s.firstartist.name = NA,
+               album.s.firstartist.quality = NA)
   }
   .parse_results <- function(res){
     res %>%
-      tidyr::hoist(artists, artist.s.name = list('name', 1L), .remove = F) %>%
-      tidyr::hoist(artists, artist.s.id = list('id', 1L), .remove = F) %>%
+      tidyr::hoist(artists, album.s.firstartist.name = list('name', 1L), .remove = F) %>%
+      tidyr::hoist(artists, album.s.firstartist.id = list('id', 1L), .remove = F) %>%
       dplyr::rename(album.s.title = name,
                     album.s.id = id) %>%
       dplyr::mutate(artist.search = artist,
                     album.search = album,
                     album.s.quality = 1 - stringdist::stringdist(simplify_name(album.s.title), simplify_name(album.search), 'jw'),
-                    artist.s.quality = 1 - stringdist::stringdist(simplify_name(artist.s.name), simplify_name(artist.search), 'jw'),
+                    album.s.firstartist.quality = 1 - stringdist::stringdist(simplify_name(album.s.firstartist.name), simplify_name(artist.search), 'jw'),
                     album.s.releaseyear = stringr::str_sub(release_date, start = 1, 4) %>% as.integer(),
                     releasediff = abs(album.s.releaseyear - releaseyear)) %>%
-      dplyr::arrange(-artist.s.quality, -album.s.quality, releasediff, -total_tracks) %>%
+      dplyr::arrange(-album.s.firstartist.quality, -album.s.quality, releasediff, -total_tracks) %>%
       dplyr::first() %>%
       dplyr::select(artist.search,
                     album.search,
                     album.s.id,
                     album.s.title,
                     album.s.quality,
-                    artist.s.id,
-                    artist.s.name,
-                    artist.s.quality)
+                    album.s.firstartist.id,
+                    album.s.firstartist.name,
+                    album.s.firstartist.quality)
   }
 
   query = paste0('artist:', artist, ' album:',album)
   res <- spotifyr::search_spotify(query, type = 'album')
   if(nrow(res) == 0){return(.make_empty_frame())}
   res <- .parse_results(res)
-  if(res$artist.s.quality < artist_threshold | res$album.s.quality < album_threshold) {return(.make_empty_frame())}
+  if(res$album.s.firstartist.quality < artist_threshold | res$album.s.quality < album_threshold) {return(.make_empty_frame())}
   res
 }
 
@@ -257,7 +257,20 @@ search_single_artist_on_spotify <- function(artist, threshold){
 }
 
 print_spotify_id_linkage <- function(res){
-  relfreq_na <- nrow(dplyr::filter(res, ! is.na(artist.s.id))) / nrow(res)
+  if('track.s.firstartist.id' %in% colnames(res)){
+    relfreq_na <- nrow(dplyr::filter(res, ! is.na(track.s.firstartist.id))) / nrow(res)
+  }
+  else{
+    if('album.s.firstartist.id' %in% colnames(res)){
+      relfreq_na <- nrow(dplyr::filter(res, ! is.na(album.s.firstartist.id))) / nrow(res)
+    }
+    else{
+      if('artist.s.id' %in% colnames(res)){
+        relfreq_na <- nrow(dplyr::filter(res, ! is.na(artist.s.id))) / nrow(res)
+      }
+    }
+  }
+
   relfreq_na_percent <- 100 * round(relfreq_na, 4)
   if('track.s.id' %in% colnames(res)){
     message(paste0('Done. Found ', relfreq_na_percent, '% of distinct tracks in the input data.')); return(NULL)

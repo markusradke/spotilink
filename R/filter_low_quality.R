@@ -13,7 +13,7 @@ filter_quality_discogs_albums <- function(frame, album_threshold, artist_thresho
     stop('Please make sure the input frame contains all Discogs album information by running get_albums_discogs first.')
   }
   filter_lowquality_content(frame,
-                            c('album.dc.quality', 'artist.dc.quality'),
+                            c('album.dc.quality', 'album.dc.firstartist.quality'),
                             c(album_threshold, artist_threshold),
                             contentcols = discogsAlbumVars)
 }
@@ -34,7 +34,7 @@ filter_quality_genius_tracks <- function(frame, track_threshold, artist_threshol
     stop('Please make sure the input frame contains all Genius track information by running get_tracks_genius first.')
   }
   filter_lowquality_content(frame,
-                            c('track.g.quality', 'artist.g.quality'),
+                            c('track.g.quality', 'track.g.firstartist.quality'),
                             c(track_threshold, artist_threshold),
                             contentcols = geniusLyricsVars)
 }

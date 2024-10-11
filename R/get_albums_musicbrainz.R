@@ -17,9 +17,10 @@
 #'It is advisable to first run \code{\link{get_albums_spotify}} before running this command,
 #'in order to have all the necessary information.
 #'
-#'@param album_threshold
+#'@param album_threshold,firstartist_threshold
 #'Floating point number between 0 and 1 indicating which elements to keep that were found using a fuzzy search.
-#'The values correspond to the string similarity (1 - Jaro-Winkler distance) between the album title on \emph{Spotify} and the found album title on \emph{Musicbrainz}.
+#'The values correspond to the string similarity (1 - Jaro-Winkler distance) between the album title / artist name on \emph{Spotify} and the found album title / artist name on \emph{Musicbrainz}.
+#'
 #'
 #' @return Data Frame with added information from the \emph{MusicBrainz} API using the  \pkg{spotilink} naming convention.
 #' @export
@@ -32,20 +33,20 @@
 #'                   album.s.upc = c('843183071623'))
 #'
 #'get_albums_musicbrainz(data)
-get_albums_musicbrainz <- function(input, album_threshold = 0.8,artist_threshold = 0.8) {
+get_albums_musicbrainz <- function(input, album_threshold = 0.8,firstartist_threshold = 0.8) {
   are_needed_columns_present(input, c('album.s.id', 'album.s.title', 'album.s.upc', 'album.s.firstartist.name', 'album.s.releaseyear'))
   res <- rename_existing_variables(input, musicbrainzAlbumVars)
 
-  pull_albums_musicbrainz(res, album_threshold, artist_threshold)
+  pull_albums_musicbrainz(res, album_threshold, firstartist_threshold)
 }
 
-pull_albums_musicbrainz <- function(input, album_threshold, artist_threshold) {
+pull_albums_musicbrainz <- function(input, album_threshold, firstartist_threshold) {
   distinctinput <- input %>%
     dplyr::filter(! is.na(album.s.id)) %>%
     dplyr::distinct(.data[['album.s.id']], .keep_all = TRUE)
   result <- search_albums_mbids(distinctinput)
   result <- lookup_albums_mb(result)
-  result <- filter_quality_musicbrainz_albums(result, album_threshold, artist_threshold)
+  result <- filter_quality_musicbrainz_albums(result, album_threshold, firstartist_threshold)
   result <- suppressMessages(dplyr::left_join(input, result, by = c('album.s.id')))
   saveRDS(result, 'mb_albums.rds')
   mbalbums_remove_checkpoints()

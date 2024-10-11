@@ -17,15 +17,15 @@
 #'It is advisable to first run \code{\link{get_tracks_spotify}} before running this command,
 #'in order to have all the necessary information.
 #'
-#'@param threshold
+#'@param album_threshold,firstartist_threshold
 #'Floating point number between 0 and 1 indicating which elements to keep that were found using a fuzzy search.
-#'The values correspond to the string similarity (1 - Jaro-Winkler distance) between the track title on \emph{Spotify} and the found track title on \emph{Deezer}.
+#'The values correspond to the string similarity (1 - Jaro-Winkler distance) between the album title or artist name on \emph{Spotify} and the found album title or artist name on \emph{Deezer}.
 #'
 #' @return Data Frame with added information from the \emph{Deezer} API using the  \pkg{spotilink} naming convention.
 #' @export
 #'
 #'@examples
-get_albums_deezer <- function(input, album_threshold = 0.8, artist_threshold = 0.8){
+get_albums_deezer <- function(input, album_threshold = 0.8, firstartist_threshold = 0.8){
   are_needed_columns_present(input, c('album.s.id', 'album.s.title', 'album.s.firstartist.name'))
   input <- rename_existing_variables(input, deezerAlbumVars)
   input_distinct <- dplyr::distinct(input, album.s.id, album.s.firstartist.name, .keep_all = T) %>% dplyr::filter(! is.na(album.s.id))
@@ -42,7 +42,7 @@ get_albums_deezer <- function(input, album_threshold = 0.8, artist_threshold = 0
                      .progress = 'Retrieving albums from Deezer...')
 
   deezer_albums <- suppressMessages(read_checkpoint(checkpoint_name)$saved_data)
-  deezer_albums <- filter_quality_deezer_albums(deezer_albums, album_threshold, artist_threshold)
+  deezer_albums <- filter_quality_deezer_albums(deezer_albums, album_threshold, firstartist_threshold)
   message('Done.')
   result <- suppressMessages(dplyr::left_join(input, deezer_albums)) %>%
     dplyr::mutate(album.dz.releasedate = album.dz.releasedate %>% as.Date())
