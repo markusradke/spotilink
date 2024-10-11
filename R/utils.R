@@ -53,6 +53,7 @@ print_linkage_for_id <- function(idcol, frame){
   relfreq_na_distinct <- freq_na_distinct / nrow(frame_distinct)
   relfreq_na_percent_distinct <- 100 * round(relfreq_na_distinct, 4)
 
+
   message(paste0('Found ', relfreq_na_percent_distinct, '% of distinct ', entity, 's in the data set.\n',
                  'This equals to ', relfreq_na_percent, '% of all ', entity, 's in the data set.'))
   data.frame(database = idcol,
@@ -194,6 +195,8 @@ show_linkage_success_in_frame <- function(frame){
     perc_complete <- round(n_complete / nrow(frame), 4) * 100
     perc_complete_distinct <- round(n_complete_distinct / nrow(frame %>% dplyr::distinct(track.s.id)), 4) * 100
     data.frame(database = 'complete track linkage',
+               'freq' = n_complete,
+               'distfreq' = n_complete_distinct,
                'relfreq' = perc_complete,
                'distrelfreq' = perc_complete_distinct)
   }
@@ -204,7 +207,8 @@ show_linkage_success_in_frame <- function(frame){
     stringr::str_subset('(firstartist|album\\.(id|firstgenre)|artist\\.g)', negate = T)
   res <- suppressMessages(purrr::map_df(idvecs, print_linkage_for_id, frame))
   complete <- .get_complete_linkage(frame, idvecs)
-  genre <- .get_complete_linkage(frame, idves[idvecs %in% c('dz', 'dc', 'mb')]) %>% dplyr::mutate(database = 'complete genre linkage')
+  genre <- .get_complete_linkage(frame, idvecs[idvecs %in% c('dz', 'dc', 'mb')]) %>% dplyr::mutate(database = 'complete genre linkage')
+  dplyr::glimpse(res)
   res <- rbind(res, genre, complete)
   print(dplyr::as_tibble(res))
   res
