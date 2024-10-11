@@ -52,7 +52,6 @@ pull_artists_musicbrainz <- function(input, artist_threshold) {
 
   n_found_by_id <- result %>% dplyr::filter(artist.mb.foundbyid) %>% nrow()
   message(paste0(round(n_found_by_id / nrow(artists) * 100, 2), '% distinct artists were found using the Musicbrainz ID from the track information.'))
-
   result <- result %>% filter_quality_musicbrainz_artists(artist_threshold) %>%
     dplyr::mutate(artist.mb.birth = as.Date(.data[['artist.mb.birth']]))  %>% # Date conversion must be here; else only integers are returned
     dplyr::mutate(artist.mb.death = as.Date(.data[['artist.mb.death']]))
@@ -135,7 +134,12 @@ lookup_single_artist_mb <- function(artist.s.id, artist.mb.id, artist.mb.quality
   musicbrainz::lookup_artist_by_id(artist.mb.id, includes = c('tags')) %>%
     dplyr::mutate(artist.mb.birth = ifelse(stringr::str_length(.data[['life_span_begin']]) == 4, paste0(.data[['life_span_begin']], '-01-01'),.data[['life_span_begin']])) %>%
     dplyr::mutate(artist.mb.birthyear = stringr::str_sub(.data[['life_span_begin']], 1,4) %>% as.integer()) %>%
-    dplyr::mutate(artist.mb.death = ifelse(stringr::str_length(.data[['life_span_end']]) == 4, paste0(.data[['life_span_end']], '-01-01'),.data[['life_span_end']])) %>%
+    dplyr::mutate(artist.mb.death = ifelse(stringr::str_length(.data[['life_span_end']]) == 4,
+                                           paste0(.data[['life_span_end']], '-01-01'),
+                                           .data[['life_span_end']]),
+                  artist.mb.death = ifelse(stringr::str_length(artist.mb.death) == 7,
+                                           paste0(artist.mb.death, '-01'),
+                                           artist.mb.death)) %>%
     dplyr::mutate(artist.mb.deathyear = stringr::str_sub(.data[['life_span_end']], 1,4) %>% as.integer()) %>%
     dplyr::mutate(artist.mb.dead = .data[['life_span_ended']] %>% as.logical()) %>%
     cbind(artist.s.id, artist.mb.id, artist.mb.quality, artist.mb.foundbyid) %>%
