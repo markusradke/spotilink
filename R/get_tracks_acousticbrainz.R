@@ -51,6 +51,7 @@ search_mbids_on_acousticbrainz <- function(unique_mbids){
   start <- 1
   stepsize <- 25
   repeat{
+    message(paste0('Searching track ', start, ' to ', stepsize - 1, ' of ', length(unique_mbids), '...'))
     end <- min(c(start+stepsize-1,length(unique_mbids)))
     url <- paste0('https://acousticbrainz.org/api/v1/count?recording_ids=',
                   paste0(unique_mbids[start:end], collapse = ';'))
@@ -70,6 +71,7 @@ lookup_tracks_on_acousticbrainz <- function(abids){
   start <- 1
   stepsize <- 25
   repeat{
+    message(paste0('Looking up track ', start, ' to ', stepsize - 1, ' of ', length(abids), '...'))
     end <- min(c(start + stepsize - 1,length(abids)))
     # manche haben nur lowlevel und keine highlevel features, bzw. vielleicht auch anders herum, das muss berücksichtigt werden
     url <- paste0('https://acousticbrainz.org/api/v1/high-level?recording_ids=',

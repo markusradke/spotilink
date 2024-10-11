@@ -59,7 +59,9 @@ search_tracks_deezer <- function(input_distinct){
                                          input_distinct$track.s.firstartist.name,
                                          input_distinct$track.s.id,
                                          input_distinct$album.s.title),
-                                    get_single_track_deezer %>% save_checkpoint_and_count(checkpoint_name, last_index, saved_data),
+                                    get_single_track_deezer %>% save_checkpoint_and_count(checkpoint_name, last_index, saved_data,
+                                                                                          savingstep = 100,
+                                                                                          ndatapoints = nrow(input_distinct)),
                                     .progress = 'Retrieving tracks from Deezer...')
   }
   else{message('Tracks already linked.')}
@@ -76,7 +78,9 @@ lookup_firstartists_deezer <- function(deezer_tracks){
     artist_urls <- purrr::map_chr(deezer_tracks$track.dz.firstartist.id, create_dz_artist_lookup_url)
     artist_urls[artist_urls == 'https://api.deezer.com/artist/NA'] <- NA
     purrr::map2_df(artist_urls, deezer_tracks$track.s.id,
-                   lookup_single_firstartist_deezer %>% save_checkpoint_and_count(checkpoint_name, last_index, saved_data),
+                   lookup_single_firstartist_deezer %>% save_checkpoint_and_count(checkpoint_name, last_index, saved_data,
+                                                                                  savingstep = 100,
+                                                                                  ndatapoints = nrow(deezer_tracks)),
                    .progress = 'Looking up corresponding artists...')
   }
   else{message('Artist already linked.')}
@@ -108,7 +112,9 @@ lookup_trackalbums_deezer <- function(deezer_tracks){
     album_urls <- purrr::map_chr(deezer_tracks$track.dz.album.id, create_dz_album_lookup_url)
     album_urls[album_urls == 'https://api.deezer.com/album/NA'] <- NA
     purrr::map2_df(album_urls, deezer_tracks$track.s.id,
-                   lookup_single_trackalbum_deezer %>% save_checkpoint_and_count(checkpoint_name, last_index, saved_data),
+                   lookup_single_trackalbum_deezer %>% save_checkpoint_and_count(checkpoint_name, last_index, saved_data,
+                                                                                 savingstep = 100,
+                                                                                 ndatapoints = nrow(deezer_tracks)),
                    .progress = 'Looking up corresponding albums...')
   }
   else{message('Albums already linked.')}

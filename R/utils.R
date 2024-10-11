@@ -69,24 +69,29 @@ handle_empty_input <- function(input, retrievalfunction, emptyframefunction){
   cbind(input, empty_frame)
 }
 
-save_checkpoint_and_count <- function(f, checkpoint_filename, last_index, checkpoint_data) {
+save_checkpoint_and_count <- function(f, checkpoint_filename, last_index, checkpoint_data, savingstep = 1, ndatapoints = -1) {
   force(f)
   force(checkpoint_filename)
   force(last_index)
   force(checkpoint_data)
 
+  if (savingstep > 1 & ndatapoints == -1) {stop(paste0('Please provide the number of data points ndatapoints when using a saving stepsize > 1; used savingstep = ', savingstep, ' and ndatapoints = ', ndatapoints, '...'))}
   i <- last_index
+  old_filename <- suppressMessages(read_checkpoint(checkpoint_filename)$last_checkpoint)
   saved_data <- checkpoint_data
 
   function(...) {
     i <<- i + 1
     result <- f(...)
     saved_data <<- rbind(saved_data, result)
-    current_filename <- paste0(checkpoint_filename, '_', i, '.rds')
-    old_filename <- paste0(checkpoint_filename, '_', i-1, '.rds')
-    saveRDS(saved_data, current_filename)
-    if (file.exists(old_filename))
-      file.remove(old_filename)
+    if(i %% savingstep == 0 | i == ndatapoints) {
+      current_filename <- paste0(checkpoint_filename, '_', i, '.rds')
+      saveRDS(saved_data, current_filename)
+      if (file.exists(old_filename)){
+        file.remove(old_filename)
+      }
+      old_filename <<- current_filename
+    }
     result
   }
 }
@@ -99,11 +104,12 @@ read_checkpoint <- function(checkpointfilename){
   if (length(matching_files) > 0) {
     last_index <- sub(pattern, '\\1', matching_files) %>% as.integer() %>% max()
     message(paste0('Detected checkpoint. Continuing with index ', last_index + 1, '...'))
-    saved_data <- readRDS(paste0(checkpointfilename, '_', last_index, '.rds'))
-    return(list(last_index = last_index, saved_data = saved_data))
+    last_checkpoint <- paste0(checkpointfilename, '_', last_index, '.rds')
+    saved_data <- readRDS(last_checkpoint)
+    return(list(last_index = last_index, saved_data = saved_data, last_checkpoint = last_checkpoint))
   }
   else {
-    return(list(last_index = 0, saved_data = c()))
+    return(list(last_index = 0, saved_data = c(), last_checkpoint = ''))
   }
 }
 
