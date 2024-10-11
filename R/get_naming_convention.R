@@ -9,5 +9,5 @@
 #'get_naming_convention()
 get_naming_convention <- function() {
   c(spotifyAllVars, musicbrainzAllVars, spotifyAudioanalysisVars,
-    discogsAlbumVars, geniusLyricsVars, deezerAllVars) %>% unique()
+    discogsAlbumVars, geniusLyricsVars, deezerAllVars, acousticbrainzTrackVars) %>% unique()
 }
