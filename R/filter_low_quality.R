@@ -227,8 +227,8 @@ filter_quality_musicbrainz_acousticbrainz_tracks <- function(frame, track_thresh
 #' @examples
 filter_quality_musicbrainz_all <- function(frame, track_threshold, album_threshold, artist_threshold){
   frame %>%
-    filter_quality_musicbrainz_acousticbrainz_tracks(track_threshold) %>%
-    filter_quality_musicbrainz_albums(album_threshold) %>%
+    filter_quality_musicbrainz_acousticbrainz_tracks(track_threshold, artist_threshold) %>%
+    filter_quality_musicbrainz_albums(album_threshold, artist_threshold) %>%
     filter_quality_musicbrainz_artists(artist_threshold) %>%
     combine_genres_musicbrainz()
 }
