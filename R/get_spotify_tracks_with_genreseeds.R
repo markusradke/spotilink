@@ -20,7 +20,7 @@ get_multiple_recommendation_for_genre_seed_spotify <- function(seed, s_pass, n_i
     temp <- get_single_recommendation_for_genre_seed_spotify(100, seed, s_token)
     res <- rbind(res, temp)
     ndistinct <- c(ndistinct, nrow(res %>% dplyr::distinct(track.s.title, track.s.firstartist.name)))
-    Sys.sleep(1)
+    Sys.sleep(5)
   }
   res <- res %>% dplyr::distinct(track.s.title, track.s.firstartist.name, .keep_all = T)
 

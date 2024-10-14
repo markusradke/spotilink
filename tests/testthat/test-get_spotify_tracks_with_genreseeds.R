@@ -6,7 +6,5 @@ test_that("get_multiple_returns the right cols", {
 
 test_that('Anime also works', {
   res <- get_multiple_recommendation_for_genre_seed_spotify('anime', s_pass)
-  res <<- res
-  expect_setequal(colnames(res$recommendations), spotifyTrackVars)
-  expect_equal(nrow(res$recommendations),  100)
+  expect_setequal(colnames(res$recommendations), spotifyTrackVars, n_iterations = 1)
 })

@@ -31,8 +31,15 @@ get_api_with_connection_management <- function(url){
       res <- httr::content(response)
       return(res)
     } else if (httr::status_code(response) == 429) {
-      message('Rate limit exceeded. Waiting for 45 seconds, then trying again...')
-      Sys.sleep(45)
+      if(stringr::str_detect(response$url, 'spotify')){
+        retry_after <- response$headers$`retry-after` %>% as.integer() + 1
+        message(paste0('Rate limit exceeded. Waiting for ', retry_after, ' seconds, then trying again...'))
+        Sys.sleep(retry_after)
+      }
+      else{
+        message('Rate limit exceeded. Waiting for 45 seconds, then trying again...')
+        Sys.sleep(45)
+      }
     } else {
       message('An error occurred: ', httr::status_code(response), ' - ', suppressMessages(httr::content(response, 'text')))
       return(NULL)
