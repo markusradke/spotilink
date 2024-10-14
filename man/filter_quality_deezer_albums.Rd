@@ -4,14 +4,14 @@
 \alias{filter_quality_deezer_albums}
 \title{Filter low quality results for \emph{Deezer} Albums}
 \usage{
-filter_quality_deezer_albums(frame, album_threshold, artist_threshold)
+filter_quality_deezer_albums(frame, album_threshold, firstartist_threshold)
 }
 \arguments{
 \item{frame}{Data frame containing Deezer album variables.}
 
 \item{album_threshold}{Threshold for Deezer album quality. Ranging between 0 and 1.}
 
-\item{artist_threshold}{Threshold for Deezer artist quality. Ranging between 0 and 1.}
+\item{firstartist_threshold}{Threshold for Deezer artist quality. Ranging between 0 and 1.}
 }
 \value{
 Updated input frame with all Deezer album information set to NA where at least one threshold was not met.

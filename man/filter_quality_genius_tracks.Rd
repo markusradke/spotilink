@@ -4,14 +4,14 @@
 \alias{filter_quality_genius_tracks}
 \title{Filter low quality results for \emph{Genius} Tracks}
 \usage{
-filter_quality_genius_tracks(frame, track_threshold, artist_threshold)
+filter_quality_genius_tracks(frame, track_threshold, firstartist_threshold)
 }
 \arguments{
 \item{frame}{Data frame containing Genius variables.}
 
 \item{track_threshold}{Threshold for Genius track quality. Ranging between 0 and 1.}
 
-\item{artist_threshold}{Threshold for Genius artist quality. Ranging between 0 and 1.}
+\item{firstartist_threshold}{Threshold for Genius artist quality. Ranging between 0 and 1.}
 }
 \value{
 Updated input frame with all Genius track information set to NA where at least one threshold was not met.

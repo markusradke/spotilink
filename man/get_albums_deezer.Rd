@@ -4,7 +4,7 @@
 \alias{get_albums_deezer}
 \title{Get \emph{Deezer} Album Information}
 \usage{
-get_albums_deezer(input, album_threshold = 0.8, artist_threshold = 0.8)
+get_albums_deezer(input, album_threshold = 0.8, firstartist_threshold = 0.8)
 }
 \arguments{
 \item{input}{Data Frame containing the following columns:
@@ -13,14 +13,14 @@ get_albums_deezer(input, album_threshold = 0.8, artist_threshold = 0.8)
 with \emph{Spotify} album ids,
 \item \code{album.s.title} \cr
 with \emph{Spotify} album title,
-\item \code{track.s.firstartist.name} \cr
+\item \code{album.s.firstartist.name} \cr
 with \code{Spotify} name of first artist,
 }
 It is advisable to first run \code{\link{get_tracks_spotify}} before running this command,
 in order to have all the necessary information.}
 
-\item{threshold}{Floating point number between 0 and 1 indicating which elements to keep that were found using a fuzzy search.
-The values correspond to the string similarity (1 - Jaro-Winkler distance) between the track title on \emph{Spotify} and the found track title on \emph{Deezer}.}
+\item{album_threshold, firstartist_threshold}{Floating point number between 0 and 1 indicating which elements to keep that were found using a fuzzy search.
+The values correspond to the string similarity (1 - Jaro-Winkler distance) between the album title or artist name on \emph{Spotify} and the found album title or artist name on \emph{Deezer}.}
 }
 \value{
 Data Frame with added information from the \emph{Deezer} API using the  \pkg{spotilink} naming convention.

@@ -122,7 +122,7 @@ lookup_artists_mb <- function(artist_mbids){
     if(last_index > 0) {artist_mbids <- tail(artist_mbids, -last_index)}
     purrr::pmap_df(artist_mbids,
                    lookup_single_artist_mb %>% save_checkpoint_and_count(checkpoint_name, last_index, saved_data),
-                   .progress = 'Looking up artist information on Muiscbrainz...')
+                   .progress = 'Looking up artist information on Musicbrainz...')
   }
   else{message('Artist lookup already done.')}
   suppressMessages(read_checkpoint(checkpoint_name)$saved_data)

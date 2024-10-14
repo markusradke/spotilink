@@ -20,6 +20,8 @@ with \emph{Spotify} track ids,
 with \emph{Spotify} track name,
 \item \code{track.s.isrc} \cr
 with track ISRCs from \emph{Spotify},
+\item \code{track.s.firstartist.name} \cr
+with the track's first artist name from \emph{Spotify},
 \item \code{album.s.id} \cr
 with \emph{Spotify} album id,
 \item \code{album.s.title} \cr
@@ -54,6 +56,7 @@ The \pkg{spotilink} naming convention is used.
 data <- data.frame(track.s.id = c('4ZXLWTmQFzM02hZwMiZfgS'),
                   track.s.title = c('Der Geist hilft unser Schwachheit auf, BWV 226'),
                   track.s.isrc = c('GBHNG1200003'),
+                  track.s.firstartist.name = c('Johann Sebastian Bach'),
                   album.s.id = c('2rlWvQ1GuTOSkyNpmcoaMC'),
                   album.s.title = c('Bach: Motets'),
                   album.s.upc = c('843183071623'),

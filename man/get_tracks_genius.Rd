@@ -8,7 +8,7 @@ get_tracks_genius(
   input,
   g_token,
   track_threshold = 0.8,
-  artist_threshold = 0.8
+  firstartist_threshold = 0.8
 )
 }
 \arguments{
@@ -26,8 +26,8 @@ in order to have all the necessary information.}
 
 \item{g_token}{Genius Authentification. Please refer to \url{https://genius.com/api-clients} for generating an access token.}
 
-\item{threshold}{Floating point number between 0 and 1 indicating which elements to keep that were found using a fuzzy search.
-The values correspond to the string similarity (1 - Jaro-Winkler distance) between the searched artist / album and the found name / title on \emph{Spotify}. \emph{spotilink} will only keep results where the artist name as well as the album title surpass the threshold.}
+\item{track_threshold, firstartist_threshold}{Floating point number between 0 and 1 indicating which elements to keep that were found using a fuzzy search.
+The values correspond to the string similarity (1 - Jaro-Winkler distance) between the searched artist / track and the found name / title on \emph{Spotify}. \emph{spotilink} will only keep results where the artist name as well as the album title surpass the threshold.}
 }
 \description{
 Get \emph{Genius} song lyrics

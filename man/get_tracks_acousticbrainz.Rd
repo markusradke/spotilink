@@ -20,7 +20,7 @@ It is advisable to first run \code{\link{get_tracks_musicbrainz}} before running
 Data Frame with added information from the \emph{Acousticbrainz} API using the  \pkg{spotilink} naming convention.
 }
 \description{
-Retrieve a data frame containing information from the \emph{Acousticbrainz} API using the IDs from retrieved from Musicbrainz.
+Retrieve a data frame containing information from the \emph{Acousticbrainz} API using the IDs from retrieved from Musicbrainz. Filtering information with \code{\link{filter_quality_musicbrainz_acousticbrainz_tracks}} will be based on the track and firstartist quality of the corresponding Musicbrainz entry.
 The result contains information on tracks.
 The \pkg{spotilink} naming convention is used.
 }

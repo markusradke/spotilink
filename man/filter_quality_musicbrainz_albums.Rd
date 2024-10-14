@@ -4,7 +4,11 @@
 \alias{filter_quality_musicbrainz_albums}
 \title{Filter low quality results for \emph{Musicbrainz} Albums}
 \usage{
-filter_quality_musicbrainz_albums(frame, album_threshold)
+filter_quality_musicbrainz_albums(
+  frame,
+  album_threshold,
+  firstartist_threshold
+)
 }
 \arguments{
 \item{frame}{Data frame containing Musicbrainz album variables.}

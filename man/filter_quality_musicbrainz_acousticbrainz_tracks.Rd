@@ -4,12 +4,18 @@
 \alias{filter_quality_musicbrainz_acousticbrainz_tracks}
 \title{Filter low quality results for \emph{Musicbrainz} and \emph{Acousticbrainz} Tracks}
 \usage{
-filter_quality_musicbrainz_acousticbrainz_tracks(frame, track_threshold)
+filter_quality_musicbrainz_acousticbrainz_tracks(
+  frame,
+  track_threshold,
+  firstartist_threshold
+)
 }
 \arguments{
 \item{frame}{Data frame containing Musicbrainz track variables.}
 
 \item{track_threshold}{Threshold for Musicbrainz track quality. Ranging between 0 and 1.}
+
+\item{firstartist_threshold}{Threshold for Musicbrainz artist quality. Ranging between 0 and 1.}
 }
 \value{
 Updated input frame with all Musicbrainz and Acousticbrainz track information set to NA where at least one threshold was not met.

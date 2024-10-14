@@ -8,7 +8,7 @@ filter_quality_deezer_all(
   frame,
   track_threshold,
   album_threshold,
-  artist_threshold
+  firstartist_threshold
 )
 }
 \arguments{
@@ -18,7 +18,7 @@ filter_quality_deezer_all(
 
 \item{album_threshold}{Threshold for Deezer artist quality. Ranging between 0 and 1.}
 
-\item{artist_threshold}{Threshold for Deezer artist quality. Ranging between 0 and 1.}
+\item{firstartist_threshold}{Threshold for Deezer artist quality. Ranging between 0 and 1.}
 }
 \value{
 Updated input frame with all Deezer artist information set to NA where at least one threshold was not met.

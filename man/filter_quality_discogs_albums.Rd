@@ -4,14 +4,14 @@
 \alias{filter_quality_discogs_albums}
 \title{Filter low quality results for \emph{Discogs} Albums}
 \usage{
-filter_quality_discogs_albums(frame, album_threshold, artist_threshold)
+filter_quality_discogs_albums(frame, album_threshold, firstartist_threshold)
 }
 \arguments{
 \item{frame}{Data frame containing Discogs variables.}
 
 \item{album_threshold}{Threshold for Discogs album quality. Ranging between 0 and 1.}
 
-\item{artist_threshold}{Threshold for Discogs artist quality. Ranging between 0 and 1.}
+\item{firstartist_threshold}{Threshold for Discogs artist quality. Ranging between 0 and 1.}
 }
 \value{
 Updated input frame with all Discogs information set to NA where at least one threshold was not met.

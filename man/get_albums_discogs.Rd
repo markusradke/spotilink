@@ -8,7 +8,7 @@ get_albums_discogs(
   input,
   dc_pass,
   album_threshold = 0.8,
-  artist_threshold = 0.8
+  firstartist_threshold = 0.8
 )
 }
 \arguments{
@@ -18,15 +18,17 @@ get_albums_discogs(
 with \emph{Spotify} album id,
 \item \code{album.s.title} \cr
 with \emph{Spotify} album title,
-\item \code{track.s.firstartist.name} \cr
-with \emph{Spotify} artist name.
+\item \code{album.s.firstartist.name} \cr
+with \emph{Spotify} artist name,
+\item \code{album.s.releaseyear} \cr
+with \emph{Spotify} release year.
 }
 It is advisable to first run \code{\link{get_all_spotify}} before running this command,
 in order to have all the necessary information.}
 
 \item{dc_pass}{Discogs Authentification. Please refer to \url{https://www.discogs.com/developers/#page:authentication,header:authentication-discogs-auth-flow} for details.}
 
-\item{threshold}{Floating point number between 0 and 1 indicating which elements to keep that were found using a fuzzy search.
+\item{album_threshold, firstartist_threshold}{Floating point number between 0 and 1 indicating which elements to keep that were found using a fuzzy search.
 The values correspond to the string similarity (1 - Jaro-Winkler distance) between the searched artist / album and the found name / title on \emph{Spotify}. \emph{spotilink} will only keep results where the artist name as well as the album title surpass the threshold.}
 }
 \description{
