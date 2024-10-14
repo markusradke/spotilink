@@ -36,6 +36,7 @@ get_from_IDs <- function(ids, pullFunction, batchsize, start, pulled, oldfilenam
     message('Already scraped.')
     return(pulled)
   }
+  i <- 1
 
   repeat{
     stop <- min(c(start + stepsize - 1, total))
@@ -43,10 +44,13 @@ get_from_IDs <- function(ids, pullFunction, batchsize, start, pulled, oldfilenam
     pulled <- pullFunction(ids[start:stop]) %>%
       rbind(pulled, .)
     filename <- paste0(fct_name, '_', start, '.rds')
-    saveRDS(pulled, filename)
-    if(file.exists(oldfilename)){file.remove(oldfilename)}
-    oldfilename <- filename
+    if(i %% 10 == 0){
+      saveRDS(pulled, filename)
+      if(file.exists(oldfilename)){file.remove(oldfilename)}
+      oldfilename <- filename
+    }
     start <- start + stepsize
+    i <- i + 1
     if (start > total) {
       break
     }
