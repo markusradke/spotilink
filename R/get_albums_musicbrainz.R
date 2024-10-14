@@ -53,8 +53,7 @@ pull_albums_musicbrainz <- function(input, album_threshold, firstartist_threshol
   result
 }
 
-savingstep = 20,
-                                                                       ndatapoints = nrow(album_mbids)search_albums_mbids <- function(distinctinput){
+search_albums_mbids <- function(distinctinput){
   checkpoint_name <- 'mb_albums_search'
   checkpoint <- read_checkpoint(checkpoint_name)
   last_index <- checkpoint$last_index
