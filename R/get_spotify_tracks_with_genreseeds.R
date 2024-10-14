@@ -11,7 +11,7 @@
 #'
 #' @examples
 get_multiple_recommendation_for_genre_seed_spotify <- function(seed, s_pass, n_iterations = 5){
-  connect_spotify(s_pass)
+  suppressMessages(connect_spotify(s_pass))
   s_token <- spotifyr::get_spotify_access_token()
 
   res <- c()
@@ -34,6 +34,7 @@ get_multiple_recommendation_for_genre_seed_spotify <- function(seed, s_pass, n_i
     ggplot2::labs(title = paste0('# distinct new tracks for new recommendations, genre seed: "', seed, '"')) +
     ggplot2::scale_x_continuous(breaks = seq(n_iterations))
   list(seed = seed,
+       date_of_retrieval = Sys.Date(),
        recommendations = res,
        n_of_new_recommends_per_iteration = list(new_recommends = news,
                                                 plot = plot))
@@ -61,7 +62,6 @@ get_single_recommendation_for_genre_seed_spotify <- function(n, seed, s_token){
                                 })),
                                 track.s.explicit = sapply(result$tracks, function(hit) hit$explicit),
                                 track.s.popularity = sapply(result$tracks, function(hit) hit$popularity),
-                                track.s.isrc = sapply(result$tracks, function(hit) hit$external_ids$isrc),
                                 track.s.durationms = sapply(result$tracks, function(hit) hit$duration_ms),
                                 track.s.albumposition = sapply(result$tracks, function(hit) hit$track_number),
                                 album.s.id = sapply(result$tracks, function(hit) hit$album$id),
@@ -69,6 +69,11 @@ get_single_recommendation_for_genre_seed_spotify <- function(n, seed, s_token){
     tidyr::hoist('track.s.artists', track.s.firstartist.id = list('id', 1L), .remove = FALSE) %>%
     tidyr::hoist('track.s.artists', track.s.firstartist.name = list('name', 1L), .remove = FALSE) %>%
     dplyr::mutate(track.s.duration = track.s.durationms * 0.001)
+
+  isrcs <- sapply(result$tracks, function(hit) hit$external_ids$isrc)
+  isrcs <- lapply(isrcs, function(x) if (is.null(x)) NA else x)
+  recommendations$track.s.isrc <- isrcs
+
   recommendations <- suppressMessages(get_from_API(recommendations, 'track.s.id',
                                                    spotifyr::get_track_audio_features, clean_features, batchsize = 50))
   recommendations

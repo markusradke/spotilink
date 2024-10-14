@@ -208,6 +208,5 @@ show_linkage_success_in_frame <- function(frame){
   res <- suppressMessages(purrr::map_df(idvecs, print_linkage_for_id, frame))
   complete <- .get_complete_linkage(frame, idvecs)
   res <- rbind(res, complete)
-  print(dplyr::as_tibble(res))
-  res
+  dplyr::as_tibble(res)
 }
