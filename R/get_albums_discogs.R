@@ -38,7 +38,11 @@ get_albums_discogs <- function(input, dc_pass, album_threshold = 0.8, firstartis
   if(last_index > 0) {distinct_input <- tail(distinct_input, -last_index)}
   purrr::pmap_df(list(distinct_input$album.s.id, distinct_input$album.s.title,
                              distinct_input$album.s.firstartist.name, distinct_input$album.s.releaseyear),
-                        get_discogs_for_single_track %>% save_checkpoint_and_count(checkpoint_name, last_index, saved_data),
+                        get_discogs_for_single_track %>% save_checkpoint_and_count(checkpoint_name,
+                                                                                   last_index,
+                                                                                   saved_data,
+                                                                                   savingstep = 20,
+                                                                                   ndatapoints = nrow(distinct_input)),
                         dc_pass,
                         .progress = 'Linking DC album genres...')
   res <- suppressMessages(read_checkpoint(checkpoint_name)$saved_data)

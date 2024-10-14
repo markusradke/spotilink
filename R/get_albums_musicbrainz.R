@@ -53,7 +53,8 @@ pull_albums_musicbrainz <- function(input, album_threshold, firstartist_threshol
   result
 }
 
-search_albums_mbids <- function(distinctinput){
+savingstep = 20,
+                                                                       ndatapoints = nrow(album_mbids)search_albums_mbids <- function(distinctinput){
   checkpoint_name <- 'mb_albums_search'
   checkpoint <- read_checkpoint(checkpoint_name)
   last_index <- checkpoint$last_index
@@ -65,7 +66,11 @@ search_albums_mbids <- function(distinctinput){
                                 distinctinput$album.s.firstartist.name,
                                 distinctinput$album.s.releaseyear,
                                 distinctinput$album.s.upc),
-                             search_single_album_mbid %>% save_checkpoint_and_count(checkpoint_name, last_index, saved_data),
+                             search_single_album_mbid %>% save_checkpoint_and_count(checkpoint_name,
+                                                                                    last_index,
+                                                                                    saved_data,
+                                                                                    savingstep = 20,
+                                                                                    ndatapoints = nrow(distinctinput)),
                              .progress = 'Searching for albums on Musicbrainz...')
   }
   else{message('Album search already done.')}
@@ -130,7 +135,11 @@ lookup_albums_mb <- function(album_mbids){
     saved_data <- checkpoint$saved_data
     if(last_index > 0) {album_mbids <- tail(album_mbids, -last_index)}
     purrr::map_df(album_mbids$album.mb.id,
-                  lookup_single_album_mb %>% save_checkpoint_and_count(checkpoint_name, last_index, saved_data),
+                  lookup_single_album_mb %>% save_checkpoint_and_count(checkpoint_name,
+                                                                       last_index,
+                                                                       saved_data,
+                                                                       savingstep = 20,
+                                                                       ndatapoints = nrow(album_mbids)),
                   .progress = 'Looking up album genres on Musicbrainz...')
   }
   else{message('Album lookup already done.')}

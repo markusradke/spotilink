@@ -71,7 +71,11 @@ search_artist_mbids <- function(artists){
     saved_data <- checkpoint$saved_data
     if(last_index > 0) {artists <- tail(artists, -last_index)}
     purrr::pmap_df(artists,
-                   search_single_artist_mbid %>% save_checkpoint_and_count(checkpoint_name, last_index, saved_data),
+                   search_single_artist_mbid %>% save_checkpoint_and_count(checkpoint_name,
+                                                                           last_index,
+                                                                           saved_data,
+                                                                           savingstep = 20,
+                                                                           ndatapoints = nrow(artists)),
                    .progress = 'Searching artists on Musicbrainz...')
   }
   else{message('Artist search already done.')}
@@ -121,7 +125,11 @@ lookup_artists_mb <- function(artist_mbids){
     saved_data <- checkpoint$saved_data
     if(last_index > 0) {artist_mbids <- tail(artist_mbids, -last_index)}
     purrr::pmap_df(artist_mbids,
-                   lookup_single_artist_mb %>% save_checkpoint_and_count(checkpoint_name, last_index, saved_data),
+                   lookup_single_artist_mb %>% save_checkpoint_and_count(checkpoint_name,
+                                                                         last_index,
+                                                                         saved_data,
+                                                                         savingstep = 20,
+                                                                         ndatapoints = nrow(artist_mbids)),
                    .progress = 'Looking up artist information on Musicbrainz...')
   }
   else{message('Artist lookup already done.')}

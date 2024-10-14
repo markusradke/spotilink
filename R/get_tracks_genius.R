@@ -36,7 +36,11 @@ get_tracks_genius <- function(input, g_token, track_threshold = 0.8, firstartist
   purrr::pmap_df(list(input_distinct$track.s.title,
                                 input_distinct$track.s.firstartist.name,
                                 input_distinct$track.s.id),
-                           get_lyrics_for_single_track %>% save_checkpoint_and_count(checkpoint_name, last_index, saved_data),
+                           get_lyrics_for_single_track %>% save_checkpoint_and_count(checkpoint_name,
+                                                                                     last_index,
+                                                                                     saved_data,
+                                                                                     savingstep = 20,
+                                                                                     ndatapoints = nrow(input_distinct)),
                            g_token, .progress = 'Retrieving lyrics from Genius...')
 
   genius <- suppressMessages(read_checkpoint(checkpoint_name)$saved_data)

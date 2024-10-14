@@ -65,7 +65,11 @@ search_tracks_mbids <- function(distinctinput){
                                   distinctinput$track.s.title,
                                   distinctinput$track.s.firstartist.name,
                                   distinctinput$track.s.isrc),
-                             search_single_track_mbid %>% save_checkpoint_and_count(checkpoint_name, last_index, saved_data),
+                             search_single_track_mbid %>% save_checkpoint_and_count(checkpoint_name,
+                                                                                    last_index,
+                                                                                    saved_data,
+                                                                                    savingstep = 20,
+                                                                                    ndatapoints = nrow(distinctinput)),
                              .progress = 'Searching tracks on Musicbrainz...')
   }
   else{message('Track search already done.')}
@@ -127,7 +131,11 @@ lookup_tracks_mb <- function(track_mbids){
     saved_data <- checkpoint$saved_data
     if(last_index > 0) {track_mbids <- tail(track_mbids, -last_index)}
     purrr::map_df(track_mbids$track.mb.id,
-                  lookup_single_track_mb %>% save_checkpoint_and_count(checkpoint_name, last_index, saved_data),
+                  lookup_single_track_mb %>% save_checkpoint_and_count(checkpoint_name,
+                                                                       last_index,
+                                                                       saved_data,
+                                                                       savingstep = 20,
+                                                                       ndatapoints = nrow(track_mbids)),
                  .progress = 'Looking up track genres on Musicbrainz...')
   }
   else{message('Track lookup already done.')}
