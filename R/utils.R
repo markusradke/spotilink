@@ -207,9 +207,7 @@ show_linkage_success_in_frame <- function(frame){
     stringr::str_subset('(firstartist|album\\.(id|firstgenre)|artist\\.g)', negate = T)
   res <- suppressMessages(purrr::map_df(idvecs, print_linkage_for_id, frame))
   complete <- .get_complete_linkage(frame, idvecs)
-  genre <- .get_complete_linkage(frame, idvecs[idvecs %in% c('dz', 'dc', 'mb')]) %>% dplyr::mutate(database = 'complete genre linkage')
-  dplyr::glimpse(res)
-  res <- rbind(res, genre, complete)
+  res <- rbind(res, complete)
   print(dplyr::as_tibble(res))
   res
 }
