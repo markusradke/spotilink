@@ -88,7 +88,7 @@ get_single_recommendation_for_genre_seed_spotify <- function(n, seed, s_token){
 #'
 #' @examples
 #' get_available_genre_seeds_spotify()
-get_available_genre_seeds_spotify <- function(){
+get_available_genre_seeds_spotify <- function(s_pass){
   connect_spotify(s_pass)
   s_token <- spotifyr::get_spotify_access_token()
   url <- 'https://api.spotify.com/v1/recommendations/available-genre-seeds'
