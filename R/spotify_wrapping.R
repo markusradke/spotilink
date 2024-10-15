@@ -19,6 +19,7 @@ get_from_API <- function(input, IDcol, pullFunction, cleanFunction, batchsize) {
 
   res <- input %>%
     dplyr::distinct(.data[[IDcol]]) %>%
+    dplyr::filter(!is.na(.data[[IDcol]])) %>%
     dplyr::pull(IDcol) %>%
     get_from_IDs(pullFunction, batchsize, start, pulled, oldfilename, fctn_name)
 
