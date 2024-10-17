@@ -124,12 +124,16 @@ lookup_trackalbums_deezer <- function(deezer_tracks){
 }
 
 lookup_single_trackalbum_deezer <- function(url, track.s.id){
-  if(is.na(url)){album <- make_na_frame_deezer_albums(track.s.id)}
+  if(is.na(url)){album <- make_na_framee_deezer_trackalbums(track.s.id)}
   else{
     album_lookup <- get_api_with_connection_management(url)
-    album <- parse_dz_album_lookup(album_lookup, track.s.id)
+    if('error' %in% ls(album_lookup) ){return(make_na_framee_deezer_trackalbums(track.s.id))}
+    else{album <- parse_dz_album_lookup(album_lookup, track.s.id)}
   }
-  dplyr::select(album, track.s.id = album.s.id,
+  if('track.dz.album.id' %in% colnames(album)){return(album)}
+  dplyr::select(album,
+                track.s.id = album.s.id,
+                track.dz.album.id = album.dz.id,
                 track.dz.album.title = album.dz.title,
                 track.dz.album.upc = album.dz.upc,
                 track.dz.album.totaltracks = album.dz.totaltracks,

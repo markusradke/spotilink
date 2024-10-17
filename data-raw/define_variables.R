@@ -218,6 +218,7 @@ deezerAlbumVars <- c('album.dz.id', 'album.dz.title', 'album.dz.upc', 'album.dz.
                      'album.dz.firstgenre.id', 'album.dz.firstgenre.name', 'album.dz.genres', 'album.dz.quality',
                      'album.dz.firstartist.id', 'album.dz.firstartist.name','album.dz.firstartist.quality')
 
+
 deezerArtistVars <- c('artist.dz.id', 'artist.dz.name', 'artist.dz.follower', 'artist.dz.nalbums',
                        'artist.dz.quality', 'artist.dz.toptracks')
 

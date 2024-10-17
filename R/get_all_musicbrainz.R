@@ -72,15 +72,23 @@ get_all_musicbrainz <- function(input, track_threshold = 0.8, album_threshold = 
   else{res <- pull_tracks_musicbrainz(res, track_threshold, artist_threshold)}
   if(file.exists('mb_albums.rds')){
     message('Checkpoint detected. Album retrieval already done.')
-    res <- readRDS('mb_albums.rds')
+    albums <- readRDS('mb_albums.rds')
+    if(! 'track.mb.id' %in% colnames(albums)){
+      res <- suppressMessages(dplyr::left_join(res, albums %>% dplyr::distinct(album.s.id, .keep_all = T)))
+      }
+    else{res <- albums}
   }
   else{res <- pull_albums_musicbrainz(res, album_threshold, artist_threshold)}
   if(file.exists('mb_artists.rds')){
     message('Checkpoint detected. Artist retrieval already done.')
-    res <- readRDS('mb_artists.rds')
+    artists <- readRDS('mb_artists.rds')
+    if(! 'track.mb.id' %in% colnames(artists) | ! 'album.mb.id' %in% colnames(artists)){
+      res <- suppressMessages(dplyr::left_join(res, artists %>% dplyr::distinct(artist.s.id, .keep_all = T)))
+      }
+    else{res <- artists}
   }
   else{res <- pull_artists_musicbrainz(res, artist_threshold)}
-
+  res <<- res
   res <- combine_genres_musicbrainz(res)
   print_linking_success(res, c('track.s.id', 'album.s.id', 'artist.s.id'))
   saveRDS(res, 'musicbrainz_all.rds')

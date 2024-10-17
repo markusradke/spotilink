@@ -53,10 +53,19 @@ make_na_frame_deezer_artists <- function(artist.s.id){
     dplyr::mutate(artist.s.id = artist.s.id)
 }
 
+make_na_framee_deezer_trackalbums <- function(track.s.id){
+  vars <- deezerAllVars %>% stringr::str_subset('track.dz.album') %>% unique()
+  vars <- vars[vars != 'track.dz.album.quality']
+  data.frame(setNames(replicate(length(vars), NA, simplify = FALSE), vars)) %>%
+    dplyr::mutate(track.s.id = track.s.id)
+}
+
+
 make_na_frame_genius_tracks <- function(track.s.id){
   data.frame(setNames(replicate(length(geniusLyricsVars), NA, simplify = FALSE), geniusLyricsVars)) %>%
     dplyr::mutate(track.s.id = track.s.id)
 }
+
 
 make_na_frame_acousticbrainz_tracks <- function(track.s.id){
   data.frame(setNames(replicate(length(acousticbrainzTrackVars), NA, simplify = FALSE), acousticbrainzTrackVars)) %>%
