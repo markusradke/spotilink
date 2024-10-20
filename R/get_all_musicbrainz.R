@@ -75,7 +75,7 @@ get_all_musicbrainz <- function(input, track_threshold = 0.8, album_threshold = 
     albums <- readRDS('mb_albums.rds')
     if(! 'track.mb.id' %in% colnames(albums)){
       res <- suppressMessages(dplyr::left_join(res, albums %>%
-                                                 dplyr..select(album.s.id, dplyr::contains('album.mb.')) %>%
+                                                 dplyr::select(album.s.id, dplyr::contains('album.mb.')) %>%
                                                  dplyr::distinct(album.s.id, .keep_all = T)))
       }
     else{res <- albums}
@@ -87,13 +87,12 @@ get_all_musicbrainz <- function(input, track_threshold = 0.8, album_threshold = 
     if(! 'track.mb.id' %in% colnames(artists) | ! 'album.mb.id' %in% colnames(artists)){
 
       res <- suppressMessages(dplyr::left_join(res, artists %>%
-                                                 dplyr::select(artist.s.sid, dplyr::contains('artist.mb.')) %>%
+                                                 dplyr::select(artist.s.id, dplyr::contains('artist.mb.')) %>%
                                                  dplyr::distinct(artist.s.id, .keep_all = T)))
       }
     else{res <- artists}
   }
   else{res <- pull_artists_musicbrainz(res, artist_threshold)}
-  res <<- res
   res <- combine_genres_musicbrainz(res)
   print_linking_success(res, c('track.s.id', 'album.s.id', 'artist.s.id'))
   saveRDS(res, 'musicbrainz_all.rds')
