@@ -74,7 +74,9 @@ get_all_musicbrainz <- function(input, track_threshold = 0.8, album_threshold = 
     message('Checkpoint detected. Album retrieval already done.')
     albums <- readRDS('mb_albums.rds')
     if(! 'track.mb.id' %in% colnames(albums)){
-      res <- suppressMessages(dplyr::left_join(res, albums %>% dplyr::distinct(album.s.id, .keep_all = T)))
+      res <- suppressMessages(dplyr::left_join(res, albums %>%
+                                                 dplyr..select(album.s.id, dplyr::contains('album.mb.')) %>%
+                                                 dplyr::distinct(album.s.id, .keep_all = T)))
       }
     else{res <- albums}
   }
@@ -83,7 +85,10 @@ get_all_musicbrainz <- function(input, track_threshold = 0.8, album_threshold = 
     message('Checkpoint detected. Artist retrieval already done.')
     artists <- readRDS('mb_artists.rds')
     if(! 'track.mb.id' %in% colnames(artists) | ! 'album.mb.id' %in% colnames(artists)){
-      res <- suppressMessages(dplyr::left_join(res, artists %>% dplyr::distinct(artist.s.id, .keep_all = T)))
+
+      res <- suppressMessages(dplyr::left_join(res, artists %>%
+                                                 dplyr::select(artist.s.sid, dplyr::contains('artist.mb.')) %>%
+                                                 dplyr::distinct(artist.s.id, .keep_all = T)))
       }
     else{res <- artists}
   }
