@@ -94,7 +94,9 @@ search_single_artist_mbid <- function(artist.s.id, artist.s.name, track.mb.artis
   }
   if(! is.na(artist.mb.id)){
     artist.mb.foundbyid <- TRUE
-    artist.mb.quality <- track.mb.quality
+    artist.mb.quality <- stringdist::stringsim(artist.s.name %>% simplify_name(),
+                                               artist$name %>% simplify_name(),
+                                               'jw')
   }
   else {
     artist.mb.foundbyid <- FALSE
