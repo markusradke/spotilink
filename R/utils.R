@@ -218,7 +218,8 @@ show_linkage_success_in_frame <- function(frame){
                                                    'album.dc.id',
                                                    'track.g.id',
                                                    'album.dz.id',
-                                                   'artist.dz.id')]
+                                                   'artist.dz.id',
+                                                   'track.ab.id')]
   res <- suppressMessages(purrr::map_df(idvecs, print_linkage_for_id, frame))
   complete <- .get_complete_linkage(frame, idvecs)
   res <- rbind(res, complete)
