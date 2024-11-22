@@ -4,7 +4,7 @@
 \alias{get_available_genre_seeds_spotify}
 \title{Get \emph{Spotify} genre seeds}
 \usage{
-get_available_genre_seeds_spotify()
+get_available_genre_seeds_spotify(s_pass)
 }
 \value{
 character vector with all available Spotify genre seeds.

@@ -6,33 +6,28 @@
 #'
 #' @param n_iterations Number of recommendation iterations. Defaults to 5.
 #'
+#' @param stop If != 0 will bypass n_iterations and instead use a stop criterium: If there are no new recommendations for \emph{stop} times in a row, the search for new recommendations will stop. Defaults to 0.
+#'
 #' @return List containing the genre seed, a data frame with recommendations, and information (vector and plot) on the number of news tracks added with each recommendation iteration.
 #' @export
 #'
 #' @examples
-get_multiple_recommendation_for_genre_seed_spotify <- function(seed, s_pass, n_iterations = 5){
+get_multiple_recommendations_for_genre_seed_spotify <- function(seed, s_pass, n_iterations = 5, stop = 0){
   suppressMessages(connect_spotify(s_pass))
   s_token <- spotifyr::get_spotify_access_token()
 
-  res <- c()
-  ndistinct <- c()
-  for(i in seq(n_iterations)){
-    temp <- get_single_recommendation_for_genre_seed_spotify(100, seed, s_token)
-    res <- rbind(res, temp)
-    ndistinct <- c(ndistinct, nrow(res %>% dplyr::distinct(track.s.title, track.s.firstartist.name)))
-    Sys.sleep(5)
+  if(stop != 0){
+    recommendations <- get_recommendations_with_stop_crit(seed, s_token, stop)
+  } else{
+    recommendations <-  get_recommendations_with_n_iterations(seed, s_token, n_iterations)
   }
-  res <- res %>% dplyr::distinct(track.s.title, track.s.firstartist.name, .keep_all = T)
+  recommendations <<- recommendations
+  res <- recommendations$res
+  ndistinct <- recommendations$ndistinct
 
+  res <- res %>% dplyr::distinct(track.s.title, track.s.firstartist.name, .keep_all = T)
   news <- c(100, diff(ndistinct))
-  ratechanges <- as.data.frame(news %>% as.matrix() %>% t)
-  colnames(ratechanges) <- seq(ncol(ratechanges))
-  ratechanges$iteration <- seq(nrow(ratechanges))
-  ratechanges_long <- tidyr::pivot_longer(ratechanges, cols = !iteration)
-  plot <- ggplot2::ggplot(ratechanges_long, ggplot2::aes(x =iteration, y = value, color = name)) +
-    ggplot2::geom_line() +
-    ggplot2::labs(title = paste0('# distinct new tracks for new recommendations, genre seed: "', seed, '"')) +
-    ggplot2::scale_x_continuous(breaks = seq(n_iterations))
+  plot <- plot_news_history(news, seed)
   list(seed = seed,
        date_of_retrieval = Sys.Date(),
        recommendations = res,
@@ -40,6 +35,43 @@ get_multiple_recommendation_for_genre_seed_spotify <- function(seed, s_pass, n_i
                                                 plot = plot))
 }
 
+get_recommendations_with_stop_crit <- function(seed, s_token, stop){
+  res <- c()
+  ndistinct <- c()
+  criterium <- 0
+  i <- 1
+  repeat{
+    message(paste0('Getting recommendations. ', i, '. iteration...'))
+    temp <- get_single_recommendation_for_genre_seed_spotify(100, seed, s_token)
+    res <- rbind(res, temp)
+    ndistinct <- c(ndistinct, nrow(res %>% dplyr::distinct(track.s.title, track.s.firstartist.name)))
+    if(length(ndistinct) > 1){
+      if(ndistinct[length(ndistinct)] == ndistinct[length(ndistinct)-1]){
+        criterium <- criterium + 1
+      } else{criterium <- 0}
+    }
+    message(paste0('Current number of distinct tracks found: ', ndistinct[length(ndistinct)]))
+    message(paste0('Distance to stop criterium: ', stop - criterium))
+    if(criterium >= stop){break}
+    Sys.sleep(5)
+    i <- i + 1
+  }
+  return(list(res = res, ndistinct = ndistinct))
+}
+
+get_recommendations_with_n_iterations <- function(seed, s_token, n_iterations){
+  res <- c()
+  ndistinct <- c()
+  for(i in seq(n_iterations)){
+    message(paste0('Getting recommendations. ', i, '. iteration...'))
+    temp <- get_single_recommendation_for_genre_seed_spotify(100, seed, s_token)
+    res <- rbind(res, temp)
+    ndistinct <- c(ndistinct, nrow(res %>% dplyr::distinct(track.s.title, track.s.firstartist.name)))
+    message(paste0('Current number of distinct tracks found: ', ndistinct[length(ndistinct)]))
+    Sys.sleep(5)
+  }
+  return(list(res = res, ndistinct = ndistinct))
+}
 
 get_single_recommendation_for_genre_seed_spotify <- function(n, seed, s_token){
   url <- paste0('https://api.spotify.com/v1/recommendations?limit=', n, '&market=DE&seed_genres=')
@@ -77,6 +109,19 @@ get_single_recommendation_for_genre_seed_spotify <- function(n, seed, s_token){
   recommendations <- suppressMessages(get_from_API(recommendations, 'track.s.id',
                                                    spotifyr::get_track_audio_features, clean_features, batchsize = 50))
   recommendations
+}
+
+plot_news_history <- function(news, seed){
+  ratechanges <- as.data.frame(news %>% as.matrix() %>% t)
+  colnames(ratechanges) <- seq(ncol(ratechanges))
+  ratechanges_long <- tidyr::pivot_longer(ratechanges, everything()) %>%
+    dplyr::mutate(iteration = as.integer(name))
+  plot <- ggplot2::ggplot(ratechanges_long, ggplot2::aes(x = iteration, y = value)) +
+    ggplot2::geom_line(size = 0.7, color = '#990100') +
+    ggplot2::labs(title = paste0('# distinct new tracks for new recommendations, genre seed: "',
+                                 seed, '"')) +
+    ggplot2::scale_x_continuous(breaks = seq(max(ratechanges_long$iteration)))
+  plot
 }
 
 

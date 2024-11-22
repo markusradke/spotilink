@@ -41,7 +41,7 @@ The values correspond to the string similarity (1 - Jaro-Winkler distance) betwe
 \enumerate{
 \item the track title on \emph{Spotify} and the found track title on \emph{Musicbrainz}.
 \item the album title on \emph{Spotify} and the found album title on \emph{Musicbrainz}.
-\item the artist name on \emph{Spotify} and the found artist name on \emph{Musicbrainz}.
+\item the artist name on \emph{Spotify} and the found artist name on \emph{Musicbrainz}. It also is used to filter low quality entries for tracks and albums as the threshold for the name of the tracks or albums first artist.
 }}
 }
 \value{
