@@ -119,7 +119,8 @@ plot_news_history <- function(news, seed){
   plot <- ggplot2::ggplot(ratechanges_long, ggplot2::aes(x = iteration, y = value)) +
     ggplot2::geom_line(size = 0.7, color = '#990100') +
     ggplot2::labs(title = paste0('# distinct new tracks for new recommendations, genre seed: "',
-                                 seed, '"')) +
+                                 seed, '"'),
+                  ylab = '# of distinct new tracks') +
     ggplot2::scale_x_continuous(breaks = seq(max(ratechanges_long$iteration)))
   plot
 }
