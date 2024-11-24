@@ -14,12 +14,11 @@
 #' @examples
 get_multiple_recommendations_for_genre_seed_spotify <- function(seed, s_pass, n_iterations = 5, stop = 0){
   suppressMessages(connect_spotify(s_pass))
-  s_token <- spotifyr::get_spotify_access_token()
 
   if(stop != 0){
-    recommendations <- get_recommendations_with_stop_crit(seed, s_token, stop)
+    recommendations <- get_recommendations_with_stop_crit(seed, stop)
   } else{
-    recommendations <-  get_recommendations_with_n_iterations(seed, s_token, n_iterations)
+    recommendations <-  get_recommendations_with_n_iterations(seed, n_iterations)
   }
   recommendations <<- recommendations
   res <- recommendations$res
@@ -35,14 +34,14 @@ get_multiple_recommendations_for_genre_seed_spotify <- function(seed, s_pass, n_
                                                 plot = plot))
 }
 
-get_recommendations_with_stop_crit <- function(seed, s_token, stop){
+get_recommendations_with_stop_crit <- function(seed, stop){
   res <- c()
   ndistinct <- c()
   criterium <- 0
   i <- 1
   repeat{
     message(paste0('Getting recommendations. ', i, '. iteration...'))
-    temp <- get_single_recommendation_for_genre_seed_spotify(100, seed, s_token)
+    temp <- get_single_recommendation_for_genre_seed_spotify(100, seed)
     res <- rbind(res, temp)
     ndistinct <- c(ndistinct, nrow(res %>% dplyr::distinct(track.s.title, track.s.firstartist.name)))
     if(length(ndistinct) > 1){
@@ -59,12 +58,12 @@ get_recommendations_with_stop_crit <- function(seed, s_token, stop){
   return(list(res = res, ndistinct = ndistinct))
 }
 
-get_recommendations_with_n_iterations <- function(seed, s_token, n_iterations){
+get_recommendations_with_n_iterations <- function(seed, n_iterations){
   res <- c()
   ndistinct <- c()
   for(i in seq(n_iterations)){
     message(paste0('Getting recommendations. ', i, '. iteration...'))
-    temp <- get_single_recommendation_for_genre_seed_spotify(100, seed, s_token)
+    temp <- get_single_recommendation_for_genre_seed_spotify(100, seed)
     res <- rbind(res, temp)
     ndistinct <- c(ndistinct, nrow(res %>% dplyr::distinct(track.s.title, track.s.firstartist.name)))
     message(paste0('Current number of distinct tracks found: ', ndistinct[length(ndistinct)]))
@@ -73,7 +72,8 @@ get_recommendations_with_n_iterations <- function(seed, s_token, n_iterations){
   return(list(res = res, ndistinct = ndistinct))
 }
 
-get_single_recommendation_for_genre_seed_spotify <- function(n, seed, s_token){
+get_single_recommendation_for_genre_seed_spotify <- function(n, seed){
+  s_token <- spotifyr::get_spotify_access_token()
   url <- paste0('https://api.spotify.com/v1/recommendations?limit=', n, '&market=DE&seed_genres=')
   url <- paste0(url, seed)
   url <- paste0(url, '&access_token=', s_token)
