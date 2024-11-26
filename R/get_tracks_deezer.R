@@ -97,7 +97,7 @@ parse_dz_track_lookup <- function(lookup){
              track.dz.isrc = lookup$isrc,
              track.dz.duration = lookup$duration,
              track.dz.rank = lookup$rank,
-             track.dz.explicit = lookup$explicit_lyrics,
+             track.dz.explicitlyrics = lookup$explicit_lyrics,
              track.dz.explicitinfo = lookup$explicit_content_lyrics,
              track.dz.tempo = lookup$bpm,
              track.dz.loudness = lookup$gain) %>%

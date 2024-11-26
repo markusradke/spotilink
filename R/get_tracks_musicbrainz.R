@@ -90,7 +90,7 @@ search_single_track_mbid <- function(track.s.id, track.s.title, track.s.firstart
                   'track.mb.title' = 'title',
                   'track.mb.quality',
                   'track.mb.foundbyisrc',
-                  'track.mb.artistlist' = 'artists',
+                  'track.mb.artists' = 'artists',
                   'track.mb.firstartist.id',
                   'track.mb.firstartist.name',
                   'track.mb.firstartist.quality',

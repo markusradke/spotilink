@@ -94,7 +94,7 @@ parse_dz_album_lookup <- function(lookup, album.s.id){
                        album.dz.upc = lookup$upc,
                        album.dz.totaltracks = lookup$nb_tracks,
                        album.dz.duration = lookup$duration,
-                       album.dz.follower = lookup$fans,
+                       album.dz.followers = lookup$fans,
                        album.dz.releasedate = lookup$release_date %>% as.Date(),
                        album.dz.type = lookup$record_type,
                        album.dz.explicitlyrics = lookup$explicit_lyrics,

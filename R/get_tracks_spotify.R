@@ -55,7 +55,7 @@ clean_tracks <- function(tracksRaw) {
       'track.s.firstartist.id',
       'track.s.firstartist.name',
       'track.s.artists',
-      'track.s.explicit' = 'explicit',
+      'track.s.explicitlylrics' = 'explicit',
       'track.s.popularity' = 'popularity',
       'track.s.isrc' = 'external_ids.isrc',
       'track.s.durationms' = 'duration_ms',

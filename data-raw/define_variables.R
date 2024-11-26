@@ -3,7 +3,7 @@ spotifyTrackVars <- c('track.s.id',
                       'track.s.artists',
                       'track.s.firstartist.id',
                       'track.s.firstartist.name',
-                      'track.s.explicit',
+                      'track.s.explicitlyrics',
                       'track.s.popularity',
                       'track.s.isrc',
                       'track.s.duration',
@@ -29,7 +29,7 @@ musicbrainzTrackVars <- c(
   'track.mb.title',
   'track.mb.quality',
   'track.mb.foundbyisrc',
-  'track.mb.artistlist',
+  'track.mb.artists',
   'track.mb.firstartist.id',
   'track.mb.firstartist.name',
   'track.mb.firstartist.quality',
@@ -92,7 +92,7 @@ correctTypesAll <- c(
   track.s.artists	= 'list',
   track.s.firstartist.id	= 'character',
   track.s.firstartist.name	= 'character',
-  track.s.explicit = 'logical',
+  track.s.explicitlyrics = 'logical',
   track.s.popularity	= 'integer',
   track.s.isrc	= 'character',
   track.s.durationms	= 'integer',
@@ -114,7 +114,7 @@ correctTypesAll <- c(
   track.mb.title	= 'character',
   track.mb.quality	= 'numeric',
   track.mb.foundbyisrc = 'logical',
-  track.mb.artistlist	= 'list',
+  track.mb.artists	= 'list',
   track.mb.firstartist.id = 'character',
   track.mb.firstartist.name = 'character',
   track.mb.firstartist.quality = 'numeric',
@@ -208,27 +208,27 @@ geniusLyricsVars <- c('track.g.id', 'track.g.title', 'track.g.quality',
                       'track.g.lyrics', 'track.g.lyricsstate')
 
 deezerTrackVars <- c('track.dz.id', 'track.dz.title', 'track.dz.isrc', 'track.dz.duration', 'track.dz.rank',
-                     'track.dz.explicit', 'track.dz.explicitinfo', 'track.dz.tempo', 'track.dz.loudness', 'track.dz.quality',
+                     'track.dz.explicitlyrics', 'track.dz.explicitinfo', 'track.dz.tempo', 'track.dz.loudness', 'track.dz.quality',
                      'track.dz.firstartist.id', 'track.dz.firstartist.name', 'track.dz.firstartist.quality',
                      'track.dz.album.id', 'track.dz.album.title', 'track.dz.album.quality')
 
 deezerAlbumVars <- c('album.dz.id', 'album.dz.title', 'album.dz.upc', 'album.dz.totaltracks', 'album.dz.duration',
-                     'album.dz.follower', 'album.dz.releasedate', 'album.dz.type', 'album.dz.explicitlyrics',
+                     'album.dz.followers', 'album.dz.releasedate', 'album.dz.type', 'album.dz.explicitlyrics',
                      'album.dz.explicitlyricsinfo', 'album.dz.explicitcoverinfo', 'album.dz.label',
                      'album.dz.firstgenre.id', 'album.dz.firstgenre.name', 'album.dz.genres', 'album.dz.quality',
                      'album.dz.firstartist.id', 'album.dz.firstartist.name','album.dz.firstartist.quality')
 
 
-deezerArtistVars <- c('artist.dz.id', 'artist.dz.name', 'artist.dz.follower', 'artist.dz.nalbums',
+deezerArtistVars <- c('artist.dz.id', 'artist.dz.name', 'artist.dz.followers', 'artist.dz.nalbums',
                        'artist.dz.quality', 'artist.dz.toptracks')
 
 deezerAllVars <- c(deezerTrackVars,
                    'track.dz.album.id', 'track.dz.album.title', 'track.dz.album.upc', 'track.dz.album.totaltracks',
-                   'track.dz.album.duration', 'track.dz.album.follower', 'track.dz.album.releasedate', 'track.dz.album.type',
+                   'track.dz.album.duration', 'track.dz.album.followers', 'track.dz.album.releasedate', 'track.dz.album.type',
                    'track.dz.album.explicitlyrics', 'track.dz.album.explicitlyricsinfo', 'track.dz.album.explicitcoverinfo',
                    'track.dz.album.label', 'track.dz.album.firstgenre.id', 'track.dz.album.firstgenre.name',
                    'track.dz.album.genres',
-                   'track.dz.firstartist.follower', 'track.dz.firstartist.nalbums', 'track.dz.firstartist.toptracks')
+                   'track.dz.firstartist.followers', 'track.dz.firstartist.nalbums', 'track.dz.firstartist.toptracks')
 
 acousticbrainzTrackVarsHighlevel <- c(
   'track.ab.id', 'track.ab.danceability', 'track.ab.gender',

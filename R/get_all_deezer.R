@@ -98,7 +98,7 @@ lookup_single_firstartist_deezer <- function(url, track.s.id){
   dplyr::select(artist, track.s.id = artist.s.id,
                 track.dz.firstartist.id = artist.dz.id,
                 track.dz.firstartist.name = artist.dz.name,
-                track.dz.firstartist.follower = artist.dz.follower,
+                track.dz.firstartist.followers = artist.dz.followers,
                 track.dz.firstartist.nalbums = artist.dz.nalbums,
                 track.dz.firstartist.toptracks = artist.dz.toptracks)
 }
@@ -138,7 +138,7 @@ lookup_single_trackalbum_deezer <- function(url, track.s.id){
                 track.dz.album.upc = album.dz.upc,
                 track.dz.album.totaltracks = album.dz.totaltracks,
                 track.dz.album.duration = album.dz.duration,
-                track.dz.album.follower = album.dz.follower,
+                track.dz.album.followers = album.dz.followers,
                 track.dz.album.releasedate = album.dz.releasedate,
                 track.dz.album.type = album.dz.type,
                 track.dz.album.explicitlyrics = album.dz.explicitlyrics,
