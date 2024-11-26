@@ -114,5 +114,6 @@ parse_dz_album_lookup <- function(lookup, album.s.id){
     parsed <- dplyr::mutate(parsed, album.dz.firstgenre.name = NA,
                                     album.dz.firstgenre.id = NA)
   }
-  parsed
+  parsed %>%
+    dplyr::mutate(album.dz.firstgenre.id = album.dz.firstgenre.id %>% as.character())
 }
