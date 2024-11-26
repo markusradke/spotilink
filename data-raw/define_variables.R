@@ -47,7 +47,8 @@ spotifyAlbumVars <- c('album.s.id',
                       'album.s.label',
                       'album.s.popularity',
                       'album.s.firstartist.id',
-                      'album.s.firstartist.name')
+                      'album.s.firstartist.name',
+                      'album.s.coverurl')
 
 musicbrainzAlbumVars <- c('album.mb.id',
                           'album.mb.title',
@@ -155,6 +156,7 @@ correctTypesAll <- c(
   album.s.popularity	= 'integer',
   album.s.firstartist.id = 'character',
   album.s.firstartist.name = 'character',
+  album.s.coverurl = 'character',
   album.mb.id	= 'character',
   album.mb.title	= 'character',
   album.mb.quality	= 'numeric',
