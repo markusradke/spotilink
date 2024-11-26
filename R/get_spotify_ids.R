@@ -146,9 +146,11 @@ search_single_track_on_spotify <- function(artist, track, album, releaseyear, ar
   .make_empty_frame <- function(){
     data.frame(artist.search = artist,
                track.search = track,
+               album.search = album,
                track.s.id = NA,
                track.s.title = NA,
                track.s.quality = NA,
+               track.s.album.quality = NA,
                track.s.firstartist.id = NA,
                track.s.firstartist.name = NA,
                track.s.firstartist.quality = NA)
@@ -162,6 +164,7 @@ search_single_track_on_spotify <- function(artist, track, album, releaseyear, ar
                     track.s.id = id) %>%
       dplyr::mutate(artist.search = artist,
                     track.search = track,
+                    album.search = album,
                     track.s.quality = stringdist::stringsim(simplify_name(track.s.title), simplify_name(track.search), 'jw'),
                     track.s.firstartist.quality = stringdist::stringsim(simplify_name(track.s.firstartist.name), simplify_name(artist.search), 'jw'),
                     album.s.quality = stringdist::stringsim(simplify_name(album), simplify_name(album.name), 'jw'),
@@ -171,9 +174,11 @@ search_single_track_on_spotify <- function(artist, track, album, releaseyear, ar
       dplyr::first() %>%
       dplyr::select(artist.search,
                     track.search,
+                    album.search,
                     track.s.id,
                     track.s.title,
                     track.s.quality,
+                    track.s.album.quality = album.s.quality,
                     track.s.firstartist.id,
                     track.s.firstartist.name,
                     track.s.firstartist.quality)
