@@ -26,6 +26,7 @@ get_all_spotify <- function(input, pass) {
     connect_spotify(pass)
     res <- pull_tracks_spotify(input_ready)
     res <- dplyr::select(res, -'album.s.title')
+    suppressMessages(connect_spotify(pass))
     res <- pull_albums_spotify(res)
     res <- expand_artists(res)
     res <- pull_artists_spotify(res)

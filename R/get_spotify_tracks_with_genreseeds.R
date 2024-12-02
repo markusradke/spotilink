@@ -1,4 +1,5 @@
 #' Get \emph{Spotify}-Recommendations for specific Genres
+#' DEPRECATED - API does not allow for recommendation retrieval any more since November 2024
 #'
 #'Retrieve a frame with distinct \emph{Spotify} track information, as well for a specific genres through n iterations. Will also return information on the number of \emph{distinct} new tracks added with each recommendation iteration. Each recommendation iteration will retrieve 100 tracks tracks from the API.
 #' @param seed \emph{Spotify} genre seed. Run \code{\link{get_available_genre_seeds_spotify}} to get a list of all available genre seeds.
@@ -12,7 +13,7 @@
 #' @export
 #'
 #' @examples
-get_multiple_recommendations_for_genre_seed_spotify <- function(seed, s_pass, n_iterations = 5, stop = 0){
+get_multiple_recommendations_for_genre_seed_spotify <- function(seed, n_iterations = 5, stop = 0){
   suppressMessages(connect_spotify(s_pass))
 
   if(stop != 0){

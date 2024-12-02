@@ -37,6 +37,7 @@ get_tracks_spotify <- function(input, pass) {
 }
 
 pull_tracks_spotify <- function(input) {
+  suppressMessages(connect_spotify(c('6f069a93062b4333bedd796f9312904c','ddcee099adcd4147a590beeb4bae4475'))) # use SPOTIVEY login
   res <- get_from_API(input, 'track.s.id', spotifyr::get_tracks, clean_tracks, batchsize = 50)
   res <- get_from_API(res, 'track.s.id', spotifyr::get_track_audio_features, clean_features, batchsize = 50)
 }
@@ -62,6 +63,7 @@ clean_tracks <- function(tracksRaw) {
       'track.s.duration',
       'track.s.popularity' = 'popularity',
       'track.s.albumposition' = 'track_number',
+      'track.s.previewurl' = 'preview_url',
       'album.s.id' = 'album.id',
       'album.s.title' = 'album.name'
     )

@@ -2,7 +2,8 @@
 % Please edit documentation in R/get_audioanalysis_spotify.R
 \name{get_audioanalysis_spotify}
 \alias{get_audioanalysis_spotify}
-\title{Get \emph{Spotify} API Audio Analysis for Tracks}
+\title{Get \emph{Spotify} API Audio Analysis for Tracks
+#' DEPRECATED - API does not allow for recommendation retrieval any more since November 2024}
 \usage{
 get_audioanalysis_spotify(input, pass)
 }

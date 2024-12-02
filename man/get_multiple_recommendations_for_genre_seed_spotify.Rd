@@ -2,11 +2,11 @@
 % Please edit documentation in R/get_spotify_tracks_with_genreseeds.R
 \name{get_multiple_recommendations_for_genre_seed_spotify}
 \alias{get_multiple_recommendations_for_genre_seed_spotify}
-\title{Get \emph{Spotify}-Recommendations for specific Genres}
+\title{Get \emph{Spotify}-Recommendations for specific Genres
+DEPRECATED - API does not allow for recommendation retrieval any more since November 2024}
 \usage{
 get_multiple_recommendations_for_genre_seed_spotify(
   seed,
-  s_pass,
   n_iterations = 5,
   stop = 0
 )
@@ -14,11 +14,11 @@ get_multiple_recommendations_for_genre_seed_spotify(
 \arguments{
 \item{seed}{\emph{Spotify} genre seed. Run \code{\link{get_available_genre_seeds_spotify}} to get a list of all available genre seeds.}
 
-\item{s_pass}{Character Vector containing two entries: \emph{Client ID} and \emph{Client secret}. See \url{https://developer.spotify.com/documentation/web-api/concepts/authorization} for details.}
-
 \item{n_iterations}{Number of recommendation iterations. Defaults to 5.}
 
 \item{stop}{If != 0 will bypass n_iterations and instead use a stop criterium: If there are no new recommendations for \emph{stop} times in a row, the search for new recommendations will stop. Defaults to 0.}
+
+\item{s_pass}{Character Vector containing two entries: \emph{Client ID} and \emph{Client secret}. See \url{https://developer.spotify.com/documentation/web-api/concepts/authorization} for details.}
 }
 \value{
 List containing the genre seed, a data frame with recommendations, and information (vector and plot) on the number of news tracks added with each recommendation iteration.

@@ -1,4 +1,5 @@
 #'Get \emph{Spotify} API Audio Analysis for Tracks
+#'#' DEPRECATED - API does not allow for recommendation retrieval any more since November 2024
 #'
 #'Retrieve a data frame containing information from the \emph{Spotify} API.
 #'The result contains tracks' audio analysis using the  \pkg{spotilink} naming convention.
@@ -17,7 +18,8 @@ get_audioanalysis_spotify <- function(input, pass) {
   renameVars <- spotifyAudioanalysisVars[! spotifyAudioanalysisVars %in% c('track.s.id')]
   res <- rename_existing_variables(input, renameVars)
 
-  connect_spotify(pass)
+
+  connect_spotify(s_pass) # use SPOTIVEY pass
   res <- retrieve_audioanalysis_spotify(res)
 }
 
