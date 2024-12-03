@@ -24,7 +24,7 @@ select_features <- function(input,
                             ml_genre_classificators = F,
                             genre_tags = F,
                             platform_popularity = F,
-                            explicitness_and_lyrics = F){
+                            cover_lyrics_explicitness = F){
 
   features <- c('track.s.id')
   if(track_identifier){features <- c(features, trackIdentifier)}
@@ -43,7 +43,7 @@ select_features <- function(input,
   if(ml_genre_classificators){features <- c(features, mlGenreClassificators)}
   if(genre_tags){features <- c(features, genreTags)}
   if(platform_popularity){features <- c(features, platformPopularity)}
-  if(explicitness_and_lyrics){features <- c(features, explicitnessAndLyrics)}
+  if(cover_lyrics_explicitness){features <- c(features, coverLyricsExplicitness)}
 
   features <- unique(features)
   features <- features[features %in% colnames(input)]

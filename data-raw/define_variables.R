@@ -331,7 +331,6 @@ releaseIdentifier <- c('album.s.id',
                        'album.s.upc',
                        'album.s.firstartist.id',
                        'album.s.firstartist.name',
-                       'album.s.coverurl',
                        'album.mb.id',
                        'album.mb.title',
                        'album.mb.firstartist.id',
@@ -513,7 +512,8 @@ platformPopularity <- c('track.s.popularity',
                         'album.dz.followers',
                         'track.dz.album.followers')
 
-explicitnessAndLyrics <- c('track.s.explicitlyrics',
+coverLyricsExplicitness <- c('album.s.coverurl',
+                           'track.s.explicitlyrics',
                            'track.dz.explicitlyrics',
                            'track.dz.explicitinfo',
                            'album.dz.explicitlyrics',
@@ -544,4 +544,4 @@ allFeatureSets <- c(trackIdentifier,
                     mlGenreClassificators,
                     genreTags,
                     platformPopularity,
-                    explicitnessAndLyrics)
+                    coverLyricsExplicitness)

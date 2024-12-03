@@ -55,7 +55,7 @@ use_data(musicbrainzWhitelist, # external references
          mlGenreClassificators,
          genreTags,
          platformPopularity,
-         explicitnessAndLyrics,
+         coverLyricsExplicitness,
          allFeatureSets,
 
 
