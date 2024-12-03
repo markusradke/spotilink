@@ -1,38 +1,65 @@
 ## code to prepare `DATASET` dataset goes here
+rm(list=ls())
 musicbrainzWhitelist <- readRDS('./data-raw/whitelist.rds')
 source('./data-raw/define_test_data.R')
 source('./data-raw/define_variables.R')
 
-s_pass <-  c("6f069a93062b4333bedd796f9312904c","ddcee099adcd4147a590beeb4bae4475") # SPOTIVEY PASS
+s_pass <-  c('eb2a169a0bc84c3fa675cf52e59a0adf', '93b3486b9cea4af8b68231af3114501a') # NOT SPOTIVEY PASS
 dc_pass <- c('bSyzKCYCBBwMYsMfxUhj', 'lZvwpvEOdZnrJsWewPxjvYUgdeWDCENu')
 g_token <- '-jEcwl0b2ANL3rmxjbL5gcsHcmtkV3-sw55SslkLtWBFn3tpBrdHS0ANZteuQjco'
-use_data(musicbrainzWhitelist,
-         testTracksArtistsAlbums,
+use_data(musicbrainzWhitelist, # external references
+
+         testTracksArtistsAlbums, # test data
          testTracksArtistsAlbums_larger,
-         spotifyTrackVars,
+         largeArtistTest,
+         testAcousticbrainz,
+         testresults,
+
+         spotifyTrackVars,# platform var sets
          musicbrainzTrackVars,
          spotifyAlbumVars,
          musicbrainzAlbumVars,
          spotifyArtistVars,
          musicbrainzArtistVars,
-         spotifyAllVars,
-         musicbrainzAllVars,
          discogsAlbumVars,
          geniusLyricsVars,
          deezerTrackVars,
          deezerAlbumVars,
          deezerArtistVars,
          deezerAllVars,
-         acousticbrainzTrackVars,
          acousticbrainzTrackVarsHighlevel,
          acousticbrainzTrackVarsLowlevel,
+         allVars,
+
+         spotifyAllVars, # aggregated var sets
+         musicbrainzAllVars,
+         acousticbrainzTrackVars,
+
+         spotifyAudioanalysisVars, # special vars
          correctTypesAll,
-         spotifyAudioanalysisVars,
          correctTypesAudioanalysis,
-         largeArtistTest,
-         testAcousticbrainz,
-         testresults,
-         s_pass,
+
+         trackIdentifier, # feature var sets
+         artistIdentifier,
+         releaseIdentifier,
+         linkageVariables,
+         labelIdentifier,
+         artistDescriptors,
+         releaseDescriptors,
+         platformHighlevelAudioDescriptors,
+         audioTrackMetadata,
+         mlHighlevelAudioClassificators,
+         mlHighlevelAudioDescriptors,
+         aggregatedTrackLowlevelFeatures,
+         genreDescriptors,
+         mlGenreClassificators,
+         genreTags,
+         platformPopularity,
+         explicitnessAndLyrics,
+         allFeatureSets,
+
+
+         s_pass, # passports
          dc_pass,
          g_token,
          internal = TRUE,
