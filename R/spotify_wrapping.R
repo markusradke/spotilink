@@ -43,7 +43,7 @@ get_from_IDs <- function(ids, pullFunction, batchsize, start, pulled, oldfilenam
     stop <- min(c(start + stepsize - 1, total))
     message(paste0("Getting infos for ", start ,"-", stop, " of ", total, "...\n"))
     pulled <- pullFunction(ids[start:stop]) %>%
-      rbind(pulled, .)
+      dplyr::bind_rows(pulled, .)
     filename <- paste0(fct_name, '_', start, '.rds')
     if(i %% 10 == 0){
       saveRDS(pulled, filename)
