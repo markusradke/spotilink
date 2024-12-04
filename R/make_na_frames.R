@@ -33,7 +33,7 @@ make_na_frame_musicbrainz_artists <- function(artist.s.id){
     dplyr::mutate(artist.s.id = artist.s.id)
 }
 
-make_na_frame_musicbrainz_albums <- function(track.s.id){
+make_na_frame_musicbrainz_all <- function(track.s.id){
   data.frame(setNames(replicate(length(musicbrainzAllVars), NA, simplify = FALSE), musicbrainzAllVars)) %>%
     dplyr::mutate(track.s.id = track.s.id)
 }

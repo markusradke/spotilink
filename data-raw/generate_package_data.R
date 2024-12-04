@@ -14,6 +14,7 @@ use_data(musicbrainzWhitelist, # external references
          largeArtistTest,
          testAcousticbrainz,
          testresults,
+         musicbrainzAlbumBugfix,
 
          spotifyTrackVars,# platform var sets
          musicbrainzTrackVars,

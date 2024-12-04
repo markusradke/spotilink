@@ -84,6 +84,11 @@ search_single_album_mbid <- function(album.s.id, album.s.title, album.s.firstart
   if  (nrow(result) == 0) {
     result <- find_album_without_UPC(album.s.title, album.s.firstartist.name, album.s.releaseyear)
   }
+  if(nrow(result) == 0){
+    return(make_na_frame_musicbrainz_albums(album.s.id) %>%
+             dplyr::select(-album.mb.genres, -album.mb.topgenre) %>%
+             dplyr::glimpse())
+  }
   result <- result %>% dplyr::select('album.mb.id' = 'mbid',
                                      'album.mb.title' = 'title',
                                      'album.mb.language' = 'language',
@@ -109,6 +114,7 @@ find_album_with_UPC <- function(album.s.upc) {
 
 find_album_without_UPC <- function(album.s.title, album.s.firstartist.name, album.s.releaseyear) {
   result <- suppressMessages(musicbrainz::search_releases(paste0('artist:', album.s.firstartist.name,' and release:', album.s.title)))
+  if(nrow(result) == 0){return(result)}
   result %>%
     tidyr::hoist('artists', album.mb.firstartist.id = list('artist_mbid', 1L), .remove = FALSE) %>%
     tidyr::hoist('artists', album.mb.firstartist.name = list('name', 1L), .remove = FALSE) %>%
