@@ -33,13 +33,23 @@ get_tracks_spotify <- function(input, pass) {
       dplyr::bind_rows(res, .)
   }
   saveRDS(res, 'spotify_tracks.rds')
+  if(file.exists('spotify_tracks_without_audiofeatures.rds')){
+    file.remove('spotify_tracks_without_audiofeatures.rds')
+  }
   res
 }
 
 pull_tracks_spotify <- function(input) {
   suppressMessages(connect_spotify(c('6f069a93062b4333bedd796f9312904c','ddcee099adcd4147a590beeb4bae4475'))) # use SPOTIVEY login
-  res <- get_from_API(input, 'track.s.id', spotifyr::get_tracks, clean_tracks, batchsize = 50)
+  if(! file.exists('spotify_tracks_without_audiofeatures.rds')){
+    res <- get_from_API(input, 'track.s.id', spotifyr::get_tracks, clean_tracks, batchsize = 50)
+    saveRDS(res, 'spotify_tracks_without_audiofeatures.rds')
+  }
+  else{
+    res <- readRDS('spotify_tracks_without_audiofeatures.rds')
+  }
   res <- get_from_API(res, 'track.s.id', spotifyr::get_track_audio_features, clean_features, batchsize = 50)
+  res
 }
 
 clean_tracks <- function(tracksRaw) {
