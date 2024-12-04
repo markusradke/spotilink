@@ -86,8 +86,7 @@ search_single_album_mbid <- function(album.s.id, album.s.title, album.s.firstart
   }
   if(nrow(result) == 0){
     return(make_na_frame_musicbrainz_albums(album.s.id) %>%
-             dplyr::select(-album.mb.genres, -album.mb.topgenre) %>%
-             dplyr::glimpse())
+             dplyr::select(-album.mb.genres, -album.mb.topgenre))
   }
   result <- result %>% dplyr::select('album.mb.id' = 'mbid',
                                      'album.mb.title' = 'title',

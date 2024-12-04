@@ -84,6 +84,10 @@ search_single_track_mbid <- function(track.s.id, track.s.title, track.s.firstart
   if  (nrow(result) == 0) {
     result <- find_tracks_without_ISRC(track.s.firstartist.name, track.s.title)
   }
+  if(nrow(result) == 0){
+    return(make_na_frame_musicbrainz_tracks(track.s.id) %>%
+             dplyr::select(-track.mb.genres, -track.mb.topgenre))
+  }
   result %>% dplyr::mutate(track.s.id = track.s.id) %>%
     dplyr::select('track.s.id',
                   'track.mb.id' = 'mbid',
@@ -110,6 +114,7 @@ find_tracks_with_ISRC <- function(track.s.isrc) {
 
 find_tracks_without_ISRC <- function(track.s.firstartist.name, track.s.title) {
   search <- suppressMessages(musicbrainz::search_recordings(paste0('artist:', track.s.firstartist.name,' and recording:', track.s.title)))
+  if(nrow(search) == 0){return(search)}
   search %>%  tidyr::hoist('artists', track.mb.firstartist.id = list('artist_mbid', 1L), .remove = FALSE) %>%
     tidyr::hoist('artists', track.mb.firstartist.name = list('name', 1L), .remove = FALSE) %>%
     dplyr::mutate(track.mb.quality = stringdist::stringsim(track.s.title %>% simplify_name(),
