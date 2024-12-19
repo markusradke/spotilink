@@ -68,7 +68,7 @@ search_tracks_mbids <- function(distinctinput){
                              search_single_track_mbid %>% save_checkpoint_and_count(checkpoint_name,
                                                                                     last_index,
                                                                                     saved_data,
-                                                                                    savingstep = 20,
+                                                                                    savingstep = 100,
                                                                                     ndatapoints = nrow(distinctinput)),
                              .progress = 'Searching tracks on Musicbrainz...')
   }
@@ -139,7 +139,7 @@ lookup_tracks_mb <- function(track_mbids){
                   lookup_single_track_mb %>% save_checkpoint_and_count(checkpoint_name,
                                                                        last_index,
                                                                        saved_data,
-                                                                       savingstep = 20,
+                                                                       savingstep = 100,
                                                                        ndatapoints = nrow(track_mbids)),
                  .progress = 'Looking up track genres on Musicbrainz...')
   }

@@ -74,7 +74,7 @@ search_artist_mbids <- function(artists){
                    search_single_artist_mbid %>% save_checkpoint_and_count(checkpoint_name,
                                                                            last_index,
                                                                            saved_data,
-                                                                           savingstep = 20,
+                                                                           savingstep = 100,
                                                                            ndatapoints = nrow(artists)),
                    .progress = 'Searching artists on Musicbrainz...')
   }
@@ -130,7 +130,7 @@ lookup_artists_mb <- function(artist_mbids){
                    lookup_single_artist_mb %>% save_checkpoint_and_count(checkpoint_name,
                                                                          last_index,
                                                                          saved_data,
-                                                                         savingstep = 20,
+                                                                         savingstep = 100,
                                                                          ndatapoints = nrow(artist_mbids)),
                    .progress = 'Looking up artist information on Musicbrainz...')
   }
