@@ -11,7 +11,9 @@ calculate_and_print_quality <- function(search, found) {
 get_top_genres <- function(mbresult, type){
   genres_col <- paste0(type, '.mb.genres')
   topgenre_col <- paste0(type, '.mb.topgenre')
-  all_zero_rows <- all(sapply(mbresult[[genres_col]], nrow) == 0)
+  all_zero_rows <- all(purrr::map_lgl(mbresult[[genres_col]],
+                                      check_zero_genres,
+                       .progress = 'checking if all genres info is empty'))
   if(all_zero_rows){
     return(dplyr::mutate(mbresult, !! topgenre_col := NA))
   }
@@ -20,7 +22,18 @@ get_top_genres <- function(mbresult, type){
   mbresult %>%
     dplyr::mutate(!! topgenre_col := purrr::map_chr(mbresult[[genres_col]],
                                                     get_highest_ranking_genre,
-                                                    overall_genrecounts))
+                                                    overall_genrecounts,
+                                                    .progress = 'Extracting highest ranking genre...'))
+}
+
+check_zero_genres <- function(genres){
+  flag <- FALSE
+  if(is.data.frame(genres)){
+    if(nrow(genres) == 0){return(flag <- TRUE)}
+  } else{
+    if(is.na(genres)) {flag <- TRUE}
+  }
+  flag
 }
 
 count_genres_in_whole_dataset <- function(mbresult, genres_col){
