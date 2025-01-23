@@ -21,7 +21,7 @@ unzip_tags <- function(tags) {
   tags <- tags[[1]]
   if (ncol(tags == 2)) {
     tags <- dplyr::filter(tags, .data[['tag_name']] %in% musicbrainzWhitelist$genres)
-    tags <- dplyr::arrange(tags, dplyr::desc('tag_count'))
+    tags <- dplyr::arrange(tags, -tag_count)
     return(
       list(tags[['tag_name']][1])
     )
