@@ -8,31 +8,41 @@ calculate_and_print_quality <- function(search, found) {
   quality
 }
 
-get_top_genres <- function(input, type){
-  # input is result frame containing colum type.mb.genres
-  # here, all genres must be unlisted and counted, and then joined with the corresponding genre votings
+get_top_genres <- function(mbresult, type){
+  genres_col <- paste0(type, '.mb.genres')
+  topgenre_col <- paste0(type, '.mb.topgenre')
+  all_zero_rows <- all(sapply(mbresult[[genres_col]], nrow) == 0)
+  if(all_zero_rows){
+    return(dplyr::mutate(mbresult, !! topgenre_col := NA))
+  }
+
+  overall_genrecounts <- count_genres_in_whole_dataset(mbresult, genres_col)
+  mbresult %>%
+    dplyr::mutate(!! topgenre_col := purrr::map_chr(mbresult[[genres_col]],
+                                                    get_highest_ranking_genre,
+                                                    overall_genrecounts))
 }
 
-get_highest_ranking_genre <- function(tagLookup) {
-  highest_tag <- tagLookup$tags %>%
-    purrr::lmap(unzip_tags) %>%
-    unlist() %>%
-    dplyr::tibble(topgenre = .)
-  genresMB <- cbind(tagLookup, highest_tag) %>%
-    dplyr::select('genres' = 'tags', 'topgenre')
+count_genres_in_whole_dataset <- function(mbresult, genres_col){
+  pasted_genresframes <- do.call(rbind, mbresult[[genres_col]])
+  pasted_genresframes %>%
+    dplyr::group_by(tag_name) %>%
+    dplyr::summarize(tag_importance = sum(tag_count, na.rm = TRUE)) %>%
+    dplyr::filter(tag_name %in% musicbrainzWhitelist$genres)
 }
 
-unzip_tags <- function(tags) {
-  tags <- tags[[1]]
-  if (ncol(tags == 2)) {
-    tags <- dplyr::filter(tags, .data[['tag_name']] %in% musicbrainzWhitelist$genres)
-    tags <- dplyr::arrange(tags, -tag_count)
-    return(
-      list(tags[['tag_name']][1])
-    )
+get_highest_ranking_genre <- function(genres, overall_genrecounts) {
+  if (ncol(genres == 2)) {
+    genres <- suppressMessages(
+      dplyr::filter(genres, tag_name %in% musicbrainzWhitelist$genres) %>%
+      dplyr::left_join(overall_genrecounts) %>%
+      dplyr::arrange(-tag_count, -tag_importance)
+      )
+    topgenre <- dplyr::first(genres) %>% dplyr::pull(tag_name)
+    return(topgenre)
   }
   else {
-    return(list(NA))
+    return(NA)
   }
 }
 

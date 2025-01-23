@@ -148,7 +148,6 @@ lookup_albums_mb <- function(album_searchresults){
                   .progress = 'Looking up album genres on Musicbrainz...')
   }
   else{message('Album lookup already done.')}
-  browser()
   albumGenres <- suppressMessages(read_checkpoint(checkpoint_name)$saved_data)
   cbind(album_searchresults, albumGenres)
 }
