@@ -47,6 +47,7 @@ pull_albums_musicbrainz <- function(input, album_threshold, firstartist_threshol
   result <- search_albums_mbids(distinctinput)
   result <- lookup_albums_mb(result)
   result <- filter_quality_musicbrainz_albums(result, album_threshold, firstartist_threshold)
+  # result <- get_top_genres(result, 'album')
   result <- suppressMessages(dplyr::left_join(input, result, by = c('album.s.id')))
   saveRDS(result, 'mb_albums.rds')
   mbalbums_remove_checkpoints()
@@ -131,35 +132,32 @@ find_album_without_UPC <- function(album.s.title, album.s.firstartist.name, albu
     dplyr::select(-releasediff, -album.mb.releaseyear)
 }
 
-lookup_albums_mb <- function(album_mbids){
+lookup_albums_mb <- function(album_searchresults){
   checkpoint_name <- 'mb_albums_lookup'
   checkpoint <- read_checkpoint(checkpoint_name)
   last_index <- checkpoint$last_index
-  if(! last_index == nrow(album_mbids)){
+  if(! last_index == nrow(album_searchresults)){
     saved_data <- checkpoint$saved_data
-    if(last_index > 0) {album_mbids <- tail(album_mbids, -last_index)}
-    purrr::map_df(album_mbids$album.mb.id,
+    if(last_index > 0) {album_searchresults <- tail(album_searchresults, -last_index)}
+    purrr::map_df(album_searchresults$album.mb.id,
                   lookup_single_album_mb %>% save_checkpoint_and_count(checkpoint_name,
                                                                        last_index,
                                                                        saved_data,
                                                                        savingstep = 100,
-                                                                       ndatapoints = nrow(album_mbids)),
+                                                                       ndatapoints = nrow(album_searchresults)),
                   .progress = 'Looking up album genres on Musicbrainz...')
   }
   else{message('Album lookup already done.')}
+  browser()
   albumGenres <- suppressMessages(read_checkpoint(checkpoint_name)$saved_data)
-  cbind(album_mbids, albumGenres)
+  cbind(album_searchresults, albumGenres)
 }
 
 
 lookup_single_album_mb  <- function(mbID) {
   res <- musicbrainz::lookup_release_by_id(mbID, includes=c('tags'))
   res <- suppressWarnings(dplyr::mutate(res, score = .data[['score']] %>% as.character()))
-  res %>%
-    get_highest_ranking_genre() %>%
-    dplyr::rename('album.mb.genres' = 'genres',
-                  'album.mb.topgenre' = 'topgenre') %>%
-    dplyr::mutate(album.mb.topgenre = .data[['album.mb.topgenre']] %>% as.character())
+  res %>% dplyr::select('album.mb.genres' = 'tags')
 }
 
 mbalbums_remove_checkpoints <- function(){

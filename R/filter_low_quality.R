@@ -153,13 +153,13 @@ filter_quality_deezer_all <- function(frame, track_threshold, album_threshold, f
 #'
 #' @examples
 filter_quality_musicbrainz_artists <- function(frame, artist_threshold){
-  if(! all(musicbrainzArtistVars %in% colnames(frame))){
+  if(! all(musicbrainzArtistVars[musicbrainzArtistVars != 'artist.mb.topgenre'] %in% colnames(frame))){
     stop('Please make sure the input frame contains all Musicbrainz artist information by running get_artists_musicbrainz first.')
   }
   filter_lowquality_content(frame,
                             c('artist.mb.quality'),
                             c(artist_threshold),
-                            contentcols = musicbrainzArtistVars)
+                            contentcols = musicbrainzArtistVars[musicbrainzArtistVars != 'artist.mb.topgenre'])
 }
 
 
@@ -173,13 +173,13 @@ filter_quality_musicbrainz_artists <- function(frame, artist_threshold){
 #'
 #' @examples
 filter_quality_musicbrainz_albums <- function(frame, album_threshold, firstartist_threshold){
-  if(! all(musicbrainzAlbumVars %in% colnames(frame))){
+  if(! all(musicbrainzAlbumVars[musicbrainzAlbumVars != 'album.mb.topgenre'] %in% colnames(frame))){
     stop('Please make sure the input frame contains all Musicbrainz album information by running get_albums_musicbrainz first.')
   }
   filter_lowquality_content(frame,
                             c('album.mb.quality', 'album.mb.firstartist.quality'),
                             c(album_threshold, firstartist_threshold),
-                            contentcols = musicbrainzAlbumVars)
+                            contentcols = musicbrainzAlbumVars[musicbrainzAlbumVars != 'album.mb.topgenre'])
 }
 
 #' Filter low quality results for \emph{Musicbrainz} and \emph{Acousticbrainz} Tracks
@@ -193,14 +193,14 @@ filter_quality_musicbrainz_albums <- function(frame, album_threshold, firstartis
 #'
 #' @examples
 filter_quality_musicbrainz_acousticbrainz_tracks <- function(frame, track_threshold, firstartist_threshold){
-  if(! all(musicbrainzTrackVars %in% colnames(frame))){
+  if(! all(musicbrainzTrackVars[musicbrainzTrackVars != 'track.mb.topgenre'] %in% colnames(frame))){
     stop('Please make sure the input frame contains all Musicbrainz track information by running get_tracks_musicbrainz first.')
   }
   if(!'track.ab.id' %in% colnames(frame)){
     result <- filter_lowquality_content(frame,
                               c('track.mb.quality', 'track.mb.firstartist.quality'),
                               c(track_threshold, firstartist_threshold),
-                              contentcols = musicbrainzTrackVars)
+                              contentcols = musicbrainzTrackVars[musicbrainzTrackVars != 'track.mb.topgenre'])
   }
   else{
     if(! all(acousticbrainzTrackVars %in% colnames(frame))){

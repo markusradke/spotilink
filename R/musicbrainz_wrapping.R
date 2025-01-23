@@ -8,6 +8,11 @@ calculate_and_print_quality <- function(search, found) {
   quality
 }
 
+get_top_genres <- function(input, type){
+  # input is result frame containing colum type.mb.genres
+  # here, all genres must be unlisted and counted, and then joined with the corresponding genre votings
+}
+
 get_highest_ranking_genre <- function(tagLookup) {
   highest_tag <- tagLookup$tags %>%
     purrr::lmap(unzip_tags) %>%

@@ -55,6 +55,7 @@ pull_artists_musicbrainz <- function(input, artist_threshold) {
   result <- result %>% filter_quality_musicbrainz_artists(artist_threshold) %>%
     dplyr::mutate(artist.mb.birth = as.Date(.data[['artist.mb.birth']]))  %>% # Date conversion must be here; else only integers are returned
     dplyr::mutate(artist.mb.death = as.Date(.data[['artist.mb.death']]))
+  # result <- get_top_genres(result, 'artist')
   result <- dplyr::left_join(input, result, by = c('artist.s.id'))
 
   saveRDS(result, 'mb_artists.rds')
@@ -166,19 +167,8 @@ lookup_single_artist_mb <- function(artist.s.id, artist.mb.id, artist.mb.quality
                   'artist.mb.death',
                   'artist.mb.deathyear',
                   'artist.mb.dead',
-                  'tags',
-                  'artist.mb.origin' = 'begin_area_name') %>%
-  retrieve_artist_genre()
-}
-
-retrieve_artist_genre <- function(artists){
-  artistgenres <- artists %>%
-    get_highest_ranking_genre() %>%
-    dplyr::rename('artist.mb.genres' = 'genres',
-                  'artist.mb.topgenre' = 'topgenre')
-  cbind(artists, artistgenres) %>%
-    dplyr::select(-'tags') %>%
-    dplyr::mutate(artist.mb.topgenre = .data[['artist.mb.topgenre']] %>% as.character())
+                  'artist.mb.genres' = 'tags',
+                  'artist.mb.origin' = 'begin_area_name')
 }
 
 

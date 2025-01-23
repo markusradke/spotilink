@@ -48,6 +48,7 @@ pull_tracks_musicbrainz <- function(input, track_threshold, firstartist_threshol
   result <- lookup_tracks_mb(result)
 
   result <- filter_quality_musicbrainz_acousticbrainz_tracks(result, track_threshold, firstartist_threshold)
+  # result <- get_top_genres(result, 'track')
   result <- dplyr::left_join(input, result, by = c('track.s.id'))
   saveRDS(result, 'mb_tracks.rds')
   mbtracks_remove_checkpoints()
@@ -128,34 +129,31 @@ find_tracks_without_ISRC <- function(track.s.firstartist.name, track.s.title) {
     dplyr::first()
 }
 
-lookup_tracks_mb <- function(track_mbids){
+lookup_tracks_mb <- function(track_searchresults){
   checkpoint_name <- 'mb_tracks_lookup'
   checkpoint <- read_checkpoint(checkpoint_name)
   last_index <- checkpoint$last_index
-  if(! last_index == nrow(track_mbids)){
+  if(! last_index == nrow(track_searchresults)){
     saved_data <- checkpoint$saved_data
-    if(last_index > 0) {track_mbids <- tail(track_mbids, -last_index)}
-    purrr::map_df(track_mbids$track.mb.id,
+    if(last_index > 0) {track_searchresults <- tail(track_searchresults, -last_index)}
+    purrr::map_df(track_searchresults$track.mb.id,
                   lookup_single_track_mb %>% save_checkpoint_and_count(checkpoint_name,
                                                                        last_index,
                                                                        saved_data,
                                                                        savingstep = 100,
-                                                                       ndatapoints = nrow(track_mbids)),
+                                                                       ndatapoints = nrow(track_searchresults)),
                  .progress = 'Looking up track genres on Musicbrainz...')
   }
   else{message('Track lookup already done.')}
   trackGenres <- suppressMessages(read_checkpoint(checkpoint_name)$saved_data)
-  cbind(track_mbids, trackGenres)
+  cbind(track_searchresults, trackGenres)
 }
 
 lookup_single_track_mb  <- function(mbID) {
   musicbrainz::lookup_recording_by_id(mbID, includes=c('tags')) %>%
     dplyr::mutate(score = .data[['score']] %>% as.character()) %>%
     dplyr::mutate(length = .data[['length']] %>% as.integer()) %>%
-    get_highest_ranking_genre() %>%
-    dplyr::rename('track.mb.genres' = 'genres',
-                  'track.mb.topgenre' = 'topgenre') %>%
-    dplyr::mutate(track.mb.topgenre = .data[['track.mb.topgenre']] %>% as.character())
+    dplyr::select('track.mb.genres' = 'tags')
 }
 
 mbtracks_remove_checkpoints <- function(){
