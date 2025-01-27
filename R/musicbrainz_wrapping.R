@@ -45,7 +45,13 @@ count_genres_in_whole_dataset <- function(mbresult, genres_col){
 }
 
 get_highest_ranking_genre <- function(genres, overall_genrecounts) {
-  if (ncol(genres == 2)) {
+  if (length(genres) == 0){
+    return(NA)
+  }
+  if (length(genres) == 1){
+    return(NA)
+  }
+  if (ncol(genres) == 2) {
     genres <- suppressMessages(
       dplyr::filter(genres, tag_name %in% musicbrainzWhitelist$genres) %>%
       dplyr::left_join(overall_genrecounts) %>%

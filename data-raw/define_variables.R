@@ -28,6 +28,7 @@ spotifyTrackVars <- c('track.s.id',
                       'track.s.liveness',
                       'track.s.valence',
                       'track.s.tempo',
+                      'track.s.previewurl',
                       'track.s.timesignature',
                       'album.s.id',
                       'album.s.title')

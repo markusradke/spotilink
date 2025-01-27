@@ -36,7 +36,7 @@ get_all_spotify <- function(input, pass) {
   if(nrow(na_ids) > 0){
     res <- na_ids %>% dplyr::select(-track.s.id) %>%
       cbind(make_na_frame_spotify_all(NA)) %>%
-      rbind(res, .)
+      dplyr::bind_rows(res, .)
   }
   saveRDS(res, 'spotify.rds')
   res
