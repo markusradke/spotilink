@@ -47,7 +47,7 @@ pull_albums_musicbrainz <- function(input, album_threshold, firstartist_threshol
   result <- search_albums_mbids(distinctinput)
   result <- lookup_albums_mb(result)
   result <- filter_quality_musicbrainz_albums(result, album_threshold, firstartist_threshold)
-  # result <- get_top_genres(result, 'album')
+  result <- get_top_genres(result, 'album')
   result <- suppressMessages(dplyr::left_join(input, result, by = c('album.s.id')))
   saveRDS(result, 'mb_albums.rds')
   mbalbums_remove_checkpoints()

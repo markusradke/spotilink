@@ -97,7 +97,7 @@ save_checkpoint_and_count <- function(f, checkpoint_filename, last_index, checkp
   function(...) {
     i <<- i + 1
     result <- f(...)
-    saved_data <<- rbind(saved_data, result)
+    saved_data <<- dplyr::bind_rows(saved_data, result)
     if(i %% savingstep == 0 | i == ndatapoints) {
       current_filename <- paste0(checkpoint_filename, '_', i, '.rds')
       saveRDS(saved_data, current_filename)

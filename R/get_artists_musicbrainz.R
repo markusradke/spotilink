@@ -55,7 +55,7 @@ pull_artists_musicbrainz <- function(input, artist_threshold) {
   result <- result %>% filter_quality_musicbrainz_artists(artist_threshold) %>%
     dplyr::mutate(artist.mb.birth = as.Date(.data[['artist.mb.birth']]))  %>% # Date conversion must be here; else only integers are returned
     dplyr::mutate(artist.mb.death = as.Date(.data[['artist.mb.death']]))
-  # result <- get_top_genres(result, 'artist')
+  result <- get_top_genres(result, 'artist')
   result <- dplyr::left_join(input, result, by = c('artist.s.id'))
 
   saveRDS(result, 'mb_artists.rds')
