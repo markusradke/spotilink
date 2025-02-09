@@ -94,11 +94,8 @@ lookup_firstartists_deezer <- function(deezer_tracks, artisttoptracks){
 }
 
 lookup_single_firstartist_deezer <- function(url, artisttoptracks){
-  if(is.na(url)){artist <- make_na_frame_deezer_artists(NA)}
-  else{
-    artist_lookup <- get_api_with_connection_management(url)
-    artist <- parse_dz_artist_lookup(artist_lookup, NA)
-  }
+  artist_lookup <- get_api_with_connection_management(url)
+  artist <- parse_dz_artist_lookup(artist_lookup, NA)
   res <- dplyr::select(artist,
                 track.dz.firstartist.id = artist.dz.id,
                 track.dz.firstartist.name = artist.dz.name,
@@ -111,34 +108,34 @@ lookup_single_firstartist_deezer <- function(url, artisttoptracks){
 
 
 lookup_trackalbums_deezer <- function(deezer_tracks){
+  unique_album_urls <- deezer_tracks %>%
+    dplyr::mutate(album_urls = purrr::map_chr(track.dz.album.id, create_dz_album_lookup_url),
+                  album_urls = ifelse(album_urls == 'https://api.deezer.com/album/NA', NA, album_urls)) %>%
+    dplyr::filter(!is.na(album_urls)) %>%
+    dplyr::distinct(album_urls)
   checkpoint_name <- 'deezer_all_albums'
   checkpoint <- read_checkpoint(checkpoint_name)
   last_index <- checkpoint$last_index
-  if(! last_index == nrow(deezer_tracks)){
+  if(! last_index == nrow(unique_album_urls)){
     saved_data <- checkpoint$saved_data
-    if(last_index > 0) {deezer_tracks <- tail(deezer_tracks, -last_index)}
-    album_urls <- purrr::map_chr(deezer_tracks$track.dz.album.id, create_dz_album_lookup_url)
-    album_urls[album_urls == 'https://api.deezer.com/album/NA'] <- NA
-    purrr::map2_df(album_urls, deezer_tracks$track.s.id,
+    if(last_index > 0) {unique_album_urls <- tail(unique_album_urls, -last_index)}
+    purrr::map_df(unique_album_urls$album_urls,
                    lookup_single_trackalbum_deezer %>% save_checkpoint_and_count(checkpoint_name, last_index, saved_data,
                                                                                  savingstep = 100,
-                                                                                 ndatapoints = nrow(deezer_tracks)),
+                                                                                 ndatapoints = nrow(unique_album_urls)),
                    .progress = 'Looking up corresponding albums...')
   }
   else{message('Albums already linked.')}
-  suppressMessages(read_checkpoint(checkpoint_name)$saved_data)
+  res <- suppressMessages(read_checkpoint(checkpoint_name)$saved_data)
+  suppressMessages(dplyr::left_join(deezer_tracks, res))
 }
 
-lookup_single_trackalbum_deezer <- function(url, track.s.id){
-  if(is.na(url)){album <- make_na_framee_deezer_trackalbums(track.s.id)}
-  else{
-    album_lookup <- get_api_with_connection_management(url)
-    if('error' %in% ls(album_lookup) ){return(make_na_framee_deezer_trackalbums(track.s.id))}
-    else{album <- parse_dz_album_lookup(album_lookup, track.s.id)}
-  }
+lookup_single_trackalbum_deezer <- function(url){
+  album_lookup <- get_api_with_connection_management(url)
+  if('error' %in% ls(album_lookup) ){return(make_na_framee_deezer_trackalbums(NA))}
+  else{album <- parse_dz_album_lookup(album_lookup, NA)}
   if('track.dz.album.id' %in% colnames(album)){return(album)}
   dplyr::select(album,
-                track.s.id = album.s.id,
                 track.dz.album.id = album.dz.id,
                 track.dz.album.title = album.dz.title,
                 track.dz.album.upc = album.dz.upc,
