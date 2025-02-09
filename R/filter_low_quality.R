@@ -110,14 +110,19 @@ filter_quality_deezer_artists <- function(frame, artist_threshold){
 #' @export
 #'
 #' @examples
-filter_quality_deezer_all <- function(frame, track_threshold, album_threshold, firstartist_threshold){
-  if(! all(deezerAllVars %in% colnames(frame))){
+filter_quality_deezer_all <- function(frame, track_threshold, album_threshold, firstartist_threshold, artisttoptracks){
+  if(!artisttoptracks) {
+    deezerAllVars_temp <- deezerAllVars[deezerAllVars != 'track.dz.firstartist.toptracks']
+  } else{
+    deezerAllVars_temp <- deezerAllVars
+  }
+  if(! all(deezerAllVars_temp %in% colnames(frame))){
     stop('Please make sure the input frame contains all Deezer information by running get_all_deezer first.')
   }
 
-  only_artist_content <- stringr::str_subset(deezerAllVars, 'firstartist')
-  only_album_content <- stringr::str_subset(deezerAllVars, 'album')
-  only_track_content <- stringr::str_subset(deezerAllVars, '(album|firstartist)', negate = T)
+  only_artist_content <- stringr::str_subset(deezerAllVars_temp, 'firstartist')
+  only_album_content <- stringr::str_subset(deezerAllVars_temp, 'album')
+  only_track_content <- stringr::str_subset(deezerAllVars_temp, '(album|firstartist)', negate = T)
 
   result <- filter_lowquality_content(frame,
                                       c('track.dz.quality', 'track.dz.firstartist.quality'),

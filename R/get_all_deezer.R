@@ -27,24 +27,23 @@
 #' @export
 #'
 #'@examples
-get_all_deezer <- function(input, track_threshold = 0.8, album_threshold = 0.8, firstartist_threshold = 0.8){
+get_all_deezer <- function(input, track_threshold = 0.8, album_threshold = 0.8, firstartist_threshold = 0.8, artisttoptracks = T){
   are_needed_columns_present(input, c('track.s.id', 'track.s.title', 'track.s.firstartist.name', 'album.s.title'))
   input <- rename_existing_variables(input, c(deezerTrackVars))
   input_distinct <- dplyr::distinct(input, track.s.id, track.s.firstartist.name, album.s.title, .keep_all = T) %>% dplyr::filter(! is.na(track.s.id))
 
 
   deezer_tracks <- search_tracks_deezer(input_distinct)
-  deezer_artists <- lookup_firstartists_deezer(deezer_tracks)
+  deezer_artists <- lookup_firstartists_deezer(deezer_tracks, artisttoptracks)
   deezer_albums <- lookup_trackalbums_deezer(deezer_tracks)
 
   message('Done.')
   result <- suppressMessages(dplyr::left_join(deezer_tracks, deezer_artists) %>%
                      dplyr::left_join(deezer_albums))
-  result <- filter_quality_deezer_all(result, track_threshold, album_threshold, firstartist_threshold)
+  result <- filter_quality_deezer_all(result, track_threshold, album_threshold, firstartist_threshold, artisttoptracks)
   result <- suppressMessages(dplyr::left_join(input, result))
 
   print_linkage_for_id('track.dz.id', result)
-  result <- result %>% dplyr::select(-track.dz.firstartist.toptracks)
   saveRDS(result, 'deezer_all.rds')
   deezer_remove_checkpoints()
   result
@@ -70,37 +69,44 @@ search_tracks_deezer <- function(input_distinct){
   suppressMessages(read_checkpoint(checkpoint_name)$saved_data)
 }
 
-lookup_firstartists_deezer <- function(deezer_tracks){
+lookup_firstartists_deezer <- function(deezer_tracks, artisttoptracks){
+  unique_artist_urls <- deezer_tracks %>%
+    dplyr::mutate(artist_urls = purrr::map_chr(track.dz.firstartist.id, create_dz_artist_lookup_url),
+                  artist_urls = ifelse(artist_urls == 'https://api.deezer.com/artist/NA', NA, artist_urls)) %>%
+    dplyr::filter(!is.na(artist_urls)) %>%
+    dplyr::distinct(artist_urls)
   checkpoint_name <- 'deezer_all_artists'
   checkpoint <- read_checkpoint(checkpoint_name)
   last_index <- checkpoint$last_index
-  if(! last_index == nrow(deezer_tracks)){
+  if(! last_index == nrow(unique_artist_urls)){
     saved_data <- checkpoint$saved_data
-    if(last_index > 0) {deezer_tracks <- tail(deezer_tracks, -last_index)}
-    artist_urls <- purrr::map_chr(deezer_tracks$track.dz.firstartist.id, create_dz_artist_lookup_url)
-    artist_urls[artist_urls == 'https://api.deezer.com/artist/NA'] <- NA
-    purrr::map2_df(artist_urls, deezer_tracks$track.s.id,
+    artists <- if(last_index > 0) {unique_artist_urls <- tail(unique_artist_urls, -last_index)}
+    purrr::map_df(unique_artist_urls$artist_urls,
                    lookup_single_firstartist_deezer %>% save_checkpoint_and_count(checkpoint_name, last_index, saved_data,
                                                                                   savingstep = 100,
-                                                                                  ndatapoints = nrow(deezer_tracks)),
+                                                                                  ndatapoints = nrow(unique_artist_urls)),
+                  artisttoptracks,
                    .progress = 'Looking up corresponding artists...')
   }
   else{message('Artist already linked.')}
-  suppressMessages(read_checkpoint(checkpoint_name)$saved_data)
+  res <- suppressMessages(read_checkpoint(checkpoint_name)$saved_data)
+  suppressMessages(dplyr::left_join(deezer_tracks, res))
 }
 
-lookup_single_firstartist_deezer <- function(url, track.s.id){
-  if(is.na(url)){artist <- make_na_frame_deezer_artists(track.s.id)}
+lookup_single_firstartist_deezer <- function(url, artisttoptracks){
+  if(is.na(url)){artist <- make_na_frame_deezer_artists(NA)}
   else{
     artist_lookup <- get_api_with_connection_management(url)
-    artist <- parse_dz_artist_lookup(artist_lookup, track.s.id)
+    artist <- parse_dz_artist_lookup(artist_lookup, NA)
   }
-  dplyr::select(artist, track.s.id = artist.s.id,
+  res <- dplyr::select(artist,
                 track.dz.firstartist.id = artist.dz.id,
                 track.dz.firstartist.name = artist.dz.name,
                 track.dz.firstartist.followers = artist.dz.followers,
                 track.dz.firstartist.nalbums = artist.dz.nalbums,
                 track.dz.firstartist.toptracks = artist.dz.toptracks)
+  if(! artisttoptracks) {res <- dplyr::select(res, -track.dz.firstartist.toptracks)}
+  res
 }
 
 
