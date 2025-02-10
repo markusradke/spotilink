@@ -93,8 +93,10 @@ parse_dz_artist_lookup <- function(lookup, artist.s.id){
                        artist.dz.nalbums = lookup$nb_album,
                        artist.dz.followers = lookup$nb_fan,
                        artist.dz.toptracks = lookup$tracklist)
-  toptracks <- list(get_api_with_connection_management(parsed$artist.dz.toptracks)$data)
-  parsed$artist.dz.toptracks <- toptracks
+  if(! is.na(parsed$artist.dz.toptracks)){
+    toptracks <- list(get_api_with_connection_management(parsed$artist.dz.toptracks)$data)
+    parsed$artist.dz.toptracks <- toptracks
+  }
   parsed
 }
 
