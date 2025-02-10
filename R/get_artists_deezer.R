@@ -82,9 +82,11 @@ create_dz_artist_lookup_url <- function(artist.dz.id){
 }
 
 parse_dz_artist_lookup <- function(lookup, artist.s.id){
-  if(length(lookup$tracklist) == 0){
-    lookup$tracklist <- NA
-  }
+  if(length(lookup$tracklist) == 0){lookup$tracklist <- NA}
+  if(length(lookup$name) == 0){lookup$name <- NA}
+  if(length(lookup$nb_album) == 0){lookup$nb_album <- NA}
+  if(length(lookup$nb_fan) == 0){lookup$nb_fan <- NA}
+  if(length(lookup$id) == 0){lookup$id <- NA}
   parsed <- data.frame(artist.s.id,
                        artist.dz.id = lookup$id %>% as.character(),
                        artist.dz.name = lookup$name,
