@@ -217,7 +217,7 @@ discogsAlbumVars <- c('album.dc.id', 'album.dc.title', 'album.dc.genres', 'album
                       'album.dc.firstgenre', 'album.dc.firststyle',
                       'album.dc.quality', 'album.dc.firstartist.name', 'album.dc.firstartist.quality')
 
-geniusLyricsVars <- c('track.g.id', 'track.g.title', 'track.g.quality',
+geniusLyricsVars <- c('track.g.id', 'track.g.title', 'track.g.quality', 'track.g.url',
                       'track.g.firstartist.id', 'track.g.firstartist.name', 'track.g.firstartist.quality',
                       'track.g.lyrics', 'track.g.lyricsstate')
 

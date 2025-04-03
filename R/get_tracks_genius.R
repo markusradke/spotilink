@@ -72,7 +72,12 @@ get_lyrics_for_single_track <- function(track.s.title, artist.s.name, track.s.id
 
   .get_lyrics_for_topresult <- function(topresult){
     lyrics_html <- rvest::read_html(topresult$track.g.url)
-    lyrics <- lyrics_html %>% rvest::html_nodes(xpath = "//div[contains(@class, \"Lyrics__Container\")]")
+    lyrics <- lyrics_html %>% rvest::html_element(xpath = "//div[contains(@class, 'Lyrics__Container')]")
+
+    header <- xml2::xml_find_first(lyrics, ".//div[(contains(@class, 'LyricsHeader__Container'))]")
+    xml2::xml_remove(header)
+
+
     xml2::xml_find_all(lyrics, ".//br") %>% xml2::xml_add_sibling("p", "\n")
     xml2::xml_find_all(lyrics, ".//br") %>% xml2::xml_remove()
     lyrics <- rvest::html_text(lyrics, trim = TRUE)
@@ -106,7 +111,6 @@ get_lyrics_for_single_track <- function(track.s.title, artist.s.name, track.s.id
   lyrics <- .get_lyrics_for_topresult(topresult)
   topresult %>%
     dplyr::mutate(track.g.lyrics = list(lyrics),
-                  track.s.id = track.s.id) %>%
-    dplyr::select(-track.g.url)
+                  track.s.id = track.s.id)
 }
 
