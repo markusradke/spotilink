@@ -71,7 +71,7 @@ get_lyrics_for_single_track <- function(track.s.title, artist.s.name, track.s.id
   }
 
   .get_lyrics_for_topresult <- function(topresult){
-    lyrics_html <- rvest::read_html(topresult$track.g.url)
+    lyrics_html <- .read_html_with_retries(topresult$track.g.url)
     lyrics <- lyrics_html %>% rvest::html_element(xpath = "//div[contains(@class, 'Lyrics__Container')]")
 
     header <- xml2::xml_find_first(lyrics, ".//div[(contains(@class, 'LyricsHeader__Container'))]")
@@ -91,8 +91,26 @@ get_lyrics_for_single_track <- function(track.s.title, artist.s.name, track.s.id
     sections <- gsub("\\[|\\]", "", sections)
     sections <- strsplit(sections, split = ": ", fixed = TRUE)
     section <- sapply(sections, "[", 1)
-    data.frame(line = lyrics[!section_tags], section = section[!section_tags])
+    lyrics_res <- data.frame(line = lyrics[!section_tags], section = section[!section_tags])
+    if (length(unique(lyrics_res$section)) == 1) {
+      lyrics_res$section <- NA
+    }
+    lyrics_res
+  }
 
+  .read_html_with_retries <- function(url, max_attempts = 10, wait_time = 10) {
+    for (attempt in 1:max_attempts) {
+      tryCatch({
+        html_content <- rvest::read_html(url)
+        return(html_content)
+      }, error = function(e) {
+        message(sprintf("Attempt %d failed: %s. Retrying in %d seconds...",
+                        attempt, e$message, wait_time))
+        Sys.sleep(wait_time)
+      })
+    }
+    message(sprintf("Failed to read HTML from %s after %d attempts.", url, max_attempts))
+    return(NULL)
   }
 
   .repeat_before <- function (x, y){
