@@ -12,7 +12,7 @@
 #' @export
 #'
 #'@examples
-get_tracks_spotify <- function(input, pass) {
+get_tracks_spotify <- function(input, pass, pwd = 'none') {
   are_needed_columns_present(input, c('track.s.id'))
   renameVars <- spotifyTrackVars[! spotifyTrackVars %in% c('track.s.id')]
   input <- rename_existing_variables(input, renameVars)
@@ -23,7 +23,7 @@ get_tracks_spotify <- function(input, pass) {
   }
   else{
     connect_spotify(pass)
-    res <- pull_tracks_spotify(input_ready)
+    res <- pull_tracks_spotify(input_ready, pwd)
 
   }
   na_ids <- input %>% dplyr::filter(is.na(track.s.id))
@@ -39,17 +39,21 @@ get_tracks_spotify <- function(input, pass) {
   res
 }
 
-pull_tracks_spotify <- function(input) {
-  suppressMessages(connect_spotify(c('6f069a93062b4333bedd796f9312904c','ddcee099adcd4147a590beeb4bae4475'))) # use SPOTIVEY login
-  if(! file.exists('spotify_tracks_without_audiofeatures.rds')){
-    res <- get_from_API(input, 'track.s.id', spotifyr::get_tracks, clean_tracks, batchsize = 50)
-    saveRDS(res, 'spotify_tracks_without_audiofeatures.rds')
+pull_tracks_spotify <- function(input, pwd) {
+  if(pwd == 'spotivey'){
+    suppressMessages(connect_spotify(spotivey_pass))
+    if(! file.exists('spotify_tracks_audiofeatures.rds')){
+      res <- get_from_API(input, 'track.s.id', spotifyr::get_track_audio_features, clean_features, batchsize = 50)
+      saveRDS(res, 'spotify_tracks_audiofeatures.rds')
+    }
+    else {res <- readRDS('spotify_tracks_audiofeatures.rds')}
   }
   else{
-    res <- readRDS('spotify_tracks_without_audiofeatures.rds')
+    res <- input
   }
-  res <- get_from_API(res, 'track.s.id', spotifyr::get_track_audio_features, clean_features, batchsize = 50)
-  res
+  res <- get_from_API(res, 'track.s.id', spotifyr::get_tracks, clean_tracks, batchsize = 50)
+  if(pwd != 'spotivey'){res <- res %>% dplyr::select(-track.s.previewurl)}
+  tibble::as_tibble(res)
 }
 
 clean_tracks <- function(tracksRaw) {

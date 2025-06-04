@@ -13,7 +13,7 @@
 #' @export
 #'
 #'@examples
-get_all_spotify <- function(input, pass) {
+get_all_spotify <- function(input, pass, pwd = 'none') {
   are_needed_columns_present(input, c('track.s.id'))
   renameVars <- spotifyAllVars[! spotifyAllVars %in% c('track.s.id')]
   input <- rename_existing_variables(input, renameVars)
@@ -24,7 +24,7 @@ get_all_spotify <- function(input, pass) {
   }
   else{
     connect_spotify(pass)
-    res <- pull_tracks_spotify(input_ready)
+    res <- pull_tracks_spotify(input_ready, pwd)
     res <- dplyr::select(res, -'album.s.title')
     suppressMessages(connect_spotify(pass))
     res <- pull_albums_spotify(res)

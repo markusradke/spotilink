@@ -24,6 +24,7 @@ Imports:
     rvest,
     sjmisc,
     ggplot2,
+    tibble,
     patchwork
 Depends: 
     R (>= 2.10)
