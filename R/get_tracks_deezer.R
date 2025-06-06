@@ -80,6 +80,7 @@ get_single_track_deezer <- function(track.s.title, track.s.firstartist.name, tra
   url <- .create_search_url(track.s.title, track.s.firstartist.name, album.s.title)
   result <- get_api_with_connection_management(url)
   topresult <- .get_parsed_topresult(result)
+  print(topresult)
   if(is.null(topresult)){return(make_na_frame_deezer_tracks(track.s.id))}
   url <- create_dz_track_lookup_url(topresult$track.dz.id)
   track_lookup <- get_api_with_connection_management(url)
@@ -101,6 +102,5 @@ parse_dz_track_lookup <- function(lookup){
              track.dz.explicitinfo = lookup$explicit_content_lyrics,
              track.dz.tempo = lookup$bpm,
              track.dz.loudness = lookup$gain)
-  dplyr::glimpse(parsed)
   parsed %>%  dplyr::mutate(track.dz.explicitinfo = purrr::map_chr(.data$track.dz.explicitinfo, decode_explicit_info))
 }
