@@ -102,9 +102,9 @@ create_linkage_table <- function(linkage){
     gt::tab_spanner('Distinct', c(distfreq, distrelfreq)) %>%
     gt::cols_align(align = 'center', columns = -Source) %>%
     gt::row_group_order(c('Albums', 'Artists', 'Tracks')) %>%
-    gt::tab_style(style = list(cell_text(weight = 'bold')),
-                  locations = list(cells_row_groups(),
-                                   cells_column_spanners())) %>%
+    gt::tab_style(style = list(gt::cell_text(weight = 'bold')),
+                  locations = list(gt::cells_row_groups(),
+                                   gt::cells_column_spanners())) %>%
     gt::tab_style_body(style = gt::cell_text(weight='bold'),
                        columns = Source,
                        value = 'Complete track linkage')
