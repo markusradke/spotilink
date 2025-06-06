@@ -101,6 +101,6 @@ parse_dz_track_lookup <- function(lookup){
              track.dz.explicitinfo = lookup$explicit_content_lyrics,
              track.dz.tempo = lookup$bpm,
              track.dz.loudness = lookup$gain)
-  dpylr::glimpse(parsed)
+  dplyr::glimpse(parsed)
   parsed %>%  dplyr::mutate(track.dz.explicitinfo = purrr::map_chr(.data$track.dz.explicitinfo, decode_explicit_info))
 }
