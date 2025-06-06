@@ -13,7 +13,7 @@ select_features(
   linkage_variables = F,
   artist_descriptors = F,
   release_descriptors = F,
-  spotify_highlevel_audio_descriptors = F,
+  platform_highlevel_audio_descriptors = F,
   ml_highlevel_audio_classificators = F,
   ml_highlevel_audio_descriptors = F,
   audio_track_metadata = F,
@@ -22,7 +22,7 @@ select_features(
   ml_genre_classificators = F,
   genre_tags = F,
   platform_popularity = F,
-  explicitness_and_lyrics = F
+  cover_lyrics_explicitness = F
 )
 }
 \arguments{

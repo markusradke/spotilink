@@ -6,3 +6,4 @@ test_that('Returns a frame with correct additional colnames and content', {
                       deezerAllVars)
   expect_setequal(res_names, expected_names)
 })
+

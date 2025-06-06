@@ -4,7 +4,7 @@
 \alias{get_tracks_spotify}
 \title{Get \emph{Spotify} API Information on Tracks}
 \usage{
-get_tracks_spotify(input, pass)
+get_tracks_spotify(input, pass, pwd = "none")
 }
 \arguments{
 \item{input}{Data Frame containing a column \code{track.s.id} with \emph{Spotify} track ids.}

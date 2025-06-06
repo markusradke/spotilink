@@ -8,7 +8,8 @@ get_all_deezer(
   input,
   track_threshold = 0.8,
   album_threshold = 0.8,
-  firstartist_threshold = 0.8
+  firstartist_threshold = 0.8,
+  artisttoptracks = T
 )
 }
 \arguments{

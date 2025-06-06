@@ -8,7 +8,8 @@ filter_quality_deezer_all(
   frame,
   track_threshold,
   album_threshold,
-  firstartist_threshold
+  firstartist_threshold,
+  artisttoptracks
 )
 }
 \arguments{

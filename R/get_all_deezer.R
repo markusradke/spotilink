@@ -23,6 +23,9 @@
 #'Floating point number between 0 and 1 indicating which elements to keep that were found using a fuzzy search.
 #'The values correspond to the string similarity (1 - Jaro-Winkler distance) between the track / album title or artist name  on \emph{Spotify} and the found track / album title or artist name on \emph{Deezer}.
 #'
+#'@param artisttoptracks
+#'TRUE or FALSE indicator wether to also collect the artists' top track. ATTENTION: This produces very large files and is not encouraged for larger datasets due to possible troubles when loading results, as well as reading and writing checkpoints.
+#'
 #' @return Data Frame with added information from the \emph{Deezer} API using the  \pkg{spotilink} naming convention.
 #' @export
 #'
