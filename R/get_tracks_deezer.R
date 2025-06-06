@@ -80,10 +80,10 @@ get_single_track_deezer <- function(track.s.title, track.s.firstartist.name, tra
   url <- .create_search_url(track.s.title, track.s.firstartist.name, album.s.title)
   result <- get_api_with_connection_management(url)
   topresult <- .get_parsed_topresult(result)
-  print(topresult)
   if(is.null(topresult)){return(make_na_frame_deezer_tracks(track.s.id))}
   url <- create_dz_track_lookup_url(topresult$track.dz.id)
   track_lookup <- get_api_with_connection_management(url)
+  print(track_lookup)
   res <- parse_dz_track_lookup(track_lookup)
   suppressMessages(dplyr::inner_join(res, topresult) %>% dplyr::mutate(track.s.id = track.s.id))
 }
