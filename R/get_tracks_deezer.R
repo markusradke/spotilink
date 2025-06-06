@@ -89,7 +89,7 @@ get_single_track_deezer <- function(track.s.title, track.s.firstartist.name, tra
       break
     }
     else{
-      message('Quota limit raeched. Waiting for 5 seconds...')
+      message('Quota limit reached. Waiting for 5 seconds...')
       Sys.sleep(5)
     }
   }
