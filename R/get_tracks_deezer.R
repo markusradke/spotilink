@@ -92,7 +92,7 @@ create_dz_track_lookup_url <- function(track.dz.id){
 }
 
 parse_dz_track_lookup <- function(lookup){
-  data.frame(track.dz.id = lookup$id %>% as.character(),
+  parsed <- data.frame(track.dz.id = lookup$id %>% as.character(),
              track.dz.title = lookup$title,
              track.dz.isrc = lookup$isrc,
              track.dz.duration = lookup$duration,
@@ -100,6 +100,6 @@ parse_dz_track_lookup <- function(lookup){
              track.dz.explicitlyrics = lookup$explicit_lyrics,
              track.dz.explicitinfo = lookup$explicit_content_lyrics,
              track.dz.tempo = lookup$bpm,
-             track.dz.loudness = lookup$gain) %>%
-    dplyr::mutate(track.dz.explicitinfo = purrr::map_chr(.data$track.dz.explicitinfo, decode_explicit_info))
+             track.dz.loudness = lookup$gain)
+  parsed %>%  dplyr::mutate(track.dz.explicitinfo = purrr::map_chr(.data$track.dz.explicitinfo, decode_explicit_info))
 }
