@@ -25,7 +25,7 @@ show_linkage_success <- function(frame){
   res <- suppressMessages(purrr::map_df(idvecs, print_linkage_for_id, frame))
   complete <- get_complete_linkage(frame, idvecs)
   res <- rbind(res, complete)
-  dplyr::as_tibble(res)
+  create_linkage_table(res)
 }
 
 
@@ -69,10 +69,10 @@ get_complete_linkage <- function(frame, idvecs){
 }
 
 
-library(gt)
+
 create_linkage_table <- function(linkage){
   prepared_data <- linkage %>%
-    dplyr::mutate(Layer = stringr::str_extract(database, '(track|album|artist)') %>% stringr::str_to_title(),
+    dplyr::mutate(Layer = stringr::str_extract(database, '(track|album|artist)') %>% stringr::str_to_title() %>% paste0('s'),
                   Source = stringr::str_extract(database, '(?<=\\.).*(?=\\.)'),#
                   Source = ifelse(Source == 's', 'Spotify', Source),
                   Source = ifelse(Source == 'mb', 'Musicbrainz', Source),
@@ -84,22 +84,30 @@ create_linkage_table <- function(linkage){
                   relfreq = ifelse(Source == 'Spotify', ' ', relfreq),
                   distrelfreq = ifelse(Source == 'Spotify', ' ', distrelfreq)) %>%
     dplyr::select(Source,
-                  Frequency = freq,
-                  'Rel. Freq. [%]' = relfreq,
-                  Distinct = distfreq,
-                  'Rel. Freq. Distinct [%]' = distrelfreq,
+                  freq,
+                  relfreq,
+                  distfreq,
+                  distrelfreq,
                   Layer)
 
   gt::gt(prepared_data, groupname_col = 'Layer') %>%
+    gt::cols_label(
+      freq = gt::html('Frequency<br> n'),
+      relfreq = gt::html('Rel. Frequency<br>[%]'),
+      distfreq = gt::html('Frequency<br>n'),
+      distrelfreq = gt::html('Rel. Frequency<br>[%]'),
+      Source = ''
+    ) %>%
+    gt::tab_spanner('Whole Dataframe', c(freq, relfreq)) %>%
+    gt::tab_spanner('Distinct', c(distfreq, distrelfreq)) %>%
     gt::cols_align(align = 'center', columns = -Source) %>%
-    gt::row_group_order(c('Album', 'Artist', 'Track')) %>%
-    gt::tab_style(style = list(cell_text(weight = 'bold'),
-                               cell_fill(color = '#d5d8dc')),
+    gt::row_group_order(c('Albums', 'Artists', 'Tracks')) %>%
+    gt::tab_style(style = list(cell_text(weight = 'bold')),
                   locations = list(cells_row_groups(),
-                                   cells_column_labels())) %>%
-    gt::tab_style(style = cell_borders(c('top', 'bottom'), color = 'black'),
-                  locations = list(cells_body(),
-                                  cells_row_groups()))
+                                   cells_column_spanners())) %>%
+    gt::tab_style_body(style = gt::cell_text(weight='bold'),
+                       columns = Source,
+                       value = 'Complete track linkage')
 }
 
 
