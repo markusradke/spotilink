@@ -41,6 +41,16 @@ get_all_deezer <- function(input, track_threshold = 0.8, album_threshold = 0.8, 
   deezer_albums <- lookup_trackalbums_deezer(deezer_tracks)
 
   message('Done.')
+
+  deezer_tracks <- deezer_tracks %>% dplyr::filter(!is.na(track.dz.id)) %>%
+    dplyr::select(-track.dz.firstartist.name, -track.dz.album.title) %>%
+    dplyr::distinct(track.s.id, .keep_all = TRUE)
+  deezer_artists <- deezer_artists %>% dplyr::filter(!is.na(track.dz.firstartist.id)) %>%
+    dplyr::distinct(track.dz.firstartist.id, .keep_all = TRUE)
+  deezer_albums <-deezer_albums %>% dplyr::filter(!is.na(track.dz.album.id)) %>%
+    dplyr::select(-track.s.id) %>%
+    dplyr::distinct(track.dz.album.id, .keep_all = TRUE)
+
   result <- suppressMessages(dplyr::left_join(deezer_tracks, deezer_artists) %>%
                      dplyr::left_join(deezer_albums))
   result <- filter_quality_deezer_all(result, track_threshold, album_threshold, firstartist_threshold, artisttoptracks)
