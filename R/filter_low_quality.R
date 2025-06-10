@@ -220,18 +220,18 @@ filter_quality_musicbrainz_acousticbrainz_tracks <- function(frame, track_thresh
   result
 }
 
-#' Filter low quality results for all \emph{Musicbrainz} Information
+#' Filter low quality results for all \emph{Musicbrainz} and \emp{Acousticbrainz} Information
 #'
-#' @param frame Data frame containing all Musicbrainz variables.
+#' @param frame Data frame containing all Musicbrainz and optional also Acousticbrainz variables.
 #' @param track_threshold Threshold for Musicbrainz track quality. Ranging between 0 and 1.
 #' @param album_threshold Threshold for Musicbrainz track quality. Ranging between 0 and 1.
 #' @param artist_threshold Threshold for Musicbrainz track quality. Ranging between 0 and 1.
 #'
-#' @return Updated input frame with all Musicbrainz information set to NA where at least one threshold was not met. For album and track, artist quality will also be considered.
+#' @return Updated input frame with all Musicbrainz (and Acousticbrainz) information set to NA where at least one threshold was not met. For album and track, artist quality will also be considered.
 #' @export
 #'
 #' @examples
-filter_quality_musicbrainz_all <- function(frame, track_threshold, album_threshold, artist_threshold){
+filter_quality_musicbrainz_acousticbrainz_all <- function(frame, track_threshold, album_threshold, artist_threshold){
   frame %>%
     filter_quality_musicbrainz_acousticbrainz_tracks(track_threshold, artist_threshold) %>%
     filter_quality_musicbrainz_albums(album_threshold, artist_threshold) %>%
