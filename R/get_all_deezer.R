@@ -42,23 +42,16 @@ get_all_deezer <- function(input, track_threshold = 0.8, album_threshold = 0.8, 
 
   message('Done.')
 
-  deezer_tracks <- deezer_tracks %>% dplyr::filter(!is.na(track.dz.id)) %>%
-    dplyr::select(-track.dz.firstartist.name, -track.dz.album.title) %>%
-    dplyr::distinct(track.s.id, .keep_all = TRUE)
-  deezer_artists <- deezer_artists %>% dplyr::filter(!is.na(track.dz.firstartist.id)) %>%
-    dplyr::distinct(track.dz.firstartist.id, .keep_all = TRUE)
-  deezer_albums <-deezer_albums %>% dplyr::filter(!is.na(track.dz.album.id)) %>%
-    dplyr::select(-track.s.id) %>%
-    dplyr::distinct(track.dz.album.id, .keep_all = TRUE)
+  result <- join_deezer_track_information(deezer_tracks,
+                                          deezer_artists,
+                                          deezer_albums)
 
-  result <- suppressMessages(dplyr::left_join(deezer_tracks, deezer_artists) %>%
-                     dplyr::left_join(deezer_albums))
   result <- filter_quality_deezer_all(result, track_threshold, album_threshold, firstartist_threshold, artisttoptracks)
   result <- suppressMessages(dplyr::left_join(input, result))
 
   print_linkage_for_id('track.dz.id', result)
-  saveRDS(result, 'deezer_all.rds')
-  deezer_remove_checkpoints()
+  # saveRDS(result, 'deezer_all.rds')
+  # deezer_remove_checkpoints()
   result
 }
 
@@ -172,3 +165,20 @@ deezer_remove_checkpoints <- function(){
   matching_files <- grep(pattern, files, value = TRUE)
   for(file in matching_files){file.remove(file)}
 }
+
+join_deezer_track_information <- function(deezer_tracks, deezer_artists, deezer_albums){
+  deezer_tracks_prejoin <- deezer_tracks %>% dplyr::filter(!is.na(track.dz.id)) %>%
+    dplyr::select(-track.dz.firstartist.name, -track.dz.album.title) %>%
+    dplyr::distinct(track.s.id, .keep_all = TRUE)
+  deezer_artists_prejoin <- deezer_artists %>% dplyr::filter(!is.na(track.dz.firstartist.id)) %>%
+    dplyr::distinct(track.dz.firstartist.id, .keep_all = TRUE) %>%
+    dplyr::select(dplyr::contains('track.dz.firstartist'))
+  deezer_albums_prejoin <-deezer_albums %>% dplyr::filter(!is.na(track.dz.album.id)) %>%
+    dplyr::distinct(track.dz.album.id, .keep_all = TRUE) %>%
+    dplyr::select(dplyr::contains('track.dz.album'))
+
+  res <- dplyr::left_join(deezer_tracks_prejoin, deezer_artists_prejoin) %>%
+    dplyr::left_join(deezer_albums_prejoin)
+  res
+}
+
