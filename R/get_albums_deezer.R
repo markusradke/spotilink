@@ -77,7 +77,16 @@ get_single_album_deezer <- function(album.s.title, album.s.firstartist.name, alb
   if(is.null(topresult)){return(make_na_frame_deezer_albums(album.s.id))}
 
   url <- create_dz_album_lookup_url(topresult$album.dz.id)
-  album_lookup <- get_api_with_connection_management(url)
+  repeat{
+    album_lookup <- get_api_with_connection_management(url)
+    if(is.null(album_lookup$error)){
+      break
+    }
+    else{
+      message('Quota limit reached. Waiting for 5 seconds...')
+      Sys.sleep(5)
+    }
+  }
   res <- parse_dz_album_lookup(album_lookup, album.s.id)
   return(suppressMessages(dplyr::inner_join(res, topresult) %>% dplyr::mutate(album.s.id = album.s.id)))
 }

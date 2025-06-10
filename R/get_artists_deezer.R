@@ -71,7 +71,16 @@ get_single_artist_deezer <- function(artist.s.name, artist.s.id){
   if(is.null(topresult)){return(make_na_frame_deezer_artists(artist.s.id))}
 
   url <- create_dz_artist_lookup_url(topresult$artist.dz.id)
-  artist_lookup <- get_api_with_connection_management(url)
+  repeat{
+    artist_lookup <- get_api_with_connection_management(url)
+    if(is.null(artist_lookup$error)){
+      break
+    }
+    else{
+      message('Quota limit reached. Waiting for 5 seconds...')
+      Sys.sleep(5)
+    }
+  }
   res <- parse_dz_artist_lookup(artist_lookup, artist.s.id)
   return(suppressMessages(dplyr::inner_join(res, topresult) %>% dplyr::mutate(artist.s.id = artist.s.id)))
 }

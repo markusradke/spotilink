@@ -50,8 +50,8 @@ get_all_deezer <- function(input, track_threshold = 0.8, album_threshold = 0.8, 
   result <- suppressMessages(dplyr::left_join(input, result))
 
   print_linkage_for_id('track.dz.id', result)
-  # saveRDS(result, 'deezer_all.rds')
-  # deezer_remove_checkpoints()
+  saveRDS(result, 'deezer_all.rds')
+  deezer_remove_checkpoints()
   result
 }
 
@@ -100,7 +100,17 @@ lookup_firstartists_deezer <- function(deezer_tracks, artisttoptracks){
 }
 
 lookup_single_firstartist_deezer <- function(url, artisttoptracks){
-  artist_lookup <- get_api_with_connection_management(url)
+  repeat{
+    artist_lookup <- get_api_with_connection_management(url)
+    if(is.null(artist_lookup$error)){
+      break
+    }
+    else{
+      message('Quota limit reached. Waiting for 5 seconds...')
+      Sys.sleep(5)
+    }
+  }
+
   artist <- parse_dz_artist_lookup(artist_lookup, NA)
   res <- dplyr::select(artist,
                 track.dz.firstartist.id = artist.dz.id,
@@ -137,9 +147,18 @@ lookup_trackalbums_deezer <- function(deezer_tracks){
 }
 
 lookup_single_trackalbum_deezer <- function(url){
-  album_lookup <- get_api_with_connection_management(url)
-  if('error' %in% ls(album_lookup) ){return(make_na_framee_deezer_trackalbums(NA))}
-  else{album <- parse_dz_album_lookup(album_lookup, NA)}
+  repeat{
+    album_lookup <- get_api_with_connection_management(url)
+    if(is.null(album_lookup$error)){
+      break
+    }
+    else{
+      message('Quota limit reached. Waiting for 5 seconds...')
+      Sys.sleep(5)
+    }
+  }
+  album <- parse_dz_album_lookup(album_lookup, NA)
+
   if('track.dz.album.id' %in% colnames(album)){return(album)}
   dplyr::select(album,
                 track.dz.album.id = album.dz.id,
