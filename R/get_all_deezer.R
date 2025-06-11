@@ -103,15 +103,16 @@ lookup_single_firstartist_deezer <- function(url, artisttoptracks){
   repeat{
     artist_lookup <- get_api_with_connection_management(url)
     if(is.null(artist_lookup$error)){
+      artist <- parse_dz_artist_lookup(artist_lookup, NA)
       break
-    }
-    else{
+    } else if (artist_lookup$error$code == 800) { # no data
+      artist <- make_na_frame_deezer_artists(NA)
+      break
+    } else {
       message('Quota limit reached. Waiting for 5 seconds...')
       Sys.sleep(5)
     }
   }
-
-  artist <- parse_dz_artist_lookup(artist_lookup, NA)
   res <- dplyr::select(artist,
                 track.dz.firstartist.id = artist.dz.id,
                 track.dz.firstartist.name = artist.dz.name,
@@ -150,16 +151,16 @@ lookup_single_trackalbum_deezer <- function(url){
   repeat{
     album_lookup <- get_api_with_connection_management(url)
     if(is.null(album_lookup$error)){
+      album <- parse_dz_album_lookup(album_lookup, NA)
       break
-    }
-    else{
+    } else if (album_lookup$error$code == 800) { # no data
+      album <- make_na_frame_deezer_albums(NA)
+      break
+    } else {
       message('Quota limit reached. Waiting for 5 seconds...')
       Sys.sleep(5)
     }
   }
-  album <- parse_dz_album_lookup(album_lookup, NA)
-
-  if('track.dz.album.id' %in% colnames(album)){return(album)}
   dplyr::select(album,
                 track.dz.album.id = album.dz.id,
                 track.dz.album.title = album.dz.title,

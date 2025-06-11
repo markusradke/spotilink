@@ -23,7 +23,7 @@ test_that('Returns a frame with correct additional colnames and content', {
   expect_true(class(res$track.dz.isrc) == 'character')
   expect_true(class(res$track.dz.duration) == 'integer')
   expect_true(class(res$track.dz.rank) == 'integer')
-  expect_true(class(res$track.dz.explicit) == 'logical')
+  expect_true(class(res$track.dz.explicitlyrics) == 'logical')
   expect_true(class(res$track.dz.explicitinfo) == 'character')
   expect_true(class(res$track.dz.tempo) == 'integer')
   expect_true(class(res$track.dz.loudness) == 'numeric')

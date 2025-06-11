@@ -86,15 +86,17 @@ get_single_track_deezer <- function(track.s.title, track.s.firstartist.name, tra
   repeat{
     track_lookup <- get_api_with_connection_management(url)
     if(is.null(track_lookup$error)){
+      res <- parse_dz_track_lookup(track_lookup)
       break
-    }
-    else{
+    } else if (track_lookup$error$code == 800) { # no data
+      res <- make_na_frame_deezer_tracks(track.s.id)
+      break
+    } else{
       message('Quota limit reached. Waiting for 5 seconds...')
       Sys.sleep(5)
     }
   }
 
-  res <- parse_dz_track_lookup(track_lookup)
   suppressMessages(dplyr::inner_join(res, topresult) %>% dplyr::mutate(track.s.id = track.s.id))
 }
 
