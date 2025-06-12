@@ -71,11 +71,13 @@ get_discogs_for_single_track <- function(album.s.id, album.s.title,album.s.first
     res <- res$results
     topresults <- data.frame(id = sapply(res, function(hit) hit$id),
                              title = sapply(res, function(hit) hit$title))
-    topresults$genre = lapply(res, function(hit) hit$genre)
-    topresults$style = lapply(res, function(hit) hit$style)
+    topresults$genre <-  lapply(res, function(hit) hit$genre)
+    topresults$style <-  lapply(res, function(hit) hit$style)
     topresults$releaseyear = lapply(res, function(hit) hit$year)
     topresults$releaseyear <- lapply(topresults$releaseyear, function(x) if (is.null(x)) NA else x) %>% as.integer()
-    topresults$album.s.releaseyear = album.s.releaseyear
+    topresults$album.s.releaseyear <-  album.s.releaseyear
+    topresults$country <-  lapply(res, function(hit) hit$country)
+    topresults$country <- lapply(topresults$country, function(x) if (is.null(x)) NA else x) %>% as.character()
 
     topresults %>%
       .extract_albumtitle_and_artistname_from_dctitle() %>%
@@ -84,6 +86,7 @@ get_discogs_for_single_track <- function(album.s.id, album.s.title,album.s.first
       dplyr::select(album.dc.id,
                     album.dc.genres = genre,
                     album.dc.styles = style,
+                    album.dc.country = country,
                     album.dc.title,
                     album.dc.quality,
                     album.dc.firstartist.name,

@@ -25,6 +25,7 @@ test_that('Returns a frame with correct additional colnames and content', {
   expect_true(class(res$album.dc.quality) == 'numeric')
   expect_true(class(res$album.dc.firstartist.name) == 'character')
   expect_true(class(res$album.dc.firstartist.quality) == 'numeric')
+  expect_true(class(res$album.dc.country) == 'character')
 
   expect_true(all(res$album.dc.firstgenre %in% c('Blues',
                                             'Brass & Military',

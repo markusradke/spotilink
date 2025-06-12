@@ -214,7 +214,7 @@ correctTypesAudioanalysis <- c(
 )
 
 discogsAlbumVars <- c('album.dc.id', 'album.dc.title', 'album.dc.genres', 'album.dc.styles',
-                      'album.dc.firstgenre', 'album.dc.firststyle',
+                      'album.dc.firstgenre', 'album.dc.firststyle', 'album.dc.country',
                       'album.dc.quality', 'album.dc.firstartist.name', 'album.dc.firstartist.quality')
 
 geniusLyricsVars <- c('track.g.id', 'track.g.title', 'track.g.quality', 'track.g.url',
