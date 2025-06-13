@@ -25,3 +25,4 @@ testTracksArtistsAlbums_larger <- readRDS('./data-raw/testTracksArtistsAlbums_la
 testAcousticbrainz <- readRDS('./data-raw/testAcousticbrainzData.rds')
 testresults <- readRDS('./data-raw/testresults.RDS')
 musicbrainzAlbumBugfix <- readRDS('./data-raw/musicbrainz_album_fix_testdata.rds')
+genius_translation_test <- readRDS('data-raw/genius_translation_test.rds')

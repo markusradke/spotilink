@@ -70,65 +70,66 @@ get_lyrics_for_single_track <- function(track.s.title, artist.s.name, track.s.id
       dplyr::first()
   }
 
-  .get_lyrics_for_topresult <- function(topresult){
-    lyrics_html <- .read_html_with_retries(topresult$track.g.url)
-    lyrics <- lyrics_html %>% rvest::html_element(xpath = "//div[contains(@class, 'Lyrics__Container')]")
-
-    header <- xml2::xml_find_first(lyrics, ".//div[(contains(@class, 'LyricsHeader__Container'))]")
-    xml2::xml_remove(header)
-
-
-    xml2::xml_find_all(lyrics, ".//br") %>% xml2::xml_add_sibling("p", "\n")
-    xml2::xml_find_all(lyrics, ".//br") %>% xml2::xml_remove()
-    lyrics <- rvest::html_text(lyrics, trim = TRUE)
-    lyrics <- unlist(strsplit(lyrics, split = "\n"))
-    lyrics <- grep(pattern = "[[:alnum:]]", lyrics, value = TRUE)
-    if (sjmisc::is_empty(lyrics)) {
-      return(data.frame(line = NA, section_name = NA))
-    }
-    section_tags <- nchar(gsub(pattern = "\\[.*\\]", "", lyrics)) == 0
-    sections <- .repeat_before(lyrics, section_tags)
-    sections <- gsub("\\[|\\]", "", sections)
-    sections <- strsplit(sections, split = ": ", fixed = TRUE)
-    section <- sapply(sections, "[", 1)
-    lyrics_res <- data.frame(line = lyrics[!section_tags], section = section[!section_tags])
-    if (length(unique(lyrics_res$section)) == 1) {
-      lyrics_res$section <- NA
-    }
-    lyrics_res
-  }
-
-  .read_html_with_retries <- function(url, max_attempts = 10, wait_time = 10) {
-    for (attempt in 1:max_attempts) {
-      tryCatch({
-        html_content <- rvest::read_html(url)
-        return(html_content)
-      }, error = function(e) {
-        message(sprintf("Attempt %d failed: %s. Retrying in %d seconds...",
-                        attempt, e$message, wait_time))
-        Sys.sleep(wait_time)
-      })
-    }
-    message(sprintf("Failed to read HTML from %s after %d attempts.", url, max_attempts))
-    return(NULL)
-  }
-
-  .repeat_before <- function (x, y){
-     ind = which(y)
-    if (!y[1])
-      ind = c(1, ind)
-    rep(x[ind], times = diff(c(ind, length(x) + 1)))
-  }
-
   search_term <- paste(track.s.title %>% simplify_name(),
                        artist.s.name %>% simplify_name())
   url <- paste0('https://api.genius.com/search/?q="', search_term, '"&page=1&access_token=',g_token, '#') %>% utils::URLencode()
   result <- get_api_with_connection_management(url)
   topresult <- .get_parsed_topresult(result)
   if(is.null(topresult)){return(make_na_frame_genius_tracks(track.s.id))}
-  lyrics <- .get_lyrics_for_topresult(topresult)
+  lyrics <- retrieve_lyrics_from_url(topresult$track.g.url)
   topresult %>%
     dplyr::mutate(track.g.lyrics = list(lyrics),
                   track.s.id = track.s.id)
+}
+
+
+retrieve_lyrics_from_url <- function(url){
+  lyrics_html <- read_html_with_retries(url)
+  lyrics <- lyrics_html %>% rvest::html_element(xpath = "//div[contains(@class, 'Lyrics__Container')]")
+
+  header <- xml2::xml_find_first(lyrics, ".//div[(contains(@class, 'LyricsHeader__Container'))]")
+  xml2::xml_remove(header)
+
+
+  xml2::xml_find_all(lyrics, ".//br") %>% xml2::xml_add_sibling("p", "\n")
+  xml2::xml_find_all(lyrics, ".//br") %>% xml2::xml_remove()
+  lyrics <- rvest::html_text(lyrics, trim = TRUE)
+  lyrics <- unlist(strsplit(lyrics, split = "\n"))
+  lyrics <- grep(pattern = "[[:alnum:]]", lyrics, value = TRUE)
+  if (sjmisc::is_empty(lyrics)) {
+    return(data.frame(line = NA, section_name = NA))
+  }
+  section_tags <- nchar(gsub(pattern = "\\[.*\\]", "", lyrics)) == 0
+  sections <- repeat_before(lyrics, section_tags)
+  sections <- gsub("\\[|\\]", "", sections)
+  sections <- strsplit(sections, split = ": ", fixed = TRUE)
+  section <- sapply(sections, "[", 1)
+  lyrics_res <- data.frame(line = lyrics[!section_tags], section = section[!section_tags])
+  if (length(unique(lyrics_res$section)) == 1) {
+    lyrics_res$section <- NA
+  }
+  lyrics_res
+}
+
+read_html_with_retries <- function(url, max_attempts = 10, wait_time = 10) {
+  for (attempt in 1:max_attempts) {
+    tryCatch({
+      html_content <- rvest::read_html(url)
+      return(html_content)
+    }, error = function(e) {
+      message(sprintf("Attempt %d failed: %s. Retrying in %d seconds...",
+                      attempt, e$message, wait_time))
+      Sys.sleep(wait_time)
+    })
+  }
+  message(sprintf("Failed to read HTML from %s after %d attempts.", url, max_attempts))
+  return(NULL)
+}
+
+repeat_before <- function (x, y){
+  ind = which(y)
+  if (!y[1])
+    ind = c(1, ind)
+  rep(x[ind], times = diff(c(ind, length(x) + 1)))
 }
 

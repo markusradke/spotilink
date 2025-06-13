@@ -16,6 +16,7 @@ use_data(musicbrainzWhitelist, # external references
          testAcousticbrainz,
          testresults,
          musicbrainzAlbumBugfix,
+         genius_translation_test,
 
          spotifyTrackVars,# platform var sets
          musicbrainzTrackVars,
