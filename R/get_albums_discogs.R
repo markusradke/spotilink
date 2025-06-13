@@ -126,6 +126,7 @@ get_discogs_for_single_track <- function(album.s.id, album.s.title,album.s.first
       album.dc.firstgenre = NA,
       album.dc.styles = NA,
       album.dc.firststyle = NA,
+      album.dc.country = NA,
       album.dc.title = NA,
       album.dc.quality = NA,
       album.dc.firstartist.name = NA,
