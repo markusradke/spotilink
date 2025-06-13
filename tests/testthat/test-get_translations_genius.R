@@ -18,14 +18,14 @@ test_that("get available languages works", {
   )
 
 
-  test <- tibble(
+  test <- tibble::tibble(
     track.g.id = "1519307",
     track.g.language = "fr",
     track.g.translations = list(translations_list),
     lyrics_translation = NA
   )
 
-  testresult <- tibble(
+  testresult <- tibble::tibble(
     available_language = c("de", "en"),
     url = c(
       "testurl1",

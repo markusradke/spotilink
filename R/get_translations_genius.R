@@ -50,8 +50,9 @@ get_translations_genius <- function(input, g_token, language= 'en'){
 get_translation_for_single_track <- function(track.g.id, track.g.lyrics, g_token, language){
   res <- get_language_details(track.g.id, g_token)
   res <- copy_lyrics_already_correct_language(res, track.g.lyrics, language)
-
-  if(is.na(res$lyrics_translation)){
+  is_no_translated_lyrics <- is.na(res$lyrics_translation)
+  is_translation_info <- length(res$track.g.translations[[1]]) != 0
+  if(is_no_translated_lyrics & is_translation_info){
     available_languages <- get_available_languages(res)
     if(language %in% available_languages$available_language){
       url <- available_languages %>%
@@ -69,8 +70,9 @@ get_language_details <- function(track.g.id, g_token){
   url <- paste0('https://api.genius.com/songs/', track.g.id, '?access_token=',g_token, '#') %>% utils::URLencode()
   res <- get_api_with_connection_management(url)
   tibble::tibble(track.g.id,
-                track.g.language = res$response$song$language,
-                track.g.translations = list(res$response$song$translation_songs))
+                track.g.language = ifelse(is.null(res$response$song$language), NA, res$response$song$language),
+                track.g.translations = ifelse(is.null(list(res$response$song$translation_songs)), NA,
+                                              list(res$response$song$translation_songs)))
 }
 
 copy_lyrics_already_correct_language <- function(res, track.g.lyrics, language){
@@ -85,6 +87,6 @@ get_available_languages <- function(input){
         url = purrr::map_chr(.x, "url")
       )
     })) %>%
-    unnest(translations) %>%
+    tidyr::unnest(translations) %>%
     dplyr::select(available_language, url)
 }
