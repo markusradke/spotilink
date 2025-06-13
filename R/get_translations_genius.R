@@ -1,3 +1,20 @@
+#' \emph{Genius} translation retrieval
+#'
+#' @param input
+#' Data Frame containing the following columns:
+#'\itemize{
+#'  \item \code{track.g.id} \cr
+#'  with \emph{Genius} track id,
+#'
+#'It is advisable to first run \code{\link{get_tracks_genius}} before running this command,
+#'in order to have all the necessary information.
+#' @param g_token Genius Authentification. Please refer to \url{https://genius.com/api-clients} for generating an access token.
+#' @param language Genius language code for the desired translation (e.g., 'en' for English, 'de' for German, 'fr' for French).
+#'
+#' @returns A new data frame containing the information of the input data frame, as well as new columns with information on the original lyrics language, available translations and a new column containing the version in the desired language, if the version exists.
+#' @export
+#'
+#' @examples
 get_translations_genius <- function(input, g_token, language= 'en'){
   are_needed_columns_present(input, c('track.g.id'))
   input_distinct <- input %>%
