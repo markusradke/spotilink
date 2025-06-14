@@ -80,13 +80,26 @@ copy_lyrics_already_correct_language <- function(res, track.g.lyrics, language){
 }
 
 get_available_languages <- function(input){
-  input %>%
+  available <- input %>%
     dplyr::mutate(translations = purrr::map(track.g.translations, ~ {
-      tibble::tibble(
-        available_language = purrr::map_chr(.x, "language"),
-        url = purrr::map_chr(.x, "url")
+      res <- tibble::tibble(
+        available_language = purrr::map_chr(.x, function(x) {
+          if (length(x$language) == 0) {
+            return(NA)
+          } else {
+            return(x$language)
+          }
+        }),
+        url = purrr::map_chr(.x, function(x) {
+          if (length(x$url) == 0) {
+            return(NA)
+          } else {
+            return(x$url)
+          }
+        }),
       )
     })) %>%
     tidyr::unnest(translations) %>%
     dplyr::select(available_language, url)
+  available
 }
