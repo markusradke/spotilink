@@ -84,6 +84,10 @@ get_lyrics_for_single_track <- function(track.s.title, artist.s.name, track.s.id
 
 
 retrieve_lyrics_from_url <- function(url){
+  browser()
+  if(length(url) == 0) return(list())
+  url <- url[[1]]
+  if(is.na(url)) return(list())
   lyrics_html <- read_html_with_retries(url)
   lyrics <- lyrics_html %>% rvest::html_element(xpath = "//div[contains(@class, 'Lyrics__Container')]")
 
