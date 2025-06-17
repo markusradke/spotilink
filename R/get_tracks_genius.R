@@ -88,6 +88,10 @@ retrieve_lyrics_from_url <- function(url){
   url <- url[[1]]
   if(is.na(url)) return(list())
   lyrics_html <- read_html_with_retries(url)
+  if(is.null(lyrics_html)) {
+    warning('Not able to read html. Returning NULL...')
+    return(list())
+  }
   lyrics <- lyrics_html %>% rvest::html_element(xpath = "//div[contains(@class, 'Lyrics__Container')]")
 
   header <- xml2::xml_find_first(lyrics, ".//div[(contains(@class, 'LyricsHeader__Container'))]")
