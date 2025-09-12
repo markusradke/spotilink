@@ -1,4 +1,4 @@
-# spotilink
+# spotilink <img src="man/figures/logo.png" align="right" height="120" alt="" />
 
 <!-- badges: start -->
 
@@ -26,7 +26,9 @@ You can install the development version of *spotilink* from [GitHub](https://git
 devtools::install_github("markusradke/spotilink")
 ```
 
+::: {style="color: red"}
 **Attention: This package is still under heavy development. Proceed with caution, unfortunately, there still might be plenty of errors.**
+:::
 
 ## Example
 
