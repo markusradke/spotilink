@@ -4,5 +4,6 @@
 .httr-oauth
 .DS_Store
 .quarto
+/data-raw
 feature_documentation.pptx
 spotilink_feature-requests.mm
