@@ -1,4 +1,4 @@
-# spotilink <img src="man/figures/logo.png" align="right" height="120" alt="" />
+# spotilink <img src="man/figures/logo.png" align="right" height="120"/>
 
 <!-- badges: start -->
 
