@@ -26,9 +26,9 @@ You can install the development version of *spotilink* from [GitHub](https://git
 devtools::install_github("markusradke/spotilink")
 ```
 
-::: {style="color: red"}
-**Attention: This package is still under heavy development. Proceed with caution, unfortunately, there still might be plenty of errors.**
-:::
+> [!CAUTION]
+>Attention: This package is still under heavy development. Proceed with caution, unfortunately, there still might be plenty of errors.
+
 
 ## Example
 
