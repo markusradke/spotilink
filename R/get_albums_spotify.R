@@ -48,8 +48,6 @@ clean_albums <- function(albumsRaw){
     dplyr::mutate(album.s.releaseyear = stringr::str_sub(.data[['release_date']], end = 4) %>% as.integer()) %>%
     dplyr::mutate(album.s.releasedate = ifelse(stringr::str_length(.data[['release_date']]) == 4, paste0(.data[['release_date']], '-01-01'),.data[['release_date']])) %>%
     dplyr::mutate(album.s.releasedate = ifelse(stringr::str_length(.data[['album.s.releasedate']]) == 7, paste0(.data[['album.s.releasedate']], '-01'),.data[['album.s.releasedate']])) %>% 
-    { print(data.frame(releasedate = .$release_date, areleasedate = .$album.s.releasedate,laenge = stringr::str_length(.$album.s.releasedate))); .} %>%
-    { print(data.frame(gueltig = !is.na(as.Date(.$album.s.releasedate, format = "%Y-%m-%d")))); .} %>%
     dplyr::mutate(album.s.releasedate = .data[['album.s.releasedate']] %>% as.Date()) %>%
     dplyr::select('album.s.id' = 'id',
                   'album.s.title' = 'name',
