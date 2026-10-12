@@ -135,6 +135,7 @@ get_discogs_for_single_track <- function(album.s.id, album.s.title,album.s.first
   }
 
   url <- .build_search_url()
+  print(url)
   res <- get_api_with_connection_management(url)
   if(length(res$results) == 0) {return(.make_empty_frame())}
   res <<- res
