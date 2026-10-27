@@ -34,6 +34,8 @@ get_api_with_connection_management <- function(url){
       if(stringr::str_detect(response$url, 'spotify')){
         retry_after <- response$headers$`retry-after` %>% as.integer() + 1
         message(paste0('Rate limit exceeded. Waiting for ', retry_after, ' seconds, then trying again...'))
+        reason <- if (!is.null(content(response, as = "parsed")$error$reason)) content(response, as = "parsed")$error$reason else "nicht angegeben"
+        message("reason: ", reason)
         Sys.sleep(retry_after)
       }
       else{

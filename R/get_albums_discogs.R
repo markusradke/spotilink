@@ -59,9 +59,9 @@ get_discogs_for_single_track <- function(album.s.id, album.s.title,album.s.first
     title <- simplify_name(album.s.title)
     artist <- simplify_name(album.s.firstartist.name)
     url <- paste0('https://api.discogs.com/database/search?q=',
-                  URLencode(title,reserved=T),
+                  URLencode(title, repeated=T,reserved=T),
                   '&type=track&artist=',
-                  URLencode(artist,reserved=T),
+                  URLencode(artist, repeated=T,reserved=T),
                   '&page=1&per_page=10&',
                   'key=', dc_pass[1],"&secret=", dc_pass[2])
     url
