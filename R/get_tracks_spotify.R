@@ -84,6 +84,25 @@ clean_tracks <- function(tracksRaw) {
 }
 
 clean_features <- function(featuresRaw){
+  if (!is.data.frame(featuresRaw)) featuresRaw <- tibble::as_tibble(featuresRaw)
+  # spotifyr may represent an empty/null response as data.frame(value = NA).
+  # Preserve a typed, empty ID column, but reject real rows without IDs.
+  if (!'id' %in% names(featuresRaw)) {
+    if (nrow(featuresRaw)) {
+      if (!all(vapply(featuresRaw, function(value) all(is.na(value)), logical(1)))) {
+        stop('Spotify audio features contain rows without track IDs.')
+      }
+      featuresRaw <- featuresRaw[FALSE, , drop = FALSE]
+    }
+    featuresRaw$id <- character()
+  }
+  # Missing optional fields must not discard the remaining audio features.
+  optional <- c('danceability', 'energy', 'key', 'loudness', 'mode',
+                'speechiness', 'acousticness', 'instrumentalness', 'liveness',
+                'valence', 'tempo', 'time_signature')
+  for (field in setdiff(optional, names(featuresRaw))) {
+    featuresRaw[[field]] <- rep(NA_real_, nrow(featuresRaw))
+  }
   keyLookup <- c('C', 'C#', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'G#', 'A', 'Bb', 'B', 'no')
   featuresRaw %>%
     dplyr::mutate(time_signature = .data[['time_signature']] %>% as.character() %>% stringr::str_c('/4')) %>%
