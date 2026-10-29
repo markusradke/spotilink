@@ -24,6 +24,14 @@ get_from_API <- function(input, IDcol, pullFunction, cleanFunction, batchsize) {
     get_from_IDs(pullFunction, batchsize, start, pulled, oldfilename, fctn_name)
 
   res <- cleanFunction(res)
+  # An empty audio-feature response must retain input IDs so that subsequent
+  # track, album and artist requests can still retrieve their metadata.
+  if (identical(fctn_name, 'spotifyr_get_track_audio_features') && nrow(res) == 0L) {
+    res <- dplyr::left_join(input, res, by = IDcol)
+    message('No audio features returned; retaining requested track IDs.')
+    remove_checkpoints_spotify(fctn_name)
+    return(res)
+  }
   res <- dplyr::left_join(res, input, ., by = IDcol)
   message('Done.')
   remove_checkpoints_spotify(fctn_name)
